@@ -28,6 +28,7 @@ public class Test {
         // set up the filters
         Filter rgb = null;
         Filter circles = null;
+        Filter anom = null;
         try {
             FilterCode c = new FilterCode(new FileInputStream(
                     "/opt/diamond/lib/fil_rgb.a"));
@@ -41,6 +42,23 @@ public class Test {
                     new String[] { "RGB" }, new String[] { "-1", "-1", "0.4",
                             "1" }, 400);
             System.out.println(circles);
+
+            c = new FilterCode(new FileInputStream("fil_anomaly.so"));
+            anom = new Filter(
+                    "anomaly",
+                    c,
+                    "f_eval_afilter",
+                    "f_init_afilter",
+                    "f_fini_afilter",
+                    0,
+                    new String[] { "circles" },
+                    new String[] { "circle-count", "circle-area-fraction",
+                            "circle-area-m0", "circle-area-m1",
+                            "circle-area-m2", "circle-area-m3",
+                            "circle-eccentricity-m0", "circle-eccentricity-m1",
+                            "circle-eccentricity-m2", "circle-eccentricity-m3" },
+                    400);
+            System.out.println(anom);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -56,6 +74,7 @@ public class Test {
         Searchlet searchlet = new Searchlet();
         searchlet.addFilter(rgb);
         searchlet.addFilter(circles);
+        searchlet.addFilter(anom);
         searchlet.setApplicationDependencies(new String[] { "RGB" });
         search.setSearchlet(searchlet);
 
@@ -86,7 +105,7 @@ public class Test {
             ByteArrayInputStream in = new ByteArrayInputStream(data);
             BufferedImage img = ImageIO.read(in);
 
-            int count = Util.extractInt(r.getValue("circle-count"));
+            int count = (int) Util.extractDouble(r.getValue("circle-count"));
             double areaFrac = Util.extractDouble(r
                     .getValue("circle-area-fraction"));
             double aM0 = Util.extractDouble(r.getValue("circle-area-m0"));

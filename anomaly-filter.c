@@ -6,7 +6,7 @@
 #include "lib_filter.h"
 
 typedef struct {
-  double count;
+  uint64_t count;
   double sum;
   double sum_of_squares;
 } stats_t;
@@ -49,9 +49,34 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
   // afilter
   context_t *ctx = (context_t *) filter_args;
 
+  int i;
+  int err;
+
   // for attributes from diamond
   size_t len;
-  unsigned char *data;
+
+  typedef union {
+    double *d;
+    unsigned char *c;
+  } char_double_t;
+
+  char_double_t val;
+
+  // compute anomalousness for each thing
+  // XXX stats done by non-statistician
+
+  // get each thing and update
+  for (i = 0; i < ctx->size; i++) {
+    err = lf_ref_attr(ohandle, ctx->name_array[i], &len,
+		      &val.c);
+
+    // add to sum
+    double d = *(val.d);
+    printf("%s: %g\n", ctx->name_array[i], d);
+    ctx->stats[i].count++;
+    ctx->stats[i].sum += d;
+    ctx->stats[i].sum_of_squares += d * d;
+  }
 
   return 0;
 }
