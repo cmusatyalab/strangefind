@@ -31,9 +31,8 @@ public class Test {
         try {
             FilterCode c = new FilterCode(new FileInputStream(
                     "/opt/diamond/lib/fil_rgb.a"));
-            rgb = new Filter("RGB", c, "f_eval_img2rgb",
-                    "f_init_img2rgb", "f_fini_img2rgb", 1, new String[0],
-                    new String[0], 400);
+            rgb = new Filter("RGB", c, "f_eval_img2rgb", "f_init_img2rgb",
+                    "f_fini_img2rgb", 1, new String[0], new String[0], 400);
             System.out.println(rgb);
 
             c = new FilterCode(new FileInputStream("fil_circle.so"));
@@ -87,12 +86,41 @@ public class Test {
             ByteArrayInputStream in = new ByteArrayInputStream(data);
             BufferedImage img = ImageIO.read(in);
 
-            JFrame j = new JFrame();
-            j.setLocationByPlatform(true);
-            j.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            j.getContentPane().add(new JButton(new ImageIcon(img)));
-            j.pack();
-            j.setVisible(true);
+            int count = Util.extractInt(r.getValue("circle-count"));
+            double areaFrac = Util.extractDouble(r
+                    .getValue("circle-area-fraction"));
+            double aM0 = Util.extractDouble(r.getValue("circle-area-m0"));
+            double aM1 = Util.extractDouble(r.getValue("circle-area-m1"));
+            double aM2 = Util.extractDouble(r.getValue("circle-area-m2"));
+            double aM3 = Util.extractDouble(r.getValue("circle-area-m3"));
+
+            double eM0 = Util.extractDouble(r
+                    .getValue("circle-eccentricity-m0"));
+            double eM1 = Util.extractDouble(r
+                    .getValue("circle-eccentricity-m1"));
+            double eM2 = Util.extractDouble(r
+                    .getValue("circle-eccentricity-m2"));
+            double eM3 = Util.extractDouble(r
+                    .getValue("circle-eccentricity-m3"));
+
+            System.out.println("count: " + count);
+            System.out.println("aFrac: " + areaFrac);
+            System.out.println("aM0:   " + aM0);
+            System.out.println("aM1:   " + aM1);
+            System.out.println("aM2:   " + aM2);
+            System.out.println("aM3:   " + aM3);
+            System.out.println("eM0:   " + eM0);
+            System.out.println("eM1:   " + eM1);
+            System.out.println("eM2:   " + eM2);
+            System.out.println("eM3:   " + eM3);
+            System.out.println();
+
+            // JFrame j = new JFrame();
+            // j.setLocationByPlatform(true);
+            // j.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            // j.getContentPane().add(new JButton(new ImageIcon(img)));
+            // j.pack();
+            // j.setVisible(true);
         } catch (IOException e) {
             e.printStackTrace();
         }

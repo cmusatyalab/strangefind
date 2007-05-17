@@ -297,6 +297,7 @@ static void compute_moments(double *data_array, int len,
 			    double *m3) {
   double mean = 0.0;
   for (int i = 0; i < len; i++) {
+    printf("%g\n", data_array[i]);
     mean += data_array[i] / (double) len;
   }
 
@@ -309,6 +310,9 @@ static void compute_moments(double *data_array, int len,
       central_moments[j] += (pow((data_array[i] - mean), j + 1.0) / len);
     }
   }
+
+  printf("\nr: %g\n%g\n%g\n%g\n", raw_moments[0], raw_moments[1], raw_moments[2], raw_moments[3] );
+  printf("c: %g\n%g\n%g\n%g\n\n", central_moments[0], central_moments[1], central_moments[2], central_moments[3] );
 
   *m0 = raw_moments[0];
   *m1 = raw_moments[1];
@@ -410,11 +414,10 @@ extern "C" {
 	*p = *c;
 
 	if (c->in_result) {
+	  total_area += areas[num_circles_in_result] = M_PI * c->a * c->b;
+	  eccentricities[num_circles_in_result] = compute_eccentricity(c->a, c->b);
 	  num_circles_in_result++;
 	}
-
-	total_area += areas[i] = M_PI * c->a * c->b;
-	eccentricities[i] = compute_eccentricity(c->a, c->b);
 
 	i++;
 	l = g_list_next(l);
@@ -423,20 +426,20 @@ extern "C" {
     }
 
     // compute aggregate stats
-    lf_write_attr(ohandle, "circle-count", sizeof(int), (unsigned char *) &num_circles);
+    lf_write_attr(ohandle, "circle-count", sizeof(int), (unsigned char *) &num_circles_in_result);
 
     double area_fraction = total_area / (w * h);
     lf_write_attr(ohandle, "circle-area-fraction", sizeof(double), (unsigned char *) &area_fraction);
 
     double area_m0, area_m1, area_m2, area_m3;
-    compute_moments(areas, num_circles, &area_m0, &area_m1, &area_m2, &area_m3);
+    compute_moments(areas, num_circles_in_result, &area_m0, &area_m1, &area_m2, &area_m3);
     lf_write_attr(ohandle, "circle-area-m0", sizeof(double), (unsigned char *) &area_m0);
     lf_write_attr(ohandle, "circle-area-m1", sizeof(double), (unsigned char *) &area_m1);
     lf_write_attr(ohandle, "circle-area-m2", sizeof(double), (unsigned char *) &area_m2);
     lf_write_attr(ohandle, "circle-area-m3", sizeof(double), (unsigned char *) &area_m3);
 
     double eccentricity_m0, eccentricity_m1, eccentricity_m2, eccentricity_m3;
-    compute_moments(eccentricities, num_circles,
+    compute_moments(eccentricities, num_circles_in_result,
 		    &eccentricity_m0, &eccentricity_m1,
 		    &eccentricity_m2, &eccentricity_m3);
     lf_write_attr(ohandle, "circle-eccentricity-m0", sizeof(double), (unsigned char *) &eccentricity_m0);
@@ -444,7 +447,11 @@ extern "C" {
     lf_write_attr(ohandle, "circle-eccentricity-m2", sizeof(double), (unsigned char *) &eccentricity_m2);
     lf_write_attr(ohandle, "circle-eccentricity-m3", sizeof(double), (unsigned char *) &eccentricity_m3);
 
+    printf("area_fraction: %g\n", area_fraction);
+    printf("area moments: %g %g %g %g\n", area_m0, area_m1, area_m2, area_m3);
+    printf("ecc  moments: %g %g %g %g\n", eccentricity_m0, eccentricity_m1, eccentricity_m2, eccentricity_m3);
 
+    printf("area_fraction hex: %llx\n", area_fraction);
 
     // free others
     g_list_foreach(clist, free_1_circle, NULL);
