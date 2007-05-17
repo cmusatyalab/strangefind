@@ -62,23 +62,41 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
 
   char_double_t val;
 
+  int result = 0;
   // compute anomalousness for each thing
   // XXX stats done by non-statistician
-
-  // get each thing and update
   for (i = 0; i < ctx->size; i++) {
+    // get each thing
     err = lf_ref_attr(ohandle, ctx->name_array[i], &len,
 		      &val.c);
+    double d = *(val.d);
+
+    // check
+    double sum = ctx->stats[i].sum;
+    int count = ctx->stats[i].count;
+    double mean = sum / count;
+    double variance = (ctx->stats[i].sum_of_squares - mean * sum) / count;
+    double stddev = sqrt(variance);
+
+    if (d > mean + (2 * stddev) || d < mean - (2 * stddev)) {
+      // flag it
+      printf(" *** %s is anomalous: %g (mean: %g, stddev: %g)\n",
+	     ctx->name_array[i], d, mean, stddev);
+      if (!result) {
+	result = 100;
+	lf_write_attr(ohandle, "anomalous-value.int", sizeof(int),
+		      (unsigned char *) &i);
+      }
+    }
 
     // add to sum
-    double d = *(val.d);
     printf("%s: %g\n", ctx->name_array[i], d);
     ctx->stats[i].count++;
     ctx->stats[i].sum += d;
     ctx->stats[i].sum_of_squares += d * d;
   }
 
-  return 0;
+  return result;
 }
 
 

@@ -1,6 +1,7 @@
 package edu.cmu.cs.diamond.anomaly;
 
-import java.awt.image.BufferedImage;
+import java.awt.BorderLayout;
+import java.awt.Image;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -11,10 +12,17 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import edu.cmu.cs.diamond.opendiamond.*;
 
 public class Test {
+    private static final String[] LABELS = { "circle-count",
+            "circle-area-fraction", "circle-area-m0", "circle-area-m1",
+            "circle-area-m2", "circle-area-m3", "circle-eccentricity-m0",
+            "circle-eccentricity-m1", "circle-eccentricity-m2",
+            "circle-eccentricity-m3" };
+
     public static void main(String[] args) {
         // get scopes
         List<Scope> scopes = ScopeSource.getPredefinedScopeList();
@@ -44,19 +52,8 @@ public class Test {
             System.out.println(circles);
 
             c = new FilterCode(new FileInputStream("fil_anomaly.so"));
-            anom = new Filter(
-                    "anomaly",
-                    c,
-                    "f_eval_afilter",
-                    "f_init_afilter",
-                    "f_fini_afilter",
-                    0,
-                    new String[] { "circles" },
-                    new String[] { "circle-count", "circle-area-fraction",
-                            "circle-area-m0", "circle-area-m1",
-                            "circle-area-m2", "circle-area-m3",
-                            "circle-eccentricity-m0", "circle-eccentricity-m1",
-                            "circle-eccentricity-m2", "circle-eccentricity-m3" },
+            anom = new Filter("anomaly", c, "f_eval_afilter", "f_init_afilter",
+                    "f_fini_afilter", 100, new String[] { "circles" }, LABELS,
                     400);
             System.out.println(anom);
 
@@ -85,7 +82,7 @@ public class Test {
 
             // read some results
             int count = 0;
-            while ((r = search.getNextResult()) != null && count < 10) {
+            while ((r = search.getNextResult()) != null && count < 10000) {
                 processResult(r);
 
                 count++;
@@ -103,7 +100,19 @@ public class Test {
         try {
             // try reading the data
             ByteArrayInputStream in = new ByteArrayInputStream(data);
-            BufferedImage img = ImageIO.read(in);
+            Image img = ImageIO.read(in);
+            
+            int h = img.getHeight(null);
+            int w = img.getWidth(null);
+            if (h > w) {
+                if (h > 500) {
+                    img = img.getScaledInstance(-1, 500, 0);
+                }
+            } else {
+                if (w > 500) {
+                    img = img.getScaledInstance(500, -1, 0);
+                }
+            }
 
             int count = (int) Util.extractDouble(r.getValue("circle-count"));
             double areaFrac = Util.extractDouble(r
@@ -134,12 +143,17 @@ public class Test {
             System.out.println("eM3:   " + eM3);
             System.out.println();
 
-            // JFrame j = new JFrame();
-            // j.setLocationByPlatform(true);
-            // j.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            // j.getContentPane().add(new JButton(new ImageIcon(img)));
-            // j.pack();
-            // j.setVisible(true);
+            String anomStr = "Anomalous value: "
+                    + LABELS[Util.extractInt(r.getValue("anomalous-value.int"))];
+            System.out.println(anomStr);
+
+            JFrame j = new JFrame();
+            j.setLocationByPlatform(true);
+            j.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            j.getContentPane().add(new JButton(new ImageIcon(img)));
+            j.getContentPane().add(new JLabel(anomStr), BorderLayout.SOUTH);
+            j.pack();
+            j.setVisible(true);
         } catch (IOException e) {
             e.printStackTrace();
         }
