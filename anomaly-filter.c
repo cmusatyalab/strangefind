@@ -78,7 +78,7 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
     double variance = (ctx->stats[i].sum_of_squares - mean * sum) / count;
     double stddev = sqrt(variance);
 
-    if (d > mean + (2 * stddev) || d < mean - (2 * stddev)) {
+    if (count > 10 && (d > mean + (5 * stddev) || d < mean - (5 * stddev))) {
       // flag it
       printf(" *** %s is anomalous: %g (mean: %g, stddev: %g)\n",
 	     ctx->name_array[i], d, mean, stddev);
@@ -86,6 +86,12 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
 	result = 100;
 	lf_write_attr(ohandle, "anomalous-value.int", sizeof(int),
 		      (unsigned char *) &i);
+	lf_write_attr(ohandle, "anomalous-value-count.int", sizeof(int),
+		      (unsigned char *) &count);
+	lf_write_attr(ohandle, "anomalous-value-mean.double", sizeof(double),
+		      (unsigned char *) &mean);
+	lf_write_attr(ohandle, "anomalous-value-stddev.double", sizeof(double),
+		      (unsigned char *) &stddev);
       }
     }
 

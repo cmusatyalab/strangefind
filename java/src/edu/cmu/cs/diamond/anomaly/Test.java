@@ -101,16 +101,17 @@ public class Test {
             // try reading the data
             ByteArrayInputStream in = new ByteArrayInputStream(data);
             Image img = ImageIO.read(in);
-            
+
             int h = img.getHeight(null);
             int w = img.getWidth(null);
+            int maxSize = 400;
             if (h > w) {
-                if (h > 500) {
-                    img = img.getScaledInstance(-1, 500, 0);
+                if (h > maxSize) {
+                    img = img.getScaledInstance(-1, maxSize, 0);
                 }
             } else {
-                if (w > 500) {
-                    img = img.getScaledInstance(500, -1, 0);
+                if (w > maxSize) {
+                    img = img.getScaledInstance(maxSize, -1, 0);
                 }
             }
 
@@ -143,8 +144,13 @@ public class Test {
             System.out.println("eM3:   " + eM3);
             System.out.println();
 
-            String anomStr = "Anomalous value: "
-                    + LABELS[Util.extractInt(r.getValue("anomalous-value.int"))];
+            String key = LABELS[Util.extractInt(r
+                    .getValue("anomalous-value.int"))];
+            String anomStr = "Anomalous value " + key + ": "
+                    + Util.extractDouble(r.getValue(key)) + "\nobject count: "
+                    + Util.extractInt(r.getValue("anomalous-value-count.int"))
+                    + "\nmean: " + Util.extractDouble(r.getValue("anomalous-value-mean.double"))
+                    + "\nstddev: " + Util.extractDouble(r.getValue("anomalous-value-stddev.double"));
             System.out.println(anomStr);
 
             JFrame j = new JFrame();
