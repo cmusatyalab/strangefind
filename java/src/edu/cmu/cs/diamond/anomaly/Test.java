@@ -87,27 +87,6 @@ public class Test {
             ByteArrayInputStream in = new ByteArrayInputStream(data);
             BufferedImage img = ImageIO.read(in);
 
-            // else, try the other one
-            data = r.getValue("_rgb_image.rgbimage");
-            byte tmp[] = r.getValue("_cols.int");
-            int w = Util.extractInt(tmp);
-            tmp = r.getValue("_rows.int");
-            int h = Util.extractInt(tmp);
-
-            System.out.println(w + "x" + h);
-
-            img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-            for (int y = 0; y < h; y++) {
-                for (int x = 0; x < w; x++) {
-                    int i = (y * w + x) * 4;
-                    // System.out.println(x);
-                    // System.out.println(y);
-                    int val = (data[i] & 0xFF) << 16
-                            | (data[i + 1] & 0xFF) << 8 | (data[i + 2] & 0xFF);
-                    img.setRGB(x, y, val);
-                }
-            }
-
             JFrame j = new JFrame();
             j.setLocationByPlatform(true);
             j.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
