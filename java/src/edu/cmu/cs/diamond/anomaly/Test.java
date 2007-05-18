@@ -1,7 +1,9 @@
 package edu.cmu.cs.diamond.anomaly;
 
 import java.awt.BorderLayout;
-import java.awt.Image;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,7 +12,6 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
@@ -51,10 +52,14 @@ public class Test {
                             "1" }, 400);
             System.out.println(circles);
 
+            String anomArgs[] = new String[LABELS.length + 2];
+            anomArgs[0] = "0";
+            anomArgs[1] = "5";
+            System.arraycopy(LABELS, 0, anomArgs, 2, LABELS.length);
             c = new FilterCode(new FileInputStream("fil_anomaly.so"));
             anom = new Filter("anomaly", c, "f_eval_afilter", "f_init_afilter",
-                    "f_fini_afilter", 100, new String[] { "circles" }, LABELS,
-                    400);
+                    "f_fini_afilter", 100, new String[] { "circles" },
+                    anomArgs, 400);
             System.out.println(anom);
 
         } catch (FileNotFoundException e) {
@@ -100,20 +105,9 @@ public class Test {
         try {
             // try reading the data
             ByteArrayInputStream in = new ByteArrayInputStream(data);
-            Image img = ImageIO.read(in);
+            BufferedImage img = ImageIO.read(in);
 
-            int h = img.getHeight(null);
-            int w = img.getWidth(null);
-            int maxSize = 400;
-            if (h > w) {
-                if (h > maxSize) {
-                    img = img.getScaledInstance(-1, maxSize, 0);
-                }
-            } else {
-                if (w > maxSize) {
-                    img = img.getScaledInstance(maxSize, -1, 0);
-                }
-            }
+            img = possiblyShrinkImage(img);
 
             int count = (int) Util.extractDouble(r.getValue("circle-count"));
             double areaFrac = Util.extractDouble(r
@@ -146,22 +140,62 @@ public class Test {
 
             String key = LABELS[Util.extractInt(r
                     .getValue("anomalous-value.int"))];
-            String anomStr = "Anomalous value " + key + ": "
-                    + Util.extractDouble(r.getValue(key)) + "\nobject count: "
+            String anomStr = "Anomalous value "
+                    + key
+                    + ": "
+                    + Util.extractDouble(r.getValue(key))
+                    + "\nobject count: "
                     + Util.extractInt(r.getValue("anomalous-value-count.int"))
-                    + "\nmean: " + Util.extractDouble(r.getValue("anomalous-value-mean.double"))
-                    + "\nstddev: " + Util.extractDouble(r.getValue("anomalous-value-stddev.double"));
+                    + "\nmean: "
+                    + Util.extractDouble(r
+                            .getValue("anomalous-value-mean.double"))
+                    + "\nstddev: "
+                    + Util.extractDouble(r
+                            .getValue("anomalous-value-stddev.double"));
             System.out.println(anomStr);
 
             JFrame j = new JFrame();
             j.setLocationByPlatform(true);
             j.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            j.getContentPane().add(new JButton(new ImageIcon(img)));
+            j.getContentPane().add(new JLabel(new ImageIcon(img)));
             j.getContentPane().add(new JLabel(anomStr), BorderLayout.SOUTH);
             j.pack();
             j.setVisible(true);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private static BufferedImage possiblyShrinkImage(BufferedImage img) {
+        int h = img.getHeight(null);
+        int w = img.getWidth(null);
+        int maxSize = 400;
+
+        double scale = 1.0;
+        if (h > w) {
+            if (h > maxSize) {
+                scale = (double) maxSize / h;
+            }
+        } else {
+            if (w > maxSize) {
+                scale = (double) maxSize / h;
+            }
+        }
+
+        if (scale == 1.0) {
+            return img;
+        } else {
+            BufferedImage newI = new BufferedImage((int) (w * scale),
+                    (int) (h * scale), img.getType());
+
+            Graphics2D g = newI.createGraphics();
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                    RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g.scale(scale, scale);
+            g.drawImage(img, 0, 0, null);
+            g.dispose();
+            
+            return newI;
         }
     }
 }

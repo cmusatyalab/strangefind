@@ -15,6 +15,8 @@ typedef struct {
   int size;
   char **name_array;
   stats_t *stats;
+  int min_count;
+  double num_stddev_for_anomaly;
 } context_t;
 
 
@@ -25,17 +27,25 @@ int f_init_afilter (int num_arg, char **args,
 		    void **filter_args) {
   int i;
 
+  // check args
+  if (num_arg < 3) {
+    return -1;
+  }
+
   // make space for things to examine
   context_t *ctx = (context_t *) malloc(sizeof(context_t));
 
   // fill in
-  ctx->size = num_arg;
+  ctx->size = num_arg - 2;
   ctx->name_array = (char **) calloc(ctx->size, sizeof(char *));
   ctx->stats = (stats_t *) calloc(ctx->size, sizeof(stats_t));
 
+  ctx->min_count = strtol(args[0], NULL, 10);
+  ctx->num_stddev_for_anomaly = strtod(args[1], NULL);
+
   // fill in names
   for (i = 0; i < ctx->size; i++) {
-    ctx->name_array[i] = strdup(args[i]);
+    ctx->name_array[i] = strdup(args[i+2]);
   }
 
   // ready?
@@ -78,7 +88,10 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
     double variance = (ctx->stats[i].sum_of_squares - mean * sum) / count;
     double stddev = sqrt(variance);
 
-    if (count > 10 && (d > mean + (5 * stddev) || d < mean - (5 * stddev))) {
+    double num_stddev = ctx->num_stddev_for_anomaly;
+    if (count > ctx->min_count
+	&& (d > mean + (num_stddev * stddev)
+	    || d < mean - (num_stddev * stddev))) {
       // flag it
       printf(" *** %s is anomalous: %g (mean: %g, stddev: %g)\n",
 	     ctx->name_array[i], d, mean, stddev);
