@@ -1,7 +1,18 @@
 package edu.cmu.cs.diamond.snapfind2;
 
 import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
-import static java.awt.event.KeyEvent.*;
+import static java.awt.event.KeyEvent.VK_A;
+import static java.awt.event.KeyEvent.VK_C;
+import static java.awt.event.KeyEvent.VK_D;
+import static java.awt.event.KeyEvent.VK_E;
+import static java.awt.event.KeyEvent.VK_H;
+import static java.awt.event.KeyEvent.VK_I;
+import static java.awt.event.KeyEvent.VK_L;
+import static java.awt.event.KeyEvent.VK_N;
+import static java.awt.event.KeyEvent.VK_O;
+import static java.awt.event.KeyEvent.VK_P;
+import static java.awt.event.KeyEvent.VK_Q;
+import static java.awt.event.KeyEvent.VK_S;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -9,8 +20,8 @@ import java.awt.event.ActionListener;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -34,8 +45,6 @@ public class SnapFind2 extends JFrame {
 
     private JMenu scopeMenu;
 
-    final protected JButton nextButton;
-
     public SnapFind2() {
         super("SnapFind 2");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -47,60 +56,37 @@ public class SnapFind2 extends JFrame {
         stopButton = new JButton("Stop");
         stopButton.setEnabled(false);
 
-        nextButton = new JButton("Next");
-        nextButton.setEnabled(false);
-
         startButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                synchronized (results) {
-                    results.clearAll();
-                    startButton.setEnabled(false);
-                    stopButton.setEnabled(true);
-                    startSearch();
-                }
+                results.clearAll();
+                startButton.setEnabled(false);
+                stopButton.setEnabled(true);
+                startSearch();
 
+                // start consumer
+                new Thread(results).start();
+                
+                // start producer
                 new Thread() {
                     @Override
                     public void run() {
-                        Result r;
-                        while ((r = search.getNextResult()) != null) {
-                            System.out.println(r);
-                            synchronized (results) {
-                                if (!results.isFull()) {
-                                    System.out.println("results not full");
-                                    addResult(r);
-                                } else {
-                                    nextButton.setEnabled(true);
-                                    while (results.isFull()) {
-                                        try {
-                                            System.out.println("FULL! waiting");
-                                            results.wait();
-                                            if (!results.isFull()) {
-                                                addResult(r);
-                                            }
-                                        } catch (InterruptedException e) {
-                                        }
-                                    }
+                        BlockingQueue<Result> q = results.getQueue();
+                        while (true) {
+                            Result r = search.getNextResult();
+                            while (true) {
+                                try {
+                                    q.put(r);
+                                    System.out.println("snapfind put result");
+                                    break;
+                                } catch (InterruptedException e) {
                                 }
+                            }
+                            if (r == null) {
+                                break;
                             }
                         }
                         startButton.setEnabled(true);
                         stopButton.setEnabled(false);
-                    }
-
-                    private void addResult(final Result r) {
-                        try {
-                            SwingUtilities.invokeAndWait(new Runnable() {
-                                public void run() {
-                                    System.out.println("filling " + r);
-                                    results.fillNext(r);
-                                }
-                            });
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        } catch (InvocationTargetException e) {
-                            e.printStackTrace();
-                        }
                     }
                 }.start();
             }
@@ -111,16 +97,6 @@ public class SnapFind2 extends JFrame {
                 startButton.setEnabled(true);
                 stopButton.setEnabled(false);
                 search.stopSearch();
-            }
-        });
-
-        nextButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                nextButton.setEnabled(false);
-                synchronized (results) {
-                    results.clearAll();
-                    results.notify();
-                }
             }
         });
 
@@ -184,7 +160,7 @@ public class SnapFind2 extends JFrame {
         // right side
         Box c2 = Box.createVerticalBox();
         c2.add(results);
-        c2.add(nextButton);
+        c2.add(results.getButton());
         b.add(c2);
     }
 

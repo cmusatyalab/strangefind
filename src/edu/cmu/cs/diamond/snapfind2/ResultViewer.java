@@ -82,6 +82,10 @@ public class ResultViewer extends JButton implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
+        if (result == null) {
+            return;
+        }
+        
         JLabel p = new JLabel(new ImageIcon(getImg()));
         JFrame f = new JFrame();
         f.add(p);
