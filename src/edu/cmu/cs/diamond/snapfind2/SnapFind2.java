@@ -35,9 +35,9 @@ public class SnapFind2 extends JFrame {
 
     final private SearchList searchList = new SearchList();
 
-    final protected JButton startButton;
+    final protected JButton startButton = new JButton("Start");
 
-    final protected JButton stopButton;
+    final protected JButton stopButton = new JButton("Stop");
 
     final protected Search search = Search.getSearch();
 
@@ -45,6 +45,8 @@ public class SnapFind2 extends JFrame {
 
     private JMenu scopeMenu;
 
+    final private ResultsFetcher rf = new ResultsFetcher(results, startButton, stopButton);
+    
     public SnapFind2() {
         super("SnapFind 2");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -52,8 +54,6 @@ public class SnapFind2 extends JFrame {
         setupMenu();
 
         // buttons
-        startButton = new JButton("Start");
-        stopButton = new JButton("Stop");
         stopButton.setEnabled(false);
 
         startButton.addActionListener(new ActionListener() {
@@ -64,31 +64,11 @@ public class SnapFind2 extends JFrame {
                 startSearch();
 
                 // start consumer
-                new Thread(results).start();
-                
+                results.start();
+
                 // start producer
-                new Thread() {
-                    @Override
-                    public void run() {
-                        BlockingQueue<Result> q = results.getQueue();
-                        while (true) {
-                            Result r = search.getNextResult();
-                            while (true) {
-                                try {
-                                    q.put(r);
-                                    System.out.println("snapfind put result");
-                                    break;
-                                } catch (InterruptedException e) {
-                                }
-                            }
-                            if (r == null) {
-                                break;
-                            }
-                        }
-                        startButton.setEnabled(true);
-                        stopButton.setEnabled(false);
-                    }
-                }.start();
+                rf.setSearch(search);
+                new Thread(rf).start();
             }
         });
 
@@ -96,7 +76,9 @@ public class SnapFind2 extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 startButton.setEnabled(true);
                 stopButton.setEnabled(false);
+                System.out.println(" *** stop search");
                 search.stopSearch();
+                results.stop();
             }
         });
 
@@ -160,7 +142,6 @@ public class SnapFind2 extends JFrame {
         // right side
         Box c2 = Box.createVerticalBox();
         c2.add(results);
-        c2.add(results.getButton());
         b.add(c2);
     }
 
