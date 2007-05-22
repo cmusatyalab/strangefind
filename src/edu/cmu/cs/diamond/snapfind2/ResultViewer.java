@@ -1,6 +1,7 @@
 package edu.cmu.cs.diamond.snapfind2;
 
 import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -27,7 +28,7 @@ public class ResultViewer extends JButton implements ActionListener {
         setMinimumSize(d);
         setPreferredSize(d);
         setMaximumSize(d);
-        
+
         setEnabled(false);
 
         addActionListener(this);
@@ -43,15 +44,16 @@ public class ResultViewer extends JButton implements ActionListener {
         }
 
         BufferedImage img = getImg();
-        thumbnail = new ImageIcon(Util.possiblyShrinkImage(img,
-                PREFERRED_WIDTH, PREFERRED_HEIGHT));
+        Insets in = getInsets();
+        thumbnail = new ImageIcon(Util.possiblyShrinkImage(img, PREFERRED_WIDTH
+                - in.left - in.right, PREFERRED_HEIGHT - in.top - in.bottom));
         setEnabled(true);
     }
 
     public void commitResult() {
         setIcon(thumbnail);
     }
-    
+
     private BufferedImage getImg() {
         BufferedImage img = null;
         try {
