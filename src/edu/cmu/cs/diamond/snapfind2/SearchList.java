@@ -13,6 +13,8 @@ public class SearchList extends JPanel {
     final private Box box = Box.createVerticalBox();
     
     public SearchList() {
+        super();
+        
         setMinimumSize(new Dimension(250, 100));
         setMaximumSize(new Dimension(250, Integer.MAX_VALUE));
 

@@ -32,6 +32,8 @@ public class ThumbnailBox extends JPanel implements ActionListener {
     final protected Object fullSynchronizer = new Object();
 
     public ThumbnailBox() {
+        super();
+        
         Box v = Box.createVerticalBox();
         add(v);
         // v.setBorder(BorderFactory.createEtchedBorder(Color.RED, Color.BLUE));

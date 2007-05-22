@@ -24,6 +24,8 @@ public class ResultViewer extends JButton implements ActionListener {
     private Icon thumbnail;
 
     public ResultViewer() {
+        super();
+        
         Dimension d = new Dimension(PREFERRED_WIDTH, PREFERRED_HEIGHT);
         setMinimumSize(d);
         setPreferredSize(d);
