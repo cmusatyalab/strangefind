@@ -8,10 +8,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
+import javax.swing.*;
 
 import edu.cmu.cs.diamond.opendiamond.Result;
 import edu.cmu.cs.diamond.opendiamond.Util;
@@ -22,6 +19,8 @@ public class ResultViewer extends JButton implements ActionListener {
     private static final int PREFERRED_WIDTH = 240;
 
     private Result result;
+
+    private Icon thumbnail;
 
     public ResultViewer() {
         Dimension d = new Dimension(PREFERRED_WIDTH, PREFERRED_HEIGHT);
@@ -36,21 +35,24 @@ public class ResultViewer extends JButton implements ActionListener {
         result = r;
 
         if (result == null) {
-            setIcon(null);
+            thumbnail = null;
             return;
         }
 
         BufferedImage img = getImg();
-        setIcon(new ImageIcon(Util.possiblyShrinkImage(img, PREFERRED_WIDTH,
-                PREFERRED_HEIGHT)));
-        validate();
+        thumbnail = new ImageIcon(Util.possiblyShrinkImage(img,
+                PREFERRED_WIDTH, PREFERRED_HEIGHT));
     }
 
+    public void validateResult() {
+        setIcon(thumbnail);
+        validate();
+    }
+    
     private BufferedImage getImg() {
         BufferedImage img = null;
         try {
-            img = ImageIO.read(new ByteArrayInputStream(result
-                    .getData()));
+            img = ImageIO.read(new ByteArrayInputStream(result.getData()));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -85,7 +87,7 @@ public class ResultViewer extends JButton implements ActionListener {
         if (result == null) {
             return;
         }
-        
+
         JLabel p = new JLabel(new ImageIcon(getImg()));
         JFrame f = new JFrame();
         f.add(p);

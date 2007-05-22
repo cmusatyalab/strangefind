@@ -64,12 +64,27 @@ public class ThumbnailBox extends JPanel implements ActionListener {
         nextEmpty = 0;
         for (ResultViewer r : pics) {
             r.setResult(null);
+            r.validateResult();
         }
     }
 
     protected void fillNext(Updater u, Result r) throws InterruptedException {
         System.out.println("fillNext " + r);
-        u.setResult(r);
+        if (!running) {
+            return;
+        }
+        
+        // update
+        ResultViewer v = pics[nextEmpty++];
+        v.setResult(r);
+        
+        if (!running) {
+            // reset
+            v.setResult(null);
+        }
+        u.setResultViewer(v);
+        
+        // update GUI
         try {
             SwingUtilities.invokeAndWait(u);
         } catch (InterruptedException e) {
@@ -80,13 +95,13 @@ public class ThumbnailBox extends JPanel implements ActionListener {
     }
 
     protected class Updater implements Runnable {
-        private Result r;
+        private ResultViewer r;
 
         public void run() {
-            pics[nextEmpty++].setResult(r);
+            r.validateResult();
         }
 
-        public void setResult(Result r) {
+        public void setResultViewer(ResultViewer r) {
             this.r = r;
         }
     }
