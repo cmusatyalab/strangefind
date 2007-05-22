@@ -16,7 +16,10 @@ import edu.cmu.cs.diamond.opendiamond.Search;
 public class ThumbnailBox extends JPanel implements ActionListener {
     volatile protected int nextEmpty = 0;
 
-    final protected ResultViewer[] pics = new ResultViewer[6];
+    final static private int ROWS = 3;
+    final static private int COLS = 3;
+    
+    final protected ResultViewer[] pics = new ResultViewer[ROWS * COLS];
 
     final protected JButton nextButton = new JButton("Next");
 
@@ -35,7 +38,7 @@ public class ThumbnailBox extends JPanel implements ActionListener {
         Box h = null;
         for (int i = 0; i < pics.length; i++) {
             boolean addBox = false;
-            if (i % 3 == 0) {
+            if (i % COLS == 0) {
                 h = Box.createHorizontalBox();
                 addBox = true;
             }
@@ -64,52 +67,52 @@ public class ThumbnailBox extends JPanel implements ActionListener {
         nextEmpty = 0;
         for (ResultViewer r : pics) {
             r.setResult(null);
-            r.validateResult();
+            r.commitResult();
         }
     }
 
-    protected void fillNext(Updater u, Result r) throws InterruptedException {
+    protected void fillNext(Result r) throws InterruptedException {
         System.out.println("fillNext " + r);
         if (!running) {
             return;
         }
-        
+
         // update
-        ResultViewer v = pics[nextEmpty++];
+        final ResultViewer v = pics[nextEmpty++];
+
+        // loading message
+        try {
+            SwingUtilities.invokeAndWait(new Runnable() {
+                public void run() {
+                    v.setText("Loading");
+                }
+            });
+        } catch (InvocationTargetException e1) {
+            e1.printStackTrace();
+        }
+
         v.setResult(r);
-        
+
         if (!running) {
             // reset
             v.setResult(null);
         }
-        u.setResultViewer(v);
-        
+
         // update GUI
         try {
-            SwingUtilities.invokeAndWait(u);
-        } catch (InterruptedException e) {
-            throw e;
+            SwingUtilities.invokeAndWait(new Runnable() {
+                public void run() {
+                    v.setText(null);
+                    v.commitResult();
+                }
+            });
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
     }
 
-    protected class Updater implements Runnable {
-        private ResultViewer r;
-
-        public void run() {
-            r.validateResult();
-        }
-
-        public void setResultViewer(ResultViewer r) {
-            this.r = r;
-        }
-    }
-
     protected class MyRunner implements Runnable {
         public void run() {
-            Updater u = new Updater();
-
             try {
                 while (running) {
                     // wait for next item
@@ -129,11 +132,11 @@ public class ThumbnailBox extends JPanel implements ActionListener {
                                 }
 
                                 // no longer full
-                                fillNext(u, r);
+                                fillNext(r);
                             }
                         } else {
                             // not full
-                            fillNext(u, r);
+                            fillNext(r);
                         }
                     } else {
                         // no more objects

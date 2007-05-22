@@ -27,6 +27,8 @@ public class ResultViewer extends JButton implements ActionListener {
         setMinimumSize(d);
         setPreferredSize(d);
         setMaximumSize(d);
+        
+        setEnabled(false);
 
         addActionListener(this);
     }
@@ -36,17 +38,18 @@ public class ResultViewer extends JButton implements ActionListener {
 
         if (result == null) {
             thumbnail = null;
+            setEnabled(false);
             return;
         }
 
         BufferedImage img = getImg();
         thumbnail = new ImageIcon(Util.possiblyShrinkImage(img,
                 PREFERRED_WIDTH, PREFERRED_HEIGHT));
+        setEnabled(true);
     }
 
-    public void validateResult() {
+    public void commitResult() {
         setIcon(thumbnail);
-        validate();
     }
     
     private BufferedImage getImg() {
