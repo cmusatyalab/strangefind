@@ -4,8 +4,6 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.InvocationTargetException;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -13,57 +11,22 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import edu.cmu.cs.diamond.opendiamond.Result;
+import edu.cmu.cs.diamond.opendiamond.Search;
 
 public class ThumbnailBox extends JPanel implements ActionListener {
-    private static enum Command {
-        STOP_COMMAND, START_COMMAND, RESULT_COMMAND
-    };
+    volatile protected int nextEmpty = 0;
 
-    private static class CommandResult {
-        final public static CommandResult STOP = new CommandResult(
-                Command.STOP_COMMAND);
+    final protected ResultViewer[] pics = new ResultViewer[6];
 
-        final public static CommandResult START = new CommandResult(
-                Command.START_COMMAND);
+    final protected JButton nextButton = new JButton("Next");
 
-        final private Command c;
+    private Thread theThread;
 
-        final private Result r;
+    volatile protected boolean running;
 
-        public CommandResult(Command c) {
-            if (c == Command.RESULT_COMMAND) {
-                throw new IllegalArgumentException();
-            }
-            this.c = c;
-            r = null;
-        }
+    protected Search search;
 
-        public CommandResult(Result r) {
-            c = Command.RESULT_COMMAND;
-            this.r = r;
-        }
-
-        public Command getCommand() {
-            return c;
-        }
-
-        public Result getResult() {
-            return r;
-        }
-    }
-
-    private int nextEmpty = 0;
-
-    final private ResultViewer[] pics = new ResultViewer[6];
-
-    final private BlockingQueue<CommandResult> q = new ArrayBlockingQueue<CommandResult>(
-            1);
-
-    final private JButton nextButton = new JButton("Next");
-
-    final private Thread theThread = new Thread(new MyRunner());
-
-    volatile private boolean running;
+    final protected Object fullSynchronizer = new Object();
 
     public ThumbnailBox() {
         Box v = Box.createVerticalBox();
@@ -91,30 +54,36 @@ public class ThumbnailBox extends JPanel implements ActionListener {
         v.add(nextButton);
         nextButton.setEnabled(false);
         nextButton.addActionListener(this);
-        theThread.start();
     }
 
-    private boolean isFull() {
+    protected boolean isFull() {
         return nextEmpty >= pics.length;
     }
 
-    void clearAll() {
+    private void clearAll() {
         nextEmpty = 0;
         for (ResultViewer r : pics) {
             r.setResult(null);
         }
     }
 
-    private void fillNext(Result r) {
+    protected void fillNext(Updater u, Result r) throws InterruptedException {
         System.out.println("fillNext " + r);
-        pics[nextEmpty++].setResult(r);
+        u.setResult(r);
+        try {
+            SwingUtilities.invokeAndWait(u);
+        } catch (InterruptedException e) {
+            throw e;
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
     }
 
-    private class Updater implements Runnable {
+    protected class Updater implements Runnable {
         private Result r;
 
         public void run() {
-            fillNext(r);
+            pics[nextEmpty++].setResult(r);
         }
 
         public void setResult(Result r) {
@@ -122,67 +91,51 @@ public class ThumbnailBox extends JPanel implements ActionListener {
         }
     }
 
-    private class MyRunner implements Runnable {
+    protected class MyRunner implements Runnable {
         public void run() {
             Updater u = new Updater();
 
-            while (true) {
-                CommandResult r;
-                try {
-                    System.out.println("waiting on queue");
-                    r = q.take();
-                    System.out.println(" got item " + r.getCommand());
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    r = CommandResult.STOP;
-                }
+            try {
+                while (running) {
+                    // wait for next item
+                    System.out.println("wait for next item...");
+                    Result r = search.getNextResult();
+                    System.out.println(" " + r);
 
-                switch (r.getCommand()) {
-                case RESULT_COMMAND:
-                    Result rr = r.getResult();
-                    try {
-                            processResult(u, rr);
-                        } catch (InterruptedException e) {
-                            // stop
-                            System.out.println(" *** INTERRUPTION");
-                            running = false;
-                            q.clear();
-                            nextButton.setEnabled(false);
+                    if (r != null) {
+                        // we have data
+
+                        if (isFull()) {
+                            // wait
+                            synchronized (fullSynchronizer) {
+                                while (isFull()) {
+                                    nextButton.setEnabled(true);
+                                    fullSynchronizer.wait();
+                                }
+
+                                // no longer full
+                                fillNext(u, r);
+                            }
+                        } else {
+                            // not full
+                            fillNext(u, r);
                         }
-                    break;
-
-                case START_COMMAND:
-                    running = true;
-                    
-                    // clear display
-                    clearAll();
-                    break;
-
-                case STOP_COMMAND:
-                    running = false;
-                    
-                    // drain queue
-                    q.clear();
-                    break;
+                    } else {
+                        // no more objects
+                        running = false;
+                    }
                 }
-            }
-        }
+            } catch (InterruptedException e) {
+                System.out.println("INTERRUPTED !");
+            } finally {
+                System.out.println("FINALLY stopping search");
+                search.stopSearch();
+                System.out.println(" done");
 
-        private void processResult(Updater u, Result r) throws InterruptedException {
-            synchronized (pics) {
-                while (isFull()) {
-                    nextButton.setEnabled(true);
-                    pics.wait();
-                }
+                // clear anything not shown
+                nextButton.setEnabled(false);
 
-                // add one
-                u.setResult(r);
-                System.out.println("thumbnail got result");
-                try {
-                    SwingUtilities.invokeAndWait(u);
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                }
+                System.out.println("done with finally");
             }
         }
     }
@@ -190,34 +143,44 @@ public class ThumbnailBox extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         // next is clicked
         nextButton.setEnabled(false);
-        synchronized (pics) {
+        synchronized (fullSynchronizer) {
             clearAll();
-            pics.notify();
-        }
-    }
-    
-    public void addResult(Result r) {
-        if (!running) {
-            return;
-        }
-        
-        try {
-            q.put(new CommandResult(r));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            fullSynchronizer.notify();
         }
     }
 
     public void stop() {
-        theThread.interrupt();
-        q.clear();
+        running = false;
+
+        if (theThread != null) {
+            // interrupt anything
+            theThread.interrupt();
+
+            // wait for exit
+            try {
+                System.out.print("joining...");
+                System.out.flush();
+                theThread.join();
+                System.out.println(" done");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        theThread = null;
     }
 
-    public void start() {
-        try {
-            q.put(new CommandResult(Command.START_COMMAND));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public void start(Search s) {
+        stop();
+
+        search = s;
+
+        clearAll();
+
+        System.out.println("start search");
+        search.startSearch();
+
+        running = true;
+
+        (theThread = new Thread(new MyRunner())).start();
     }
 }

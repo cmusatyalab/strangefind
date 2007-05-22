@@ -1,18 +1,7 @@
 package edu.cmu.cs.diamond.snapfind2;
 
 import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
-import static java.awt.event.KeyEvent.VK_A;
-import static java.awt.event.KeyEvent.VK_C;
-import static java.awt.event.KeyEvent.VK_D;
-import static java.awt.event.KeyEvent.VK_E;
-import static java.awt.event.KeyEvent.VK_H;
-import static java.awt.event.KeyEvent.VK_I;
-import static java.awt.event.KeyEvent.VK_L;
-import static java.awt.event.KeyEvent.VK_N;
-import static java.awt.event.KeyEvent.VK_O;
-import static java.awt.event.KeyEvent.VK_P;
-import static java.awt.event.KeyEvent.VK_Q;
-import static java.awt.event.KeyEvent.VK_S;
+import static java.awt.event.KeyEvent.*;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -21,7 +10,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -45,8 +33,6 @@ public class SnapFind2 extends JFrame {
 
     private JMenu scopeMenu;
 
-    final private ResultsFetcher rf = new ResultsFetcher(results, startButton, stopButton);
-    
     public SnapFind2() {
         super("SnapFind 2");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -58,26 +44,20 @@ public class SnapFind2 extends JFrame {
 
         startButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                results.clearAll();
+                // start
                 startButton.setEnabled(false);
                 stopButton.setEnabled(true);
-                startSearch();
-
-                // start consumer
-                results.start();
-
-                // start producer
-                rf.setSearch(search);
-                new Thread(rf).start();
+                prepareSearch();
+                results.start(search);
             }
         });
 
         stopButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                // stop
                 startButton.setEnabled(true);
                 stopButton.setEnabled(false);
                 System.out.println(" *** stop search");
-                search.stopSearch();
                 results.stop();
             }
         });
@@ -87,7 +67,7 @@ public class SnapFind2 extends JFrame {
         pack();
     }
 
-    protected void startSearch() {
+    protected void prepareSearch() {
         // read all enabled searches
 
         // set up search
@@ -107,8 +87,6 @@ public class SnapFind2 extends JFrame {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        search.startSearch();
     }
 
     private void setupWindow() {
