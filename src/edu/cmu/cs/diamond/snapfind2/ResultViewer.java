@@ -113,6 +113,8 @@ public class ResultViewer extends JButton implements ActionListener {
         JLabel p = new JLabel(new ImageIcon(img));
         JScrollPane jsp = new JScrollPane(p);
         JFrame f = new JFrame();
+        jsp.getVerticalScrollBar().setUnitIncrement(40);
+        jsp.getHorizontalScrollBar().setUnitIncrement(40);
         f.add(jsp);
         f.add(new JLabel(result.getAnnotation()), BorderLayout.SOUTH);
         
