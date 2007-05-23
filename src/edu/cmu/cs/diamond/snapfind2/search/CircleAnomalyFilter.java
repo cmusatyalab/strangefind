@@ -91,7 +91,7 @@ public class CircleAnomalyFilter implements SnapFindSearch {
             }
 
             String anomArgs[] = new String[paramsList.size() + 1];
-            anomArgs[0] = "0"; // number to skip
+            anomArgs[0] = "10"; // number to skip
             System.arraycopy(paramsList.toArray(), 0, anomArgs, 1, paramsList
                     .size());
             c = new FilterCode(new FileInputStream("fil_anomaly.so"));
@@ -146,20 +146,20 @@ public class CircleAnomalyFilter implements SnapFindSearch {
         return new Annotator() {
             public String annotate(Result r) {
                 int key = Util.extractInt(r.getValue("anomalous-value.int"));
-                String anomStr = "<html><p>Anomalous value "
+                String anomStr = "<html><p>Anomalous <b>"
                         + niceSelectedLabels.get(key)
-                        + ": "
+                        + "</b>: "
                         + Util.extractDouble(r
                                 .getValue(selectedLabels.get(key)))
-                        + "<p>object count: "
-                        + Util.extractInt(r
-                                .getValue("anomalous-value-count.int"))
                         + "<p>mean: "
                         + Util.extractDouble(r
                                 .getValue("anomalous-value-mean.double"))
                         + "<p>stddev: "
                         + Util.extractDouble(r
                                 .getValue("anomalous-value-stddev.double"))
+                        + "<p>object count: "
+                        + Util.extractInt(r
+                                .getValue("anomalous-value-count.int"))
                         + "</html>";
 
                 return anomStr;
@@ -192,8 +192,12 @@ public class CircleAnomalyFilter implements SnapFindSearch {
 
            double dash;
 
+           if (!circle.inResult) {
+               return;
+           }
+           
            // draw
-           Arc2D arc = new Arc2D.Double(0.5, 0.5, 2, 2, 0, 360, Arc2D.CHORD);
+           Arc2D arc = new Arc2D.Double(-1, -1, 2, 2, 0, 360, Arc2D.CHORD);
 
            AffineTransform at = new AffineTransform();
            at.scale(scale, scale);
