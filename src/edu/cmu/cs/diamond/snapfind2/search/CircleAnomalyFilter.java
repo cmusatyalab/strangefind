@@ -1,8 +1,6 @@
 package edu.cmu.cs.diamond.snapfind2.search;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.io.FileInputStream;
@@ -24,6 +22,10 @@ import edu.cmu.cs.diamond.snapfind2.Decorator;
 import edu.cmu.cs.diamond.snapfind2.SnapFindSearch;
 
 public class CircleAnomalyFilter implements SnapFindSearch {
+    public enum CircleFill {
+        CIRCLE_FILL_DASHED, CIRCLE_FILL_SOLID, CIRCLE_FILL_HAIRLINE
+    }
+
     public static class Circle {
         public float x;
 
@@ -92,7 +94,7 @@ public class CircleAnomalyFilter implements SnapFindSearch {
             }
 
             String anomArgs[] = new String[paramsList.size() + 1];
-            anomArgs[0] = ignoreSpinner.getValue().toString();                                                                // skip
+            anomArgs[0] = ignoreSpinner.getValue().toString(); // skip
             System.arraycopy(paramsList.toArray(), 0, anomArgs, 1, paramsList
                     .size());
             c = new FilterCode(new FileInputStream("fil_anomaly.so"));
@@ -129,7 +131,7 @@ public class CircleAnomalyFilter implements SnapFindSearch {
 
         result.add(new JLabel(" "));
         result.add(new JLabel(" "));
-        
+
         result.add(new JLabel("Descriptor"));
         result.add(new JLabel("Std. dev."));
         for (int i = 0; i < LABELS.length; i++) {
@@ -187,24 +189,24 @@ public class CircleAnomalyFilter implements SnapFindSearch {
 
                 List<Circle> circles = extractCircles(data);
                 for (Circle circle : circles) {
-                    drawCircle(g, circle, scale);
+                    drawCircle(g, circle, scale,
+                            circle.inResult ? CircleFill.CIRCLE_FILL_SOLID
+                                    : CircleFill.CIRCLE_FILL_DASHED);
                 }
             }
         };
     }
 
-    protected void drawCircle(Graphics2D g, Circle circle, double scale) {
+    protected void drawCircle(Graphics2D g, Circle circle, double scale,
+            CircleFill fill) {
         float x = circle.x;
         float y = circle.y;
         float a = circle.a;
         float b = circle.b;
         float t = circle.t;
 
-        double dash;
-
-        if (!circle.inResult) {
-            return;
-        }
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
 
         // draw
         Arc2D arc = new Arc2D.Double(-1, -1, 2, 2, 0, 360, Arc2D.CHORD);
@@ -216,22 +218,29 @@ public class CircleAnomalyFilter implements SnapFindSearch {
         at.rotate(t);
         at.scale(a, b);
 
-        g.setColor(Color.RED);
-        g.draw(at.createTransformedShape(arc));
-        /*
-         * switch (fill) { case CIRCLE_FILL_DASHED: dash = 5.0;
-         * cairo_set_line_width(cr, 1.0); cairo_set_dash(cr, &dash, 1, 0.0);
-         * cairo_set_source_rgb(cr, 1.0, 0.0, 0.0); cairo_stroke(cr); break;
-         * 
-         * case CIRCLE_FILL_SOLID: // show fill, no dash
-         * cairo_set_line_width(cr, 2.0); cairo_set_dash(cr, NULL, 0, 0.0);
-         * cairo_set_source_rgb(cr, 1.0, 0.0, 0.0); cairo_stroke_preserve(cr);
-         * cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 0.2); cairo_fill(cr); break;
-         * 
-         * case CIRCLE_FILL_HAIRLINE: cairo_set_line_width(cr, 1.0);
-         * cairo_set_dash(cr, NULL, 0, 0.0); cairo_set_source_rgb(cr, 1.0, 0.0,
-         * 0.0); cairo_stroke(cr); break; }
-         */
+        Shape s = at.createTransformedShape(arc);
+        switch (fill) {
+        case CIRCLE_FILL_DASHED:
+            g.setStroke(new BasicStroke(1.0f, BasicStroke.CAP_BUTT,
+                    BasicStroke.JOIN_BEVEL, 1f, new float[] { 5.0f }, 0));
+            g.setPaint(Color.RED);
+            g.draw(s);
+            break;
+
+        case CIRCLE_FILL_SOLID:
+            g.setStroke(new BasicStroke(2.0f));
+            g.setPaint(new Color(1.0f, 0.0f, 0.0f, 0.2f));
+            g.fill(s);
+            g.setPaint(Color.RED);
+            g.draw(s);
+            break;
+
+        case CIRCLE_FILL_HAIRLINE:
+            g.setStroke(new BasicStroke(1.0f));
+            g.setPaint(Color.RED);
+            g.draw(s);
+            break;
+        }
     }
 
     static protected List<Circle> extractCircles(byte[] data) {

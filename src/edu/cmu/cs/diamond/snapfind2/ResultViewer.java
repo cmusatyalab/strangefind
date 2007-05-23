@@ -1,5 +1,6 @@
 package edu.cmu.cs.diamond.snapfind2;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Insets;
@@ -104,14 +105,17 @@ public class ResultViewer extends JButton implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
-        if (result == null) {
-            return;
-        }
-
-        JLabel p = new JLabel(new ImageIcon(getImg()));
+        BufferedImage img = getImg();
+        Graphics2D g = img.createGraphics();
+        result.decorate(g, 1.0);
+        g.dispose();
+        
+        JLabel p = new JLabel(new ImageIcon(img));
         JScrollPane jsp = new JScrollPane(p);
         JFrame f = new JFrame();
         f.add(jsp);
+        f.add(new JLabel(result.getAnnotation()), BorderLayout.SOUTH);
+        
         f.pack();
         f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         f.setLocationByPlatform(true);
