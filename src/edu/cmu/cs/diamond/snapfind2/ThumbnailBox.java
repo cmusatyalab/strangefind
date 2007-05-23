@@ -33,6 +33,8 @@ public class ThumbnailBox extends JPanel implements ActionListener {
 
     private Annotator annotator;
 
+    private Decorator decorator;
+
     public ThumbnailBox() {
         super();
         
@@ -65,6 +67,10 @@ public class ThumbnailBox extends JPanel implements ActionListener {
 
     public void setAnnotator(Annotator a) {
         annotator = a;
+    }
+    
+    public void setDecorator(Decorator d) {
+        decorator = d;
     }
     
     protected boolean isFull() {
@@ -103,7 +109,7 @@ public class ThumbnailBox extends JPanel implements ActionListener {
         if (annotator != null) {
             annotation = annotator.annotate(r);
         }
-        v.setResult(new AnnotatedResult(r, annotation));
+        v.setResult(new AnnotatedResult(r, annotation, decorator));
 
         if (!running) {
             // reset

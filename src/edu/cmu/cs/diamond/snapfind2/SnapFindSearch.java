@@ -11,4 +11,6 @@ public interface SnapFindSearch {
     Filter[] getFilters();
     
     Annotator getAnnotator();
+    
+    Decorator getDecorator();
 }

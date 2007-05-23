@@ -54,4 +54,12 @@ public class SearchList extends JPanel {
         }
         return l.toArray(new Annotator[0]);
     }
+
+    public Decorator[] getDecorators() {
+        List<Decorator> l = new ArrayList<Decorator>();
+        for (SnapFindSearch s : searches) {
+            l.addAll(Arrays.asList(s.getDecorator()));
+        }
+        return l.toArray(new Decorator[0]);
+    }
 }

@@ -1,10 +1,14 @@
 package edu.cmu.cs.diamond.snapfind2.search;
 
-import java.awt.Component;
-import java.awt.Container;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Arc2D;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,9 +19,30 @@ import edu.cmu.cs.diamond.opendiamond.FilterCode;
 import edu.cmu.cs.diamond.opendiamond.Result;
 import edu.cmu.cs.diamond.opendiamond.Util;
 import edu.cmu.cs.diamond.snapfind2.Annotator;
+import edu.cmu.cs.diamond.snapfind2.Decorator;
 import edu.cmu.cs.diamond.snapfind2.SnapFindSearch;
 
 public class CircleAnomalyFilter implements SnapFindSearch {
+    public static class Circle {
+        public float x;
+
+        public float y;
+
+        public float a;
+
+        public float b;
+
+        public float t;
+
+        public boolean inResult;
+
+        @Override
+        public String toString() {
+            return "(" + x + "," + y + "), [" + a + " x " + b + "] t: " + t
+                    + ", inResult: " + inResult;
+        }
+    }
+
     private static final String[] LABELS = { "circle-count",
             "circle-area-fraction", "circle-area-m0", "circle-area-m1",
             "circle-area-m2", "circle-area-m3", "circle-eccentricity-m0",
@@ -66,7 +91,7 @@ public class CircleAnomalyFilter implements SnapFindSearch {
             }
 
             String anomArgs[] = new String[paramsList.size() + 1];
-            anomArgs[0] = "10";
+            anomArgs[0] = "0"; // number to skip
             System.arraycopy(paramsList.toArray(), 0, anomArgs, 1, paramsList
                     .size());
             c = new FilterCode(new FileInputStream("fil_anomaly.so"));
@@ -91,99 +116,20 @@ public class CircleAnomalyFilter implements SnapFindSearch {
     public JPanel getInterface() {
         // XXX do this another way
         JPanel result = new JPanel();
-        result.setBorder(BorderFactory.createTitledBorder("Anomaly Detector"));
+        result.setBorder(BorderFactory
+                .createTitledBorder("Circle Anomaly Detector"));
         result.setLayout(new SpringLayout());
 
-        result.add(new JLabel("Attribute"));
+        result.add(new JLabel("Descriptor"));
         result.add(new JLabel("Std. dev."));
         for (int i = 0; i < LABELS.length; i++) {
             result.add(checkboxes[i]);
             result.add(stddevs[i]);
         }
 
-        makeCompactGrid(result, LABELS.length + 1, 2, 5, 5, 2, 2);
+        Util.makeCompactGrid(result, LABELS.length + 1, 2, 5, 5, 2, 2);
 
         return result;
-    }
-
-    // http://java.sun.com/docs/books/tutorial/uiswing/examples/layout/SpringGridProject/src/layout/SpringUtilities.java
-    /* Used by makeCompactGrid. */
-    private static SpringLayout.Constraints getConstraintsForCell(int row,
-            int col, Container parent, int cols) {
-        SpringLayout layout = (SpringLayout) parent.getLayout();
-        Component c = parent.getComponent(row * cols + col);
-        return layout.getConstraints(c);
-    }
-
-    /**
-     * Aligns the first <code>rows</code> * <code>cols</code> components of
-     * <code>parent</code> in a grid. Each component in a column is as wide as
-     * the maximum preferred width of the components in that column; height is
-     * similarly determined for each row. The parent is made just big enough to
-     * fit them all.
-     * 
-     * @param rows
-     *            number of rows
-     * @param cols
-     *            number of columns
-     * @param initialX
-     *            x location to start the grid at
-     * @param initialY
-     *            y location to start the grid at
-     * @param xPad
-     *            x padding between cells
-     * @param yPad
-     *            y padding between cells
-     */
-    public static void makeCompactGrid(Container parent, int rows, int cols,
-            int initialX, int initialY, int xPad, int yPad) {
-        SpringLayout layout;
-        try {
-            layout = (SpringLayout) parent.getLayout();
-        } catch (ClassCastException exc) {
-            System.err
-                    .println("The first argument to makeCompactGrid must use SpringLayout.");
-            return;
-        }
-
-        // Align all cells in each column and make them the same width.
-        Spring x = Spring.constant(initialX);
-        for (int c = 0; c < cols; c++) {
-            Spring width = Spring.constant(0);
-            for (int r = 0; r < rows; r++) {
-                width = Spring.max(width, getConstraintsForCell(r, c, parent,
-                        cols).getWidth());
-            }
-            for (int r = 0; r < rows; r++) {
-                SpringLayout.Constraints constraints = getConstraintsForCell(r,
-                        c, parent, cols);
-                constraints.setX(x);
-                constraints.setWidth(width);
-            }
-            x = Spring.sum(x, Spring.sum(width, Spring.constant(xPad)));
-        }
-
-        // Align all cells in each row and make them the same height.
-        Spring y = Spring.constant(initialY);
-        for (int r = 0; r < rows; r++) {
-            Spring height = Spring.constant(0);
-            for (int c = 0; c < cols; c++) {
-                height = Spring.max(height, getConstraintsForCell(r, c, parent,
-                        cols).getHeight());
-            }
-            for (int c = 0; c < cols; c++) {
-                SpringLayout.Constraints constraints = getConstraintsForCell(r,
-                        c, parent, cols);
-                constraints.setY(y);
-                constraints.setHeight(height);
-            }
-            y = Spring.sum(y, Spring.sum(height, Spring.constant(yPad)));
-        }
-
-        // Set the parent's size.
-        SpringLayout.Constraints pCons = layout.getConstraints(parent);
-        pCons.setConstraint(SpringLayout.SOUTH, y);
-        pCons.setConstraint(SpringLayout.EAST, x);
     }
 
     public Annotator getAnnotator() {
@@ -221,4 +167,95 @@ public class CircleAnomalyFilter implements SnapFindSearch {
         };
     }
 
+    public Decorator getDecorator() {
+        return new Decorator() {
+            public void decorate(Result r, Graphics2D g, double scale) {
+                byte data[] = r.getValue("circle-data");
+                if (data == null) {
+                    return;
+                }
+
+                List<Circle> circles = extractCircles(data);
+                for (Circle circle : circles) {
+                    drawCircle(g, circle, scale);
+                }
+            }
+        };
+    }
+
+    protected void drawCircle(Graphics2D g, Circle circle, double scale) {
+           float x = circle.x;
+           float y = circle.y;
+           float a = circle.a;
+           float b = circle.b;
+           float t = circle.t;
+
+           double dash;
+
+           // draw
+           Arc2D arc = new Arc2D.Double(0.5, 0.5, 2, 2, 0, 360, Arc2D.CHORD);
+
+           AffineTransform at = new AffineTransform();
+           at.scale(scale, scale);
+
+           at.translate(x, y);
+           at.rotate(t);
+           at.scale(a, b);
+
+           g.setColor(Color.RED);
+           g.draw(at.createTransformedShape(arc));
+           /*
+           switch (fill) {
+           case CIRCLE_FILL_DASHED:
+             dash = 5.0;
+             cairo_set_line_width(cr, 1.0);
+             cairo_set_dash(cr, &dash, 1, 0.0);
+             cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
+             cairo_stroke(cr);
+             break;
+
+           case CIRCLE_FILL_SOLID:
+             // show fill, no dash
+             cairo_set_line_width(cr, 2.0);
+             cairo_set_dash(cr, NULL, 0, 0.0);
+             cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
+             cairo_stroke_preserve(cr);
+             cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 0.2);
+             cairo_fill(cr);
+             break;
+
+           case CIRCLE_FILL_HAIRLINE:
+             cairo_set_line_width(cr, 1.0);
+             cairo_set_dash(cr, NULL, 0, 0.0);
+             cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
+             cairo_stroke(cr);
+             break;
+           }
+           */
+    }
+
+    static protected List<Circle> extractCircles(byte[] data) {
+        List<Circle> circles = new ArrayList<Circle>();
+        final int sizeOfFloatPart = 4 * 5;
+
+        System.out.println(data.length);
+        for (int i = 0; i < data.length; i += sizeOfFloatPart + 1) {
+                Circle c = new Circle();
+                System.out.println(" " + i);
+                
+                ByteBuffer b = ByteBuffer.wrap(data, i, sizeOfFloatPart + 1);
+                b.order(ByteOrder.LITTLE_ENDIAN);
+                
+                c.x = b.getFloat();
+                c.y = b.getFloat();
+                c.a = b.getFloat();
+                c.b = b.getFloat();
+                c.t = b.getFloat();
+                c.inResult = b.get() != 0;
+
+                circles.add(c);
+            }
+
+        return circles;
+    }
 }

@@ -51,6 +51,7 @@ public class SnapFind2 extends JFrame {
                 prepareSearch();
                 
                 results.setAnnotator(searchList.getAnnotators()[0]);
+                results.setDecorator(searchList.getDecorators()[0]);
                 results.start(search);
             }
         });

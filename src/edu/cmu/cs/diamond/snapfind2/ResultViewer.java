@@ -1,6 +1,7 @@
 package edu.cmu.cs.diamond.snapfind2;
 
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,7 +12,6 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
-import edu.cmu.cs.diamond.opendiamond.Result;
 import edu.cmu.cs.diamond.opendiamond.Util;
 
 public class ResultViewer extends JButton implements ActionListener {
@@ -19,7 +19,7 @@ public class ResultViewer extends JButton implements ActionListener {
 
     private static final int PREFERRED_WIDTH = 240;
 
-    private Result result;
+    private AnnotatedResult result;
 
     private Icon thumbnail;
 
@@ -51,8 +51,17 @@ public class ResultViewer extends JButton implements ActionListener {
 
         BufferedImage img = getImg();
         Insets in = getInsets();
-        thumbnail = new ImageIcon(Util.possiblyShrinkImage(img, PREFERRED_WIDTH
-                - in.left - in.right, PREFERRED_HEIGHT - in.top - in.bottom));
+        
+        int w = img.getWidth();
+        int h = img.getHeight();
+        double scale = Util.getScaleForResize(w, h, PREFERRED_WIDTH
+                - in.left - in.right, PREFERRED_HEIGHT - in.top - in.bottom);
+        BufferedImage newImg = Util.scaleImage(img, scale);
+        Graphics2D g = newImg.createGraphics();
+        r.decorate(g, scale);
+        g.dispose();
+
+        thumbnail = new ImageIcon(newImg);
         setEnabled(true);
     }
 
