@@ -396,8 +396,6 @@ extern "C" {
     data = NULL;
 
     // add the list of circles to the cache and the object
-    // XXX !
-
     num_circles = g_list_length(clist);
     double *areas = (double *) g_malloc(sizeof(double) * num_circles);
     double *eccentricities = (double *) g_malloc(sizeof(double) * num_circles);
@@ -405,13 +403,22 @@ extern "C" {
     if (num_circles > 0) {
       GList *l = clist;
       int i = 0;
-      data = (unsigned char *) g_malloc(sizeof(circle_type) * num_circles);
+
+      int size_of_entry = sizeof(float) * 5 + 1;
+      data = (unsigned char *) g_malloc(size_of_entry * num_circles);
 
       // pack in and count
       while (l != NULL) {
-	circle_type *p = ((circle_type *) data) + i;
+	float *f = (float *) (data + i * size_of_entry);
+	unsigned char *in_result = data + ((i + 1) * size_of_entry) - 1;
 	circle_type *c = (circle_type *) l->data;
-	*p = *c;
+
+	f[0] = c->x;
+	f[1] = c->y;
+	f[2] = c->a;
+	f[3] = c->b;
+	f[4] = c->t;
+	*in_result = c->in_result;
 
 	if (c->in_result) {
 	  total_area += areas[num_circles_in_result] = M_PI * c->a * c->b;
@@ -422,7 +429,18 @@ extern "C" {
 	i++;
 	l = g_list_next(l);
       }
-      lf_write_attr(ohandle, "circle-data", sizeof(circle_type) * num_circles, data);
+
+      lf_write_attr(ohandle, "circle-data", size_of_entry * num_circles, data);
+
+      /*
+      printf(" ***\n");
+      for (i = 0; i < size_of_entry * num_circles; i++) {
+	printf(" %.2x", data[i]);
+      }
+      printf("\n");
+      fflush(stdout);
+      exit(0);
+      */
     }
 
     // compute aggregate stats
@@ -451,8 +469,6 @@ extern "C" {
     printf("area_fraction: %g\n", area_fraction);
     printf("area moments: %g %g %g %g\n", area_m0, area_m1, area_m2, area_m3);
     printf("ecc  moments: %g %g %g %g\n", eccentricity_m0, eccentricity_m1, eccentricity_m2, eccentricity_m3);
-
-    printf("area_fraction hex: %llx\n", area_fraction);
 
     // free others
     g_list_foreach(clist, free_1_circle, NULL);
