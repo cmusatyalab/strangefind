@@ -447,6 +447,7 @@ extern "C" {
     double n = num_circles_in_result;
     lf_write_attr(ohandle, "circle-count", sizeof(double), (unsigned char *) &n);
 
+    // XXX not really correct!
     double area_fraction = total_area / (w * h);
     lf_write_attr(ohandle, "circle-area-fraction", sizeof(double), (unsigned char *) &area_fraction);
 
