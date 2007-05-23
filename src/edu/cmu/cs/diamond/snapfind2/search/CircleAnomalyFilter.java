@@ -12,6 +12,9 @@ import javax.swing.*;
 
 import edu.cmu.cs.diamond.opendiamond.Filter;
 import edu.cmu.cs.diamond.opendiamond.FilterCode;
+import edu.cmu.cs.diamond.opendiamond.Result;
+import edu.cmu.cs.diamond.opendiamond.Util;
+import edu.cmu.cs.diamond.snapfind2.Annotator;
 import edu.cmu.cs.diamond.snapfind2.SnapFindSearch;
 
 public class CircleAnomalyFilter implements SnapFindSearch {
@@ -35,7 +38,7 @@ public class CircleAnomalyFilter implements SnapFindSearch {
                     new SpinnerNumberModel(3.0, 1.0, 7.0, 0.5));
             stddevs[i] = s;
         }
-        
+
         checkboxes[0].setSelected(true);
         checkboxes[1].setSelected(true);
     }
@@ -181,6 +184,41 @@ public class CircleAnomalyFilter implements SnapFindSearch {
         SpringLayout.Constraints pCons = layout.getConstraints(parent);
         pCons.setConstraint(SpringLayout.SOUTH, y);
         pCons.setConstraint(SpringLayout.EAST, x);
+    }
+
+    public Annotator getAnnotator() {
+        final List<String> selectedLabels = new ArrayList<String>();
+        final List<String> niceSelectedLabels = new ArrayList<String>();
+        for (int i = 0; i < checkboxes.length; i++) {
+            JCheckBox c = checkboxes[i];
+            if (c.isSelected()) {
+                selectedLabels.add(LABELS[i]);
+                niceSelectedLabels.add(NICE_LABELS[i]);
+            }
+        }
+
+        return new Annotator() {
+            public String annotate(Result r) {
+                int key = Util.extractInt(r.getValue("anomalous-value.int"));
+                String anomStr = "<html><p>Anomalous value "
+                        + niceSelectedLabels.get(key)
+                        + ": "
+                        + Util.extractDouble(r
+                                .getValue(selectedLabels.get(key)))
+                        + "<p>object count: "
+                        + Util.extractInt(r
+                                .getValue("anomalous-value-count.int"))
+                        + "<p>mean: "
+                        + Util.extractDouble(r
+                                .getValue("anomalous-value-mean.double"))
+                        + "<p>stddev: "
+                        + Util.extractDouble(r
+                                .getValue("anomalous-value-stddev.double"))
+                        + "</html>";
+
+                return anomStr;
+            }
+        };
     }
 
 }

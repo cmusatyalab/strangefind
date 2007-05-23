@@ -49,6 +49,8 @@ public class SnapFind2 extends JFrame {
                 startButton.setEnabled(false);
                 stopButton.setEnabled(true);
                 prepareSearch();
+                
+                results.setAnnotator(searchList.getAnnotators()[0]);
                 results.start(search);
             }
         });

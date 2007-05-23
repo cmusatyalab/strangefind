@@ -35,15 +35,19 @@ public class ResultViewer extends JButton implements ActionListener {
 
         addActionListener(this);
     }
-
-    public void setResult(Result r) {
+    
+    public void setResult(AnnotatedResult r) {
         result = r;
-
+        
         if (result == null) {
             thumbnail = null;
+            setToolTipText(null);
             setEnabled(false);
             return;
         }
+
+        setToolTipText(r.getAnnotation());
+
 
         BufferedImage img = getImg();
         Insets in = getInsets();

@@ -31,6 +31,8 @@ public class ThumbnailBox extends JPanel implements ActionListener {
 
     final protected Object fullSynchronizer = new Object();
 
+    private Annotator annotator;
+
     public ThumbnailBox() {
         super();
         
@@ -61,6 +63,10 @@ public class ThumbnailBox extends JPanel implements ActionListener {
         nextButton.addActionListener(this);
     }
 
+    public void setAnnotator(Annotator a) {
+        annotator = a;
+    }
+    
     protected boolean isFull() {
         return nextEmpty >= pics.length;
     }
@@ -93,7 +99,11 @@ public class ThumbnailBox extends JPanel implements ActionListener {
             e1.printStackTrace();
         }
 
-        v.setResult(r);
+        String annotation = null;
+        if (annotator != null) {
+            annotation = annotator.annotate(r);
+        }
+        v.setResult(new AnnotatedResult(r, annotation));
 
         if (!running) {
             // reset

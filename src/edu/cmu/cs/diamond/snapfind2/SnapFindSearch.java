@@ -9,4 +9,6 @@ public interface SnapFindSearch {
     JPanel getInterface();
     
     Filter[] getFilters();
+    
+    Annotator getAnnotator();
 }
