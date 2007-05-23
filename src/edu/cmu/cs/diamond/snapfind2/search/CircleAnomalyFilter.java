@@ -158,7 +158,7 @@ public class CircleAnomalyFilter implements SnapFindSearch {
         return new Annotator() {
             public String annotate(Result r) {
                 int key = Util.extractInt(r.getValue("anomalous-value.int"));
-                String anomStr = "<html><p>Anomalous <b>"
+                String anomStr = "<html><p>Anomalous descriptor: <b>"
                         + niceSelectedLabels.get(key)
                         + "</b>: "
                         + Util.extractDouble(r
@@ -172,6 +172,7 @@ public class CircleAnomalyFilter implements SnapFindSearch {
                         + "<p>object count: "
                         + Util.extractInt(r
                                 .getValue("anomalous-value-count.int"))
+                        + "<p>server: " + Util.extractString(r.getValue("Device-Name"))
                         + "</html>";
 
                 return anomStr;
