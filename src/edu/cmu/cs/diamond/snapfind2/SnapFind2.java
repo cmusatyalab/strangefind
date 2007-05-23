@@ -16,12 +16,13 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import edu.cmu.cs.diamond.opendiamond.*;
+import edu.cmu.cs.diamond.snapfind2.search.CircleAnomalyFilter;
 
 public class SnapFind2 extends JFrame {
 
     final private List<Scope> scopes = ScopeSource.getPredefinedScopeList();
 
-    final private SearchList searchList = new SearchList();
+    final protected SearchList searchList = new SearchList();
 
     final protected JButton startButton = new JButton("Start");
 
@@ -69,6 +70,7 @@ public class SnapFind2 extends JFrame {
 
     protected void prepareSearch() {
         // read all enabled searches
+        Filter[] filters = searchList.getFilters();
 
         // set up search
         FilterCode fc;
@@ -80,6 +82,11 @@ public class SnapFind2 extends JFrame {
                     new String[0], 400);
             Searchlet s = new Searchlet();
             s.addFilter(f);
+            
+            for (Filter ff : filters) {
+                s.addFilter(ff);
+            }
+            
             s.setApplicationDependencies(new String[] { "rgb" });
             search.setSearchlet(s);
         } catch (FileNotFoundException e) {
@@ -263,7 +270,7 @@ public class SnapFind2 extends JFrame {
     }
 
     protected void newSearchFromExample() {
-        searchList.addFilter(null, "filter");
+        // TODO
     }
 
     protected void saveAsSearch() {
@@ -290,8 +297,14 @@ public class SnapFind2 extends JFrame {
     }
 
     private void populateFiltersMenu(JMenu itemNew) {
-        // TODO Auto-generated method stub
-
+        // XXX do this differently
+        JMenuItem mi = new JMenuItem("Circle Anomaly Detector");
+        mi.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                searchList.addSearch(new CircleAnomalyFilter());
+            }
+        });
+        itemNew.add(mi);
     }
 
     public static void main(String[] args) {
