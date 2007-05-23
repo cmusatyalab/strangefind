@@ -1,6 +1,7 @@
 package edu.cmu.cs.diamond.snapfind2.search;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
@@ -91,7 +92,7 @@ public class CircleAnomalyFilter implements SnapFindSearch {
             }
 
             String anomArgs[] = new String[paramsList.size() + 1];
-            anomArgs[0] = "10"; // number to skip
+            anomArgs[0] = ignoreSpinner.getValue().toString();                                                                // skip
             System.arraycopy(paramsList.toArray(), 0, anomArgs, 1, paramsList
                     .size());
             c = new FilterCode(new FileInputStream("fil_anomaly.so"));
@@ -113,6 +114,9 @@ public class CircleAnomalyFilter implements SnapFindSearch {
 
     final private JSpinner[] stddevs = new JSpinner[LABELS.length];
 
+    final private JSpinner ignoreSpinner = new JSpinner(new SpinnerNumberModel(
+            5, 0, 100, 1));
+
     public JPanel getInterface() {
         // XXX do this another way
         JPanel result = new JPanel();
@@ -120,6 +124,12 @@ public class CircleAnomalyFilter implements SnapFindSearch {
                 .createTitledBorder("Circle Anomaly Detector"));
         result.setLayout(new SpringLayout());
 
+        result.add(new JLabel("Priming count"));
+        result.add(ignoreSpinner);
+
+        result.add(new JLabel(" "));
+        result.add(new JLabel(" "));
+        
         result.add(new JLabel("Descriptor"));
         result.add(new JLabel("Std. dev."));
         for (int i = 0; i < LABELS.length; i++) {
@@ -127,7 +137,7 @@ public class CircleAnomalyFilter implements SnapFindSearch {
             result.add(stddevs[i]);
         }
 
-        Util.makeCompactGrid(result, LABELS.length + 1, 2, 5, 5, 2, 2);
+        Util.makeCompactGrid(result, LABELS.length + 3, 2, 5, 5, 2, 2);
 
         return result;
     }
@@ -184,81 +194,65 @@ public class CircleAnomalyFilter implements SnapFindSearch {
     }
 
     protected void drawCircle(Graphics2D g, Circle circle, double scale) {
-           float x = circle.x;
-           float y = circle.y;
-           float a = circle.a;
-           float b = circle.b;
-           float t = circle.t;
+        float x = circle.x;
+        float y = circle.y;
+        float a = circle.a;
+        float b = circle.b;
+        float t = circle.t;
 
-           double dash;
+        double dash;
 
-           if (!circle.inResult) {
-               return;
-           }
-           
-           // draw
-           Arc2D arc = new Arc2D.Double(-1, -1, 2, 2, 0, 360, Arc2D.CHORD);
+        if (!circle.inResult) {
+            return;
+        }
 
-           AffineTransform at = new AffineTransform();
-           at.scale(scale, scale);
+        // draw
+        Arc2D arc = new Arc2D.Double(-1, -1, 2, 2, 0, 360, Arc2D.CHORD);
 
-           at.translate(x, y);
-           at.rotate(t);
-           at.scale(a, b);
+        AffineTransform at = new AffineTransform();
+        at.scale(scale, scale);
 
-           g.setColor(Color.RED);
-           g.draw(at.createTransformedShape(arc));
-           /*
-           switch (fill) {
-           case CIRCLE_FILL_DASHED:
-             dash = 5.0;
-             cairo_set_line_width(cr, 1.0);
-             cairo_set_dash(cr, &dash, 1, 0.0);
-             cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
-             cairo_stroke(cr);
-             break;
+        at.translate(x, y);
+        at.rotate(t);
+        at.scale(a, b);
 
-           case CIRCLE_FILL_SOLID:
-             // show fill, no dash
-             cairo_set_line_width(cr, 2.0);
-             cairo_set_dash(cr, NULL, 0, 0.0);
-             cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
-             cairo_stroke_preserve(cr);
-             cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 0.2);
-             cairo_fill(cr);
-             break;
-
-           case CIRCLE_FILL_HAIRLINE:
-             cairo_set_line_width(cr, 1.0);
-             cairo_set_dash(cr, NULL, 0, 0.0);
-             cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
-             cairo_stroke(cr);
-             break;
-           }
-           */
+        g.setColor(Color.RED);
+        g.draw(at.createTransformedShape(arc));
+        /*
+         * switch (fill) { case CIRCLE_FILL_DASHED: dash = 5.0;
+         * cairo_set_line_width(cr, 1.0); cairo_set_dash(cr, &dash, 1, 0.0);
+         * cairo_set_source_rgb(cr, 1.0, 0.0, 0.0); cairo_stroke(cr); break;
+         * 
+         * case CIRCLE_FILL_SOLID: // show fill, no dash
+         * cairo_set_line_width(cr, 2.0); cairo_set_dash(cr, NULL, 0, 0.0);
+         * cairo_set_source_rgb(cr, 1.0, 0.0, 0.0); cairo_stroke_preserve(cr);
+         * cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 0.2); cairo_fill(cr); break;
+         * 
+         * case CIRCLE_FILL_HAIRLINE: cairo_set_line_width(cr, 1.0);
+         * cairo_set_dash(cr, NULL, 0, 0.0); cairo_set_source_rgb(cr, 1.0, 0.0,
+         * 0.0); cairo_stroke(cr); break; }
+         */
     }
 
     static protected List<Circle> extractCircles(byte[] data) {
         List<Circle> circles = new ArrayList<Circle>();
         final int sizeOfFloatPart = 4 * 5;
 
-        System.out.println(data.length);
         for (int i = 0; i < data.length; i += sizeOfFloatPart + 1) {
-                Circle c = new Circle();
-                System.out.println(" " + i);
-                
-                ByteBuffer b = ByteBuffer.wrap(data, i, sizeOfFloatPart + 1);
-                b.order(ByteOrder.LITTLE_ENDIAN);
-                
-                c.x = b.getFloat();
-                c.y = b.getFloat();
-                c.a = b.getFloat();
-                c.b = b.getFloat();
-                c.t = b.getFloat();
-                c.inResult = b.get() != 0;
+            Circle c = new Circle();
 
-                circles.add(c);
-            }
+            ByteBuffer b = ByteBuffer.wrap(data, i, sizeOfFloatPart + 1);
+            b.order(ByteOrder.LITTLE_ENDIAN);
+
+            c.x = b.getFloat();
+            c.y = b.getFloat();
+            c.a = b.getFloat();
+            c.b = b.getFloat();
+            c.t = b.getFloat();
+            c.inResult = b.get() != 0;
+
+            circles.add(c);
+        }
 
         return circles;
     }

@@ -109,8 +109,9 @@ public class ResultViewer extends JButton implements ActionListener {
         }
 
         JLabel p = new JLabel(new ImageIcon(getImg()));
+        JScrollPane jsp = new JScrollPane(p);
         JFrame f = new JFrame();
-        f.add(p);
+        f.add(jsp);
         f.pack();
         f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         f.setLocationByPlatform(true);
