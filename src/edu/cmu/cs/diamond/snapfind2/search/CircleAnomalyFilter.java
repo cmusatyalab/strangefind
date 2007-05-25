@@ -187,24 +187,26 @@ public class CircleAnomalyFilter implements SnapFindSearch {
                 int key = Util.extractInt(r.getValue("anomalous-value.int"));
                 String descriptor = niceSelectedLabels.get(key);
 
-                double stddevNum = Util.extractDouble(r
+                double stddev = Util.extractDouble(r
                         .getValue("anomalous-value-stddev.double"));
+                double value = Util.extractDouble(r.getValue(selectedLabels
+                        .get(key)));
+                double mean = Util.extractDouble(r
+                        .getValue("anomalous-value-mean.double"));
+                double stddevDiff = (value - mean) / stddev;
 
-                String stddev = df.format(Math.abs(stddevNum));
-                String mean = df.format(Util.extractDouble(r
-                        .getValue("anomalous-value-mean.double")));
-                String value = df.format(Util.extractDouble(r
-                        .getValue(selectedLabels.get(key))));
-                String aboveOrBelow = Math.signum(stddevNum) >= 0.0 ? "above"
+                int samples = Util.extractInt(r
+                        .getValue("anomalous-value-count.int"));
+                String aboveOrBelow = Math.signum(stddevDiff) >= 0.0 ? "above"
                         : "below";
-                String samples = Integer.toString(Util.extractInt(r
-                        .getValue("anomalous-value-count.int")));
+
                 String server = Util.extractString(r.getValue("Device-Name"));
 
-                return "<html><p><b>" + descriptor + "</b> = " + value + "<p>"
-                        + stddev + " stddev <b>" + aboveOrBelow + "</b> mean of "
-                        + mean + "<br>samples collected = " + samples
-                        + "<br>server: " + server + "</html>";
+                return "<html><p><b>" + descriptor + "</b> = "
+                        + df.format(value) + "<p><b>"
+                        + df.format(Math.abs(stddevDiff)) + "</b> stddev <b>"
+                        + aboveOrBelow + "</b> mean of <b>" + df.format(mean)
+                        + "</b><hr><p>" + server + " [" + samples + "]</html>";
             }
         };
     }
