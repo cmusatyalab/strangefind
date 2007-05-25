@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,6 +70,7 @@ public class CircleAnomalyFilter implements SnapFindSearch {
 
         checkboxes[0].setSelected(true);
         checkboxes[1].setSelected(true);
+        checkboxes[6].setSelected(true);
     }
 
     public Filter[] getFilters() {
@@ -172,10 +174,37 @@ public class CircleAnomalyFilter implements SnapFindSearch {
                         + "<p>object count: "
                         + Util.extractInt(r
                                 .getValue("anomalous-value-count.int"))
-                        + "<p>server: " + Util.extractString(r.getValue("Device-Name"))
+                        + "<p>server: "
+                        + Util.extractString(r.getValue("Device-Name"))
                         + "</html>";
 
                 return anomStr;
+            }
+
+            public String annotateTooltip(Result r) {
+                DecimalFormat df = new DecimalFormat("0.###");
+
+                int key = Util.extractInt(r.getValue("anomalous-value.int"));
+                String descriptor = niceSelectedLabels.get(key);
+
+                double stddevNum = Util.extractDouble(r
+                        .getValue("anomalous-value-stddev.double"));
+
+                String stddev = df.format(Math.abs(stddevNum));
+                String mean = df.format(Util.extractDouble(r
+                        .getValue("anomalous-value-mean.double")));
+                String value = df.format(Util.extractDouble(r
+                        .getValue(selectedLabels.get(key))));
+                String aboveOrBelow = Math.signum(stddevNum) >= 0.0 ? "above"
+                        : "below";
+                String samples = Integer.toString(Util.extractInt(r
+                        .getValue("anomalous-value-count.int")));
+                String server = Util.extractString(r.getValue("Device-Name"));
+
+                return "<html><p><b>" + descriptor + "</b> = " + value + "<p>"
+                        + stddev + " stddev <b>" + aboveOrBelow + "</b> mean of "
+                        + mean + "<br>samples collected = " + samples
+                        + "<br>server: " + server + "</html>";
             }
         };
     }

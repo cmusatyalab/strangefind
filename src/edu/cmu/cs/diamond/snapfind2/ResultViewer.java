@@ -47,7 +47,7 @@ public class ResultViewer extends JButton implements ActionListener {
             return;
         }
 
-        setToolTipText(r.getAnnotation());
+        setToolTipText(r.getTooltipAnnotation());
 
 
         BufferedImage img = getImg();

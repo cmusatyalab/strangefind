@@ -9,10 +9,12 @@ public class AnnotatedResult extends Result {
     final private Result theResult;
     final private String annotation;
     final private Decorator decorator;
+    final private String tooltipAnnotation;
 
-    public AnnotatedResult(Result r, String annotation, Decorator decorator) {
+    public AnnotatedResult(Result r, String annotation, String tooltipAnnotation, Decorator decorator) {
         theResult = r;
         this.annotation = annotation;
+        this.tooltipAnnotation = tooltipAnnotation;
         this.decorator = decorator;
     }
 
@@ -37,5 +39,9 @@ public class AnnotatedResult extends Result {
     
     public void decorate(Graphics2D g, double scale) {
         decorator.decorate(this, g, scale);
+    }
+
+    public String getTooltipAnnotation() {
+        return tooltipAnnotation;
     }
 }

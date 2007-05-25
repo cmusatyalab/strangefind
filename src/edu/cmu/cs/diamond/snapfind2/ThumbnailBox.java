@@ -106,10 +106,12 @@ public class ThumbnailBox extends JPanel implements ActionListener {
         }
 
         String annotation = null;
+        String tooltipAnnotation = null;
         if (annotator != null) {
             annotation = annotator.annotate(r);
+            tooltipAnnotation = annotator.annotateTooltip(r);
         }
-        v.setResult(new AnnotatedResult(r, annotation, decorator));
+        v.setResult(new AnnotatedResult(r, annotation, tooltipAnnotation, decorator));
 
         if (!running) {
             // reset
