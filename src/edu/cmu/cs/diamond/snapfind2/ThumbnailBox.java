@@ -173,6 +173,9 @@ public class ThumbnailBox extends JPanel implements ActionListener {
                 // clear anything not shown
                 nextButton.setEnabled(false);
 
+                // send event
+                
+                
                 System.out.println("done with finally");
             }
         }

@@ -50,8 +50,10 @@ public class SnapFind2 extends JFrame {
                 stopButton.setEnabled(true);
                 prepareSearch();
                 
+                // XXX
                 results.setAnnotator(searchList.getAnnotators()[0]);
                 results.setDecorator(searchList.getDecorators()[0]);
+                
                 results.start(search);
             }
         });
@@ -59,13 +61,21 @@ public class SnapFind2 extends JFrame {
         stopButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 // stop
-                startButton.setEnabled(true);
-                stopButton.setEnabled(false);
                 System.out.println(" *** stop search");
                 results.stop();
             }
         });
 
+        search.addSearchEventListener(new SearchEventListener() {
+            public void searchStopped(SearchEvent e) {
+                startButton.setEnabled(true);
+                stopButton.setEnabled(false);
+            }
+
+            public void searchStarted(SearchEvent e) {
+            }
+        });
+        
         setupWindow();
 
         pack();
