@@ -9,35 +9,23 @@ import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 import edu.cmu.cs.diamond.opendiamond.Result;
 import edu.cmu.cs.diamond.opendiamond.Search;
 
 public class ThumbnailBox extends JPanel implements ActionListener {
-    public class StatsGatherer implements Runnable {
-        public void run() {
-            while(running) {
-                stats.update(search.getStatistics());
-                
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
     volatile protected int nextEmpty = 0;
 
     final static private int ROWS = 3;
+
     final static private int COLS = 3;
-    
+
     final protected ResultViewer[] pics = new ResultViewer[ROWS * COLS];
 
     final protected JButton nextButton = new JButton("Next");
 
-    private Thread resultGatherer;
+    protected Thread resultGatherer;
 
     volatile protected boolean running;
 
@@ -51,9 +39,15 @@ public class ThumbnailBox extends JPanel implements ActionListener {
 
     final protected StatisticsBar stats = new StatisticsBar();
 
+    final protected Timer statsTimer = new Timer(500, new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            stats.update(search.getStatistics());
+        };
+    });
+
     public ThumbnailBox() {
         super();
-        
+
         Box v = Box.createVerticalBox();
         add(v);
         // v.setBorder(BorderFactory.createEtchedBorder(Color.RED, Color.BLUE));
@@ -77,25 +71,25 @@ public class ThumbnailBox extends JPanel implements ActionListener {
 
         h = Box.createHorizontalBox();
         h.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
+
         h.add(stats);
         h.add(Box.createHorizontalStrut(10));
 
         h.add(nextButton);
         nextButton.setEnabled(false);
         nextButton.addActionListener(this);
-        
+
         v.add(h);
     }
 
     public void setAnnotator(Annotator a) {
         annotator = a;
     }
-    
+
     public void setDecorator(Decorator d) {
         decorator = d;
     }
-    
+
     protected boolean isFull() {
         return nextEmpty >= pics.length;
     }
@@ -134,7 +128,8 @@ public class ThumbnailBox extends JPanel implements ActionListener {
             annotation = annotator.annotate(r);
             tooltipAnnotation = annotator.annotateTooltip(r);
         }
-        v.setResult(new AnnotatedResult(r, annotation, tooltipAnnotation, decorator));
+        v.setResult(new AnnotatedResult(r, annotation, tooltipAnnotation,
+                decorator));
 
         if (!running) {
             // reset
@@ -196,8 +191,9 @@ public class ThumbnailBox extends JPanel implements ActionListener {
                 // clear anything not shown
                 nextButton.setEnabled(false);
 
-                // send event
-                
+                // clean up
+                resultGatherer = null;
+                statsTimer.stop();
                 
                 System.out.println("done with finally");
             }
@@ -230,7 +226,6 @@ public class ThumbnailBox extends JPanel implements ActionListener {
                 e.printStackTrace();
             }
         }
-        resultGatherer = null;
     }
 
     public void start(Search s) {
@@ -245,8 +240,7 @@ public class ThumbnailBox extends JPanel implements ActionListener {
 
         running = true;
 
-        // stats gatherer
-        new Thread(new StatsGatherer()).start();
+        statsTimer.start();
         (resultGatherer = new Thread(new ResultsGatherer())).start();
     }
 }
