@@ -14,6 +14,20 @@ import edu.cmu.cs.diamond.opendiamond.Result;
 import edu.cmu.cs.diamond.opendiamond.Search;
 
 public class ThumbnailBox extends JPanel implements ActionListener {
+    public class StatsGatherer implements Runnable {
+        public void run() {
+            while(running) {
+                stats.update(search.getStatistics());
+                
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     volatile protected int nextEmpty = 0;
 
     final static private int ROWS = 3;
@@ -23,7 +37,7 @@ public class ThumbnailBox extends JPanel implements ActionListener {
 
     final protected JButton nextButton = new JButton("Next");
 
-    private Thread theThread;
+    private Thread resultGatherer;
 
     volatile protected boolean running;
 
@@ -34,6 +48,8 @@ public class ThumbnailBox extends JPanel implements ActionListener {
     private Annotator annotator;
 
     private Decorator decorator;
+
+    final protected StatisticsBar stats = new StatisticsBar();
 
     public ThumbnailBox() {
         super();
@@ -59,10 +75,17 @@ public class ThumbnailBox extends JPanel implements ActionListener {
             }
         }
 
-        nextButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        v.add(nextButton);
+        h = Box.createHorizontalBox();
+        h.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        h.add(stats);
+        h.add(Box.createHorizontalStrut(10));
+
+        h.add(nextButton);
         nextButton.setEnabled(false);
         nextButton.addActionListener(this);
+        
+        v.add(h);
     }
 
     public void setAnnotator(Annotator a) {
@@ -131,7 +154,7 @@ public class ThumbnailBox extends JPanel implements ActionListener {
         }
     }
 
-    protected class MyRunner implements Runnable {
+    protected class ResultsGatherer implements Runnable {
         public void run() {
             try {
                 while (running) {
@@ -193,21 +216,21 @@ public class ThumbnailBox extends JPanel implements ActionListener {
     public void stop() {
         running = false;
 
-        if (theThread != null) {
+        if (resultGatherer != null) {
             // interrupt anything
-            theThread.interrupt();
+            resultGatherer.interrupt();
 
             // wait for exit
             try {
                 System.out.print("joining...");
                 System.out.flush();
-                theThread.join();
+                resultGatherer.join();
                 System.out.println(" done");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-        theThread = null;
+        resultGatherer = null;
     }
 
     public void start(Search s) {
@@ -222,6 +245,8 @@ public class ThumbnailBox extends JPanel implements ActionListener {
 
         running = true;
 
-        (theThread = new Thread(new MyRunner())).start();
+        // stats gatherer
+        new Thread(new StatsGatherer()).start();
+        (resultGatherer = new Thread(new ResultsGatherer())).start();
     }
 }
