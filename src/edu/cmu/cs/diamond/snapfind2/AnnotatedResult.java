@@ -44,4 +44,9 @@ public class AnnotatedResult extends Result {
     public String getTooltipAnnotation() {
         return tooltipAnnotation;
     }
+
+    @Override
+    public String getServerName() {
+        return theResult.getServerName();
+    }
 }
