@@ -49,15 +49,15 @@ public class CircleAnomalyFilter implements SnapFindSearch {
     }
 
     private static final String[] LABELS = { "circle-count",
-            "circle-area-fraction", "circle-area-m0", "circle-area-m1",
-            "circle-area-m2", "circle-area-m3", "circle-eccentricity-m0",
-            "circle-eccentricity-m1", "circle-eccentricity-m2",
-            "circle-eccentricity-m3" };
+            "circle-area-fraction", "circle-area-m1", "circle-area-cm2",
+            "circle-area-cm3", "circle-area-cm4", "circle-eccentricity-m1",
+            "circle-eccentricity-cm2", "circle-eccentricity-cm3",
+            "circle-eccentricity-cm4" };
 
     private static final String[] NICE_LABELS = { "Count", "Area fraction",
-            "Area moment 0", "Area moment 1", "Area moment 2", "Area moment 3",
-            "Eccentricity moment 0", "Eccentricity moment 1",
-            "Eccentricity moment 2", "Eccentricity moment 3" };
+            "Area mean", "Area variance", "Area skewness", "Area kurtosis",
+            "Eccentricity mean", "Eccentricity variance",
+            "Eccentricity skewness", "Eccentricity kurtosis" };
 
     public CircleAnomalyFilter() {
         // init GUI elements
