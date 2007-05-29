@@ -28,7 +28,7 @@ public class SnapFind2 extends JFrame {
 
     final protected JButton stopButton = new JButton("Stop");
 
-    final protected Search search = Search.getSearch();
+    final protected Search search = Search.getSharedInstance();
 
     final protected ThumbnailBox results = new ThumbnailBox();
 
