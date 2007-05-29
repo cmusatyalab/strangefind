@@ -7,9 +7,6 @@ import edu.cmu.cs.diamond.opendiamond.ServerStatistics;
 public class StatisticsBar extends JProgressBar {
     public StatisticsBar() {
         super();
-
-        setStringPainted(true);
-
         clear();
     }
 
@@ -18,8 +15,10 @@ public class StatisticsBar extends JProgressBar {
     }
 
     private void setNumbers(int total, int searched, int dropped) {
+        setIndeterminate(false);
         setString("Total: " + total + ", Searched: " + searched + ", Dropped: "
                 + dropped);
+        setStringPainted(true);
         setMaximum(total);
         setValue(searched);
     }
@@ -34,5 +33,11 @@ public class StatisticsBar extends JProgressBar {
             d += ss.getDroppedObjects();
         }
         setNumbers(t, s, d);
+    }
+    
+    public void showInitializing() {
+        setIndeterminate(true);
+        setString("Initializing Search");
+        setStringPainted(true);
     }
 }
