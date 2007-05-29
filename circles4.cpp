@@ -291,33 +291,32 @@ static GList *circlesFromImage2(circles_state_t *ct,
 // inspired by
 // http://www.csee.usf.edu/~christen/tools/moments.c
 static void compute_moments(double *data_array, int len,
-			    double *m0,
-			    double *m1,
-			    double *m2,
-			    double *m3) {
-  double mean = 0.0;
+			    double *mean,
+			    double *variance,
+			    double *skewness,
+			    double *kurtosis) {
+  *mean = 0.0;
   for (int i = 0; i < len; i++) {
     printf("%g\n", data_array[i]);
-    mean += data_array[i] / (double) len;
+    *mean += data_array[i] / (double) len;
   }
 
-  double raw_moments[4] = {0, 0, 0, 0};
+  double raw_moments[4] = {*mean, 0, 0, 0};
   double central_moments[4] = {0, 0, 0, 0};
 
   for (int i = 0; i < len; i++) {
-    for (int j = 0; j < 4; j++) {
+    for (int j = 1; j < 4; j++) {
       raw_moments[j] += (pow(data_array[i], j + 1.0) / len);
-      central_moments[j] += (pow((data_array[i] - mean), j + 1.0) / len);
+      central_moments[j] += (pow((data_array[i] - *mean), j + 1.0) / len);
     }
   }
 
   printf("\nr: %g\n%g\n%g\n%g\n", raw_moments[0], raw_moments[1], raw_moments[2], raw_moments[3] );
   printf("c: %g\n%g\n%g\n%g\n\n", central_moments[0], central_moments[1], central_moments[2], central_moments[3] );
 
-  *m0 = raw_moments[0];
-  *m1 = raw_moments[1];
-  *m2 = raw_moments[2];
-  *m3 = raw_moments[3];
+  *variance = central_moments[1];
+  *skewness = central_moments[2];
+  *kurtosis = central_moments[3];
 }
 
 // called from GUI
@@ -451,25 +450,28 @@ extern "C" {
     double area_fraction = total_area / (w * h);
     lf_write_attr(ohandle, "circle-area-fraction", sizeof(double), (unsigned char *) &area_fraction);
 
-    double area_m0, area_m1, area_m2, area_m3;
-    compute_moments(areas, num_circles_in_result, &area_m0, &area_m1, &area_m2, &area_m3);
-    lf_write_attr(ohandle, "circle-area-m0", sizeof(double), (unsigned char *) &area_m0);
+    double area_m1, area_cm2, area_cm3, area_cm4;
+    compute_moments(areas, num_circles_in_result, &area_m1, &area_cm2, &area_cm3, &area_cm4);
     lf_write_attr(ohandle, "circle-area-m1", sizeof(double), (unsigned char *) &area_m1);
-    lf_write_attr(ohandle, "circle-area-m2", sizeof(double), (unsigned char *) &area_m2);
-    lf_write_attr(ohandle, "circle-area-m3", sizeof(double), (unsigned char *) &area_m3);
+    lf_write_attr(ohandle, "circle-area-cm2", sizeof(double), (unsigned char *) &area_cm2);
+    lf_write_attr(ohandle, "circle-area-cm3", sizeof(double), (unsigned char *) &area_cm3);
+    lf_write_attr(ohandle, "circle-area-cm4", sizeof(double), (unsigned char *) &area_cm4);
 
-    double eccentricity_m0, eccentricity_m1, eccentricity_m2, eccentricity_m3;
+    double eccentricity_m1, eccentricity_cm2, eccentricity_cm3, eccentricity_cm4;
     compute_moments(eccentricities, num_circles_in_result,
-		    &eccentricity_m0, &eccentricity_m1,
-		    &eccentricity_m2, &eccentricity_m3);
-    lf_write_attr(ohandle, "circle-eccentricity-m0", sizeof(double), (unsigned char *) &eccentricity_m0);
+		    &eccentricity_m1, &eccentricity_cm2,
+		    &eccentricity_cm3, &eccentricity_cm4);
     lf_write_attr(ohandle, "circle-eccentricity-m1", sizeof(double), (unsigned char *) &eccentricity_m1);
-    lf_write_attr(ohandle, "circle-eccentricity-m2", sizeof(double), (unsigned char *) &eccentricity_m2);
-    lf_write_attr(ohandle, "circle-eccentricity-m3", sizeof(double), (unsigned char *) &eccentricity_m3);
+    lf_write_attr(ohandle, "circle-eccentricity-cm2", sizeof(double), (unsigned char *) &eccentricity_cm2);
+    lf_write_attr(ohandle, "circle-eccentricity-cm3", sizeof(double), (unsigned char *) &eccentricity_cm3);
+    lf_write_attr(ohandle, "circle-eccentricity-cm4", sizeof(double), (unsigned char *) &eccentricity_cm4);
 
     printf("area_fraction: %g\n", area_fraction);
-    printf("area moments: %g %g %g %g\n", area_m0, area_m1, area_m2, area_m3);
-    printf("ecc  moments: %g %g %g %g\n", eccentricity_m0, eccentricity_m1, eccentricity_m2, eccentricity_m3);
+    printf("area moments: %g %g %g %g\n",
+	   area_m1, area_cm2, area_cm3, area_cm4);
+    printf("ecc  moments: %g %g %g %g\n",
+	   eccentricity_m1, eccentricity_cm2,
+	   eccentricity_cm3, eccentricity_cm4);
 
     // free others
     g_list_foreach(clist, free_1_circle, NULL);
