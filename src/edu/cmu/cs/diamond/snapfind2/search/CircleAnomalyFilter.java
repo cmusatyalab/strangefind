@@ -200,13 +200,16 @@ public class CircleAnomalyFilter implements SnapFindSearch {
                 String aboveOrBelow = Math.signum(stddevDiff) >= 0.0 ? "above"
                         : "below";
 
-                String server = Util.extractString(r.getValue("Device-Name"));
+                String server = r.getServerName();
+                String name = r.getObjectName();
+                name = name.substring(name.lastIndexOf('/') + 1);
 
                 return "<html><p><b>" + descriptor + "</b> = "
                         + df.format(value) + "<p><b>"
                         + df.format(Math.abs(stddevDiff)) + "</b> stddev <b>"
                         + aboveOrBelow + "</b> mean of <b>" + df.format(mean)
-                        + "</b><hr><p>" + server + " [" + samples + "]</html>";
+                        + "</b><hr><p>" + name + "<p>" + server + " ["
+                        + samples + "]</html>";
             }
         };
     }

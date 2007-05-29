@@ -204,7 +204,7 @@ public class ThumbnailBox extends JPanel {
                 running = false;
 
                 System.out.println("FINALLY stopping search");
-                search.stopSearch();
+                search.stop();
                 System.out.println(" done");
 
                 // clear anything not shown
@@ -258,7 +258,7 @@ public class ThumbnailBox extends JPanel {
         new Thread(new Runnable() {
             public void run() {
                 System.out.println("start search");
-                search.startSearch();
+                search.start();
 
                 statsTimer.start();
                 (resultGatherer = new Thread(new ResultsGatherer())).start();

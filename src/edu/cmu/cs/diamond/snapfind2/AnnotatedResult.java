@@ -49,4 +49,9 @@ public class AnnotatedResult extends Result {
     public String getServerName() {
         return theResult.getServerName();
     }
+
+    @Override
+    public String getObjectName() {
+        return theResult.getObjectName();
+    }
 }
