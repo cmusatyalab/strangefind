@@ -229,19 +229,20 @@ public class ThumbnailBox extends JPanel {
     public void stop() {
         running = false;
 
-        if (resultGatherer != null) {
+        Thread rg = resultGatherer;
+        if (rg != null) {
             // interrupt anything
-            resultGatherer.interrupt();
+            rg.interrupt();
 
-            // wait for exit
-            try {
-                System.out.print("joining...");
-                System.out.flush();
-                resultGatherer.join();
-                System.out.println(" done");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//            // wait for exit
+//            try {
+//                System.out.print("joining...");
+//                System.out.flush();
+//                resultGatherer.join();
+//                System.out.println(" done");
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
         }
     }
 

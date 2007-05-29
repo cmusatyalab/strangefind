@@ -61,6 +61,7 @@ public class SnapFind2 extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 // stop
                 System.out.println(" *** stop search");
+                stopButton.setEnabled(false);
                 results.stop();
             }
         });
