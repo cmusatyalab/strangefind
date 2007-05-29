@@ -28,15 +28,22 @@ int f_init_afilter (int num_arg, char **args,
   int i;
 
   // check args
-  if (num_arg < 1) {
+  if (num_arg < 2) {
     return -1;
   }
 
   // make space for things to examine
   context_t *ctx = (context_t *) malloc(sizeof(context_t));
 
+  // args is:
+  // 1. min_count
+  // 2. random string to supress caching
+  // rest. pairs of attribute names and standard deviations
+  ctx->size = (num_arg - 2) / 2;
+
+  printf("uuid: %s\n", args[1]);
+
   // fill in
-  ctx->size = (num_arg - 1) / 2;
   ctx->name_array = (char **) calloc(ctx->size, sizeof(char *));
   ctx->stddev_array = (double *) calloc(ctx->size, sizeof(double));
   ctx->stats = (stats_t *) calloc(ctx->size, sizeof(stats_t));
@@ -45,8 +52,8 @@ int f_init_afilter (int num_arg, char **args,
 
   // fill in arrays
   for (i = 0; i < ctx->size; i++) {
-    ctx->name_array[i] = strdup(args[(i*2)+1]);
-    ctx->stddev_array[i] = strtod(args[(i*2)+2], NULL);
+    ctx->name_array[i] = strdup(args[(i*2)+2]);
+    ctx->stddev_array[i] = strtod(args[(i*2)+3], NULL);
   }
 
   // ready?
