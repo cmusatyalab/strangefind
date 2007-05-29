@@ -11,6 +11,7 @@ import java.nio.ByteOrder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.swing.*;
 
@@ -95,9 +96,10 @@ public class CircleAnomalyFilter implements SnapFindSearch {
                 }
             }
 
-            String anomArgs[] = new String[paramsList.size() + 1];
+            String anomArgs[] = new String[paramsList.size() + 2];
             anomArgs[0] = ignoreSpinner.getValue().toString(); // skip
-            System.arraycopy(paramsList.toArray(), 0, anomArgs, 1, paramsList
+            anomArgs[1] = UUID.randomUUID().toString();  // random value
+            System.arraycopy(paramsList.toArray(), 0, anomArgs, 2, paramsList
                     .size());
             c = new FilterCode(new FileInputStream("fil_anomaly.so"));
             anom = new Filter("anomaly", c, "f_eval_afilter", "f_init_afilter",
