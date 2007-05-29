@@ -20,9 +20,9 @@ public class ResultViewer extends JButton implements ActionListener {
 
     private static final int PREFERRED_WIDTH = 240;
 
-    private AnnotatedResult result;
+    private volatile AnnotatedResult result;
 
-    private Icon thumbnail;
+    private volatile Icon thumbnail;
 
     public ResultViewer() {
         super();

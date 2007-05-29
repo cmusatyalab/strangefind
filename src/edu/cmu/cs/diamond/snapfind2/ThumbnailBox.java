@@ -52,7 +52,7 @@ public class ThumbnailBox extends JPanel {
                 }
             }
             if (hasStats) {
-                stats.update(serverStats);                
+                stats.update(serverStats);
             } else {
                 stats.setIndeterminateMessage("Waiting for First Results");
             }
@@ -228,21 +228,22 @@ public class ThumbnailBox extends JPanel {
 
     public void stop() {
         running = false;
+        search.stop();
 
         Thread rg = resultGatherer;
         if (rg != null) {
             // interrupt anything
             rg.interrupt();
 
-//            // wait for exit
-//            try {
-//                System.out.print("joining...");
-//                System.out.flush();
-//                resultGatherer.join();
-//                System.out.println(" done");
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
+            // // wait for exit
+            // try {
+            // System.out.print("joining...");
+            // System.out.flush();
+            // resultGatherer.join();
+            // System.out.println(" done");
+            // } catch (InterruptedException e) {
+            // e.printStackTrace();
+            // }
         }
     }
 
@@ -252,7 +253,7 @@ public class ThumbnailBox extends JPanel {
         running = true;
 
         clearAll();
-        
+
         stats.setIndeterminateMessage("Initializing Search");
 
         new Thread(new Runnable() {
