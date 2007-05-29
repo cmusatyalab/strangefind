@@ -12,6 +12,7 @@ import javax.swing.Timer;
 
 import edu.cmu.cs.diamond.opendiamond.Result;
 import edu.cmu.cs.diamond.opendiamond.Search;
+import edu.cmu.cs.diamond.opendiamond.ServerStatistics;
 
 public class ThumbnailBox extends JPanel {
     volatile protected int nextEmpty = 0;
@@ -24,7 +25,7 @@ public class ThumbnailBox extends JPanel {
 
     final protected JButton nextButton = new JButton("Next");
 
-    protected Thread resultGatherer;
+    volatile protected Thread resultGatherer;
 
     volatile protected boolean running;
 
@@ -42,7 +43,19 @@ public class ThumbnailBox extends JPanel {
         public void actionPerformed(ActionEvent e) {
             // because it is Swing Timer, this is called from the
             // AWT dispatch thread
-            stats.update(search.getStatistics());
+            ServerStatistics[] serverStats = search.getStatistics();
+            boolean hasStats = false;
+            for (ServerStatistics s : serverStats) {
+                if (s.getTotalObjects() != 0) {
+                    hasStats = true;
+                    break;
+                }
+            }
+            if (hasStats) {
+                stats.update(serverStats);                
+            } else {
+                stats.setIndeterminateMessage("Waiting for First Results");
+            }
         };
     });
 
@@ -233,19 +246,23 @@ public class ThumbnailBox extends JPanel {
     }
 
     public void start(Search s) {
-        stop();
-
         search = s;
-
-        clearAll();
-
-        System.out.println("start search");
-        search.startSearch();
 
         running = true;
 
-        statsTimer.start();
-        (resultGatherer = new Thread(new ResultsGatherer())).start();
+        clearAll();
+        
+        stats.setIndeterminateMessage("Initializing Search");
+
+        new Thread(new Runnable() {
+            public void run() {
+                System.out.println("start search");
+                search.startSearch();
+
+                statsTimer.start();
+                (resultGatherer = new Thread(new ResultsGatherer())).start();
+            }
+        }).start();
     }
 
     protected void setNextEnabledOnAWT(final boolean state) {

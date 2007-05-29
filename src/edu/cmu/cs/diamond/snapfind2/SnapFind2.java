@@ -47,7 +47,6 @@ public class SnapFind2 extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 // start
                 startButton.setEnabled(false);
-                stopButton.setEnabled(true);
                 prepareSearch();
 
                 // XXX
@@ -77,6 +76,11 @@ public class SnapFind2 extends JFrame {
             }
 
             public void searchStarted(SearchEvent e) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        stopButton.setEnabled(true);
+                    }
+                });
             }
         });
 
