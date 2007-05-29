@@ -42,12 +42,8 @@ public class ResultViewer extends JButton implements ActionListener {
 
         if (result == null) {
             thumbnail = null;
-            setToolTipText(null);
-            setEnabled(false);
             return;
         }
-
-        setToolTipText(r.getTooltipAnnotation());
 
         BufferedImage img = getImg();
         Insets in = getInsets();
@@ -58,15 +54,22 @@ public class ResultViewer extends JButton implements ActionListener {
                 - in.right, PREFERRED_HEIGHT - in.top - in.bottom);
         BufferedImage newImg = Util.scaleImage(img, scale);
         Graphics2D g = newImg.createGraphics();
-        r.decorate(g, scale);
+        result.decorate(g, scale);
         g.dispose();
 
         thumbnail = new ImageIcon(newImg);
-        setEnabled(true);
     }
 
     public void commitResult() {
-        setIcon(thumbnail);
+        if (result == null) {
+            setToolTipText(null);
+            setIcon(null);
+            setEnabled(false);
+        } else {
+            setToolTipText(result.getTooltipAnnotation());
+            setIcon(thumbnail);
+            setEnabled(true);
+        }
     }
 
     private BufferedImage getImg() {

@@ -49,11 +49,11 @@ public class SnapFind2 extends JFrame {
                 startButton.setEnabled(false);
                 stopButton.setEnabled(true);
                 prepareSearch();
-                
+
                 // XXX
                 results.setAnnotator(searchList.getAnnotators()[0]);
                 results.setDecorator(searchList.getDecorators()[0]);
-                
+
                 results.start(search);
             }
         });
@@ -68,14 +68,18 @@ public class SnapFind2 extends JFrame {
 
         search.addSearchEventListener(new SearchEventListener() {
             public void searchStopped(SearchEvent e) {
-                startButton.setEnabled(true);
-                stopButton.setEnabled(false);
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        startButton.setEnabled(true);
+                        stopButton.setEnabled(false);
+                    }
+                });
             }
 
             public void searchStarted(SearchEvent e) {
             }
         });
-        
+
         setupWindow();
 
         pack();
@@ -95,11 +99,11 @@ public class SnapFind2 extends JFrame {
                     new String[0], 400);
             Searchlet s = new Searchlet();
             s.addFilter(f);
-            
+
             for (Filter ff : filters) {
                 s.addFilter(ff);
             }
-            
+
             s.setApplicationDependencies(new String[] { "rgb" });
             search.setSearchlet(s);
         } catch (FileNotFoundException e) {

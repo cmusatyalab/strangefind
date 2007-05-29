@@ -3,7 +3,6 @@ package edu.cmu.cs.diamond.snapfind2;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -14,7 +13,7 @@ import javax.swing.Timer;
 import edu.cmu.cs.diamond.opendiamond.Result;
 import edu.cmu.cs.diamond.opendiamond.Search;
 
-public class ThumbnailBox extends JPanel implements ActionListener {
+public class ThumbnailBox extends JPanel {
     volatile protected int nextEmpty = 0;
 
     final static private int ROWS = 3;
@@ -35,12 +34,14 @@ public class ThumbnailBox extends JPanel implements ActionListener {
 
     private Annotator annotator;
 
-    private Decorator decorator;
+    protected Decorator decorator;
 
     final protected StatisticsBar stats = new StatisticsBar();
 
     final protected Timer statsTimer = new Timer(500, new ActionListener() {
         public void actionPerformed(ActionEvent e) {
+            // because it is Swing Timer, this is called from the
+            // AWT dispatch thread
             stats.update(search.getStatistics());
         };
     });
@@ -77,7 +78,16 @@ public class ThumbnailBox extends JPanel implements ActionListener {
 
         h.add(nextButton);
         nextButton.setEnabled(false);
-        nextButton.addActionListener(this);
+        nextButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // next is clicked
+                nextButton.setEnabled(false);
+                synchronized (fullSynchronizer) {
+                    clearAll();
+                    fullSynchronizer.notify();
+                }
+            }
+        });
 
         v.add(h);
     }
@@ -94,7 +104,7 @@ public class ThumbnailBox extends JPanel implements ActionListener {
         return nextEmpty >= pics.length;
     }
 
-    private void clearAll() {
+    protected void clearAll() {
         nextEmpty = 0;
         for (ResultViewer r : pics) {
             r.setResult(null);
@@ -102,7 +112,7 @@ public class ThumbnailBox extends JPanel implements ActionListener {
         }
     }
 
-    protected void fillNext(Result r) throws InterruptedException {
+    protected void fillNext(final Result r) {
         System.out.println("fillNext " + r);
         if (!running) {
             return;
@@ -112,41 +122,33 @@ public class ThumbnailBox extends JPanel implements ActionListener {
         final ResultViewer v = pics[nextEmpty++];
 
         // loading message
-        try {
-            SwingUtilities.invokeAndWait(new Runnable() {
-                public void run() {
-                    v.setText("Loading");
-                }
-            });
-        } catch (InvocationTargetException e1) {
-            e1.printStackTrace();
-        }
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                v.setText("Loading");
+            }
+        });
 
-        String annotation = null;
-        String tooltipAnnotation = null;
+        final String annotation;
+        final String tooltipAnnotation;
         if (annotator != null) {
             annotation = annotator.annotate(r);
             tooltipAnnotation = annotator.annotateTooltip(r);
+        } else {
+            annotation = null;
+            tooltipAnnotation = null;
         }
+
+        // do slow activity of loading the item
         v.setResult(new AnnotatedResult(r, annotation, tooltipAnnotation,
                 decorator));
 
-        if (!running) {
-            // reset
-            v.setResult(null);
-        }
-
         // update GUI
-        try {
-            SwingUtilities.invokeAndWait(new Runnable() {
-                public void run() {
-                    v.setText(null);
-                    v.commitResult();
-                }
-            });
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                v.setText(null);
+                v.commitResult();
+            }
+        });
     }
 
     protected class ResultsGatherer implements Runnable {
@@ -164,8 +166,10 @@ public class ThumbnailBox extends JPanel implements ActionListener {
                         if (isFull()) {
                             // wait
                             synchronized (fullSynchronizer) {
+                                if (isFull()) {
+                                    setNextEnabledOnAWT(true);
+                                }
                                 while (isFull()) {
-                                    nextButton.setEnabled(true);
                                     fullSynchronizer.wait();
                                 }
 
@@ -184,28 +188,28 @@ public class ThumbnailBox extends JPanel implements ActionListener {
             } catch (InterruptedException e) {
                 System.out.println("INTERRUPTED !");
             } finally {
+                running = false;
+
                 System.out.println("FINALLY stopping search");
                 search.stopSearch();
                 System.out.println(" done");
 
                 // clear anything not shown
-                nextButton.setEnabled(false);
+                setNextEnabledOnAWT(false);
 
                 // clean up
                 resultGatherer = null;
                 statsTimer.stop();
-                
+
+                // one more stats
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        stats.update(search.getStatistics());
+                    }
+                });
+
                 System.out.println("done with finally");
             }
-        }
-    }
-
-    public void actionPerformed(ActionEvent e) {
-        // next is clicked
-        nextButton.setEnabled(false);
-        synchronized (fullSynchronizer) {
-            clearAll();
-            fullSynchronizer.notify();
         }
     }
 
@@ -242,5 +246,13 @@ public class ThumbnailBox extends JPanel implements ActionListener {
 
         statsTimer.start();
         (resultGatherer = new Thread(new ResultsGatherer())).start();
+    }
+
+    protected void setNextEnabledOnAWT(final boolean state) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                nextButton.setEnabled(state);
+            }
+        });
     }
 }
