@@ -1,17 +1,31 @@
 package edu.cmu.cs.diamond.snapfind2;
 
 import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
-import static java.awt.event.KeyEvent.*;
+import static java.awt.event.KeyEvent.VK_A;
+import static java.awt.event.KeyEvent.VK_C;
+import static java.awt.event.KeyEvent.VK_D;
+import static java.awt.event.KeyEvent.VK_E;
+import static java.awt.event.KeyEvent.VK_H;
+import static java.awt.event.KeyEvent.VK_I;
+import static java.awt.event.KeyEvent.VK_L;
+import static java.awt.event.KeyEvent.VK_N;
+import static java.awt.event.KeyEvent.VK_O;
+import static java.awt.event.KeyEvent.VK_P;
+import static java.awt.event.KeyEvent.VK_Q;
+import static java.awt.event.KeyEvent.VK_S;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -19,6 +33,103 @@ import edu.cmu.cs.diamond.opendiamond.*;
 import edu.cmu.cs.diamond.snapfind2.search.CircleAnomalyFilter;
 
 public class SnapFind2 extends JFrame {
+
+    public class ProgressWindow extends JFrame {
+        final private SortedMap<String, JProgressBar> servers = new TreeMap<String, JProgressBar>();
+
+        // slightly hacky way to measure number since last hit
+        final private Map<String, int[]> lastInfo = new HashMap<String, int[]>();
+
+        final private Box v = Box.createVerticalBox();
+
+        final private Timer statsTimer = new Timer(500, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (search == null) {
+                    return;
+                }
+
+                ServerStatistics stats[] = search.getStatistics();
+                boolean revalidate = false;
+
+                // clear all
+                for (String key : servers.keySet()) {
+                    JProgressBar jp = servers.get(key);
+                    jp.setString(key.toLowerCase() + ": No connection");
+                    jp.setValue(0);
+                }
+
+                // update
+                for (ServerStatistics s : stats) {
+                    String name = s.getAddress().getHostName();
+                    JProgressBar jp = servers.get(name);
+                    if (jp == null) {
+                        // create new
+                        jp = new JProgressBar();
+                        jp.setStringPainted(true);
+                        servers.put(name, jp);
+                        revalidate = true;
+                    }
+
+                    int info[] = lastInfo.get(name);
+                    if (info == null) {
+                        // create new
+                        info = new int[2];
+                        lastInfo.put(name, info);
+                    }
+
+                    int total = s.getTotalObjects();
+                    int processed = s.getProcessedObjects();
+                    int dropped = s.getDroppedObjects();
+                    int hits = processed - dropped;
+
+                    if (hits != info[0] || processed < info[1]) {
+                        info[0] = hits;
+                        info[1] = processed;
+                    }
+
+                    int processedSinceLastHit = processed - info[1];
+
+                    jp.setMaximum(total);
+                    jp.setValue(processed);
+                    String str = name.toLowerCase() + ": Total: " + total
+                            + ", Searched: " + processed + ", Dropped: "
+                            + dropped + ", Since last hit: "
+                            + processedSinceLastHit;
+                    jp.setString(str);
+                }
+
+                if (revalidate) {
+                    v.removeAll();
+                    for (JProgressBar jp : servers.values()) {
+                        v.add(jp);
+                    }
+                    validate();
+                    pack();
+                }
+            }
+        });
+
+        public ProgressWindow() {
+            super("Progress Window");
+            setLocationByPlatform(true);
+
+            add(v);
+
+            setMinimumSize(new Dimension(500, 300));
+
+            addComponentListener(new ComponentAdapter() {
+                @Override
+                public void componentHidden(ComponentEvent e) {
+                    statsTimer.stop();
+                }
+
+                @Override
+                public void componentShown(ComponentEvent e) {
+                    statsTimer.start();
+                }
+            });
+        }
+    }
 
     final private List<Scope> scopes = ScopeSource.getPredefinedScopeList();
 
@@ -34,8 +145,10 @@ public class SnapFind2 extends JFrame {
 
     private JMenu scopeMenu;
 
+    private JFrame progressWindow;
+
     public SnapFind2() {
-        super("SnapFind 2");
+        super("Diamond Shell");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         setupMenu();
@@ -252,8 +365,10 @@ public class SnapFind2 extends JFrame {
     }
 
     protected void showProgressWindow() {
-        // TODO Auto-generated method stub
-
+        if (progressWindow == null) {
+            progressWindow = new ProgressWindow();
+        }
+        progressWindow.setVisible(true);
     }
 
     protected void showLogWindow() {
@@ -285,10 +400,10 @@ public class SnapFind2 extends JFrame {
 
             if (first == null) {
                 first = mi;
+                first.setSelected(true);
             }
             menu.add(mi);
         }
-        first.setSelected(true);
     }
 
     protected void newSearchFromExample() {
