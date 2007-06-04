@@ -103,9 +103,10 @@ public class ResultViewer extends JButton implements ActionListener {
 
         System.out.println(w + "x" + h);
 
-        img = GraphicsUtilities.createCompatibleImage(w, h);
+        img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
 
         if (data != null) {
+            // XXX slow?
             for (int y = 0; y < h; y++) {
                 for (int x = 0; x < w; x++) {
                     int i = (y * w + x) * 4;
@@ -117,7 +118,7 @@ public class ResultViewer extends JButton implements ActionListener {
                 }
             }
         }
-        return img;
+        return GraphicsUtilities.toCompatibleImage(img);
     }
 
     public void actionPerformed(ActionEvent e) {

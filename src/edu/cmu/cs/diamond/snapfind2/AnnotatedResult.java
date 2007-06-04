@@ -38,7 +38,9 @@ public class AnnotatedResult extends Result {
     }
     
     public void decorate(Graphics2D g, double scale) {
+        if (decorator != null) {
         decorator.decorate(this, g, scale);
+        }
     }
 
     public String getTooltipAnnotation() {
