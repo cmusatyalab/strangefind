@@ -13,6 +13,8 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
+import org.jdesktop.swingx.graphics.GraphicsUtilities;
+
 import edu.cmu.cs.diamond.opendiamond.Util;
 
 public class ResultViewer extends JButton implements ActionListener {
@@ -52,9 +54,16 @@ public class ResultViewer extends JButton implements ActionListener {
         int h = img.getHeight();
         double scale = Util.getScaleForResize(w, h, PREFERRED_WIDTH - in.left
                 - in.right, PREFERRED_HEIGHT - in.top - in.bottom);
-        BufferedImage newImg = getGraphicsConfiguration()
-                .createCompatibleImage((int) (w * scale), (int) (h * scale));
-        Util.scaleImage(img, newImg, true);
+        BufferedImage newImg;
+
+        final int sW = (int) (w * scale);
+        final int sH = (int) (h * scale);
+
+        if (scale < 1.0) {
+            newImg = GraphicsUtilities.createThumbnail(img, sW, sH);
+        } else {
+            newImg = Util.scaleImage(img, scale);
+        }
         Graphics2D g = newImg.createGraphics();
         result.decorate(g, scale);
         g.dispose();
@@ -82,12 +91,7 @@ public class ResultViewer extends JButton implements ActionListener {
             e.printStackTrace();
         }
         if (img != null) {
-            BufferedImage img2 = getGraphicsConfiguration()
-                    .createCompatibleImage(img.getWidth(), img.getHeight());
-            Graphics2D g2 = img2.createGraphics();
-            g2.drawImage(img, 0, 0, null);
-            g2.dispose();
-            return img2;
+            return GraphicsUtilities.toCompatibleImage(img);
         }
 
         // ImageIO failed, try manually
@@ -99,7 +103,8 @@ public class ResultViewer extends JButton implements ActionListener {
 
         System.out.println(w + "x" + h);
 
-        img = getGraphicsConfiguration().createCompatibleImage(w, h);
+        img = GraphicsUtilities.createCompatibleImage(w, h);
+
         if (data != null) {
             for (int y = 0; y < h; y++) {
                 for (int x = 0; x < w; x++) {
