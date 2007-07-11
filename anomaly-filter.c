@@ -20,6 +20,7 @@ typedef struct {
 } context_t;
 
 static double composer_sum(double a, double b) {
+  printf(" %g + %g\n", a, b);
   return a + b;
 }
 
@@ -68,10 +69,13 @@ int f_init_afilter (int num_arg, char **args,
     char *name;
     asprintf(&name, "%s_%s", ctx->name_array[i], COUNT_KEY);
     ctx->stats[(i * 3) + 0]->name = name;
+    printf(" %d: %s\n", i, ctx->stats[(i * 3) + 0]->name);
     asprintf(&name, "%s_%s", ctx->name_array[i], SUM_KEY);
     ctx->stats[(i * 3) + 1]->name = name;
+    printf(" %d: %s\n", i, ctx->stats[(i * 3) + 1]->name);
     asprintf(&name, "%s_%s", ctx->name_array[i], SUM_OF_SQUARES_KEY);
     ctx->stats[(i * 3) + 2]->name = name;
+    printf(" %d: %s\n", i, ctx->stats[(i * 3) + 2]->name);
   }
 
   // ready?
