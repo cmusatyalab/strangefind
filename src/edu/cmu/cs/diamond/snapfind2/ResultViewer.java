@@ -56,14 +56,8 @@ public class ResultViewer extends JButton implements ActionListener {
                 - in.right, PREFERRED_HEIGHT - in.top - in.bottom);
         BufferedImage newImg;
 
-        final int sW = (int) (w * scale);
-        final int sH = (int) (h * scale);
+        newImg = Util.scaleImage(img, scale);
 
-        if (scale < 1.0) {
-            newImg = GraphicsUtilities.createThumbnail(img, sW, sH);
-        } else {
-            newImg = Util.scaleImage(img, scale);
-        }
         Graphics2D g = newImg.createGraphics();
         result.decorate(g, scale);
         g.dispose();
