@@ -5,11 +5,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Map;
 
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
+import javax.swing.*;
+import javax.swing.table.AbstractTableModel;
 
 import edu.cmu.cs.diamond.opendiamond.DoubleComposer;
 import edu.cmu.cs.diamond.opendiamond.Result;
@@ -43,6 +40,8 @@ public class ThumbnailBox extends JPanel {
 
     final protected Map<String, Double> globalSessionVariables;
 
+    final protected AbstractTableModel sessionVariablesTableModel;
+
     final protected Timer statsTimer = new Timer(500, new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             // because it is Swing Timer, this is called from the
@@ -60,7 +59,7 @@ public class ThumbnailBox extends JPanel {
             } else {
                 stats.setIndeterminateMessage("Waiting for First Results");
             }
-        };
+        }
     });
 
     final protected Timer sessionVarsTimer = new Timer(5000,
@@ -68,15 +67,19 @@ public class ThumbnailBox extends JPanel {
                 public void actionPerformed(ActionEvent e) {
                     search.mergeSessionVariables(globalSessionVariables,
                             composer);
+                    sessionVariablesTableModel.fireTableDataChanged();
                 }
             });
 
     private DoubleComposer composer;
 
-    public ThumbnailBox(Map<String, Double> globalSessionVariables) {
+    public ThumbnailBox(Map<String, Double> globalSessionVariables,
+            AbstractTableModel sessionVariablesTableModel) {
         super();
 
         this.globalSessionVariables = globalSessionVariables;
+
+        this.sessionVariablesTableModel = sessionVariablesTableModel;
 
         Box v = Box.createVerticalBox();
         add(v);

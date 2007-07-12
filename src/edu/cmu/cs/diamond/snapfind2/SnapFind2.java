@@ -18,6 +18,7 @@ import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.table.AbstractTableModel;
 
 import edu.cmu.cs.diamond.opendiamond.*;
 import edu.cmu.cs.diamond.snapfind2.search.CircleAnomalyFilter;
@@ -32,6 +33,7 @@ public class SnapFind2 extends JFrame {
 
             Box h = Box.createHorizontalBox();
             JButton save = new JButton("Save");
+            JButton clear = new JButton("Clear");
             JButton load = new JButton("Load");
 
             save.addActionListener(new ActionListener() {
@@ -40,6 +42,13 @@ public class SnapFind2 extends JFrame {
                 }
             });
 
+            clear.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    globalSessionVariables.clear();
+                    sessionVariablesTableModel.fireTableDataChanged();
+                }
+            });
+            
             load.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     loadVariables(globalSessionVariables);
@@ -48,26 +57,35 @@ public class SnapFind2 extends JFrame {
 
             h.add(save);
             h.add(Box.createGlue());
+            h.add(clear);
+            h.add(Box.createGlue());
             h.add(load);
 
             add(h, BorderLayout.SOUTH);
-            
+
+            JTable t = new JTable(sessionVariablesTableModel);
+            t.setTableHeader(null);
+            JScrollPane jsp = new JScrollPane(t);
+            add(jsp);
+
             pack();
         }
 
+        JFileChooser loadChooser = new JFileChooser();
         protected void loadVariables(Map<String, Double> sv) {
-            JFileChooser chooser = new JFileChooser();
-            chooser.setDialogTitle("Load Session Variables");
-            int returnVal = chooser.showOpenDialog(this);
+            loadChooser.setDialogTitle("Load Session Variables");
+            int returnVal = loadChooser.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 sv.clear();
                 XMLDecoder d;
                 try {
                     d = new XMLDecoder(new BufferedInputStream(
-                            new FileInputStream(chooser.getSelectedFile())));
+                            new FileInputStream(loadChooser.getSelectedFile())));
                     Object result = d.readObject();
                     d.close();
-                    sv.putAll((Map<? extends String, ? extends Double>) (result));
+                    sv
+                            .putAll((Map<? extends String, ? extends Double>) (result));
+                    sessionVariablesTableModel.fireTableDataChanged();
                 } catch (FileNotFoundException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -75,16 +93,15 @@ public class SnapFind2 extends JFrame {
             }
         }
 
+        JFileChooser saveChooser = new JFileChooser();
         protected void saveVariables(Map<String, Double> sv) {
-            JFileChooser chooser = new JFileChooser();
-            chooser.setDialogTitle("Save Session Variables");
-            int returnVal = chooser.showOpenDialog(this);
+            saveChooser.setDialogTitle("Save Session Variables");
+            int returnVal = saveChooser.showSaveDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 XMLEncoder e;
                 try {
-                    e = new XMLEncoder(
-                            new BufferedOutputStream(
-                                new FileOutputStream(chooser.getSelectedFile())));
+                    e = new XMLEncoder(new BufferedOutputStream(
+                            new FileOutputStream(saveChooser.getSelectedFile())));
                     e.writeObject(sv);
                     e.close();
                 } catch (FileNotFoundException e1) {
@@ -202,10 +219,32 @@ public class SnapFind2 extends JFrame {
 
     final protected Search search = Search.getSharedInstance();
 
-    final private Map<String, Double> globalSessionVariables = new HashMap<String, Double>();
+    final private Map<String, Double> globalSessionVariables = new TreeMap<String, Double>();
+
+    final public AbstractTableModel sessionVariablesTableModel = new AbstractTableModel() {
+        public int getColumnCount() {
+            return 2;
+        }
+
+        public int getRowCount() {
+            return globalSessionVariables.size();
+        }
+
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            // inefficient?
+            switch (columnIndex) {
+            case 0:
+                return globalSessionVariables.keySet().toArray()[rowIndex];
+            case 1:
+                return globalSessionVariables.values().toArray()[rowIndex];
+            default:
+                return null;
+            }
+        }
+    };
 
     final protected ThumbnailBox results = new ThumbnailBox(
-            globalSessionVariables);
+            globalSessionVariables, sessionVariablesTableModel);
 
     private JMenu scopeMenu;
 
