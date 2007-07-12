@@ -1,27 +1,17 @@
 package edu.cmu.cs.diamond.snapfind2;
 
 import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
-import static java.awt.event.KeyEvent.VK_A;
-import static java.awt.event.KeyEvent.VK_C;
-import static java.awt.event.KeyEvent.VK_D;
-import static java.awt.event.KeyEvent.VK_E;
-import static java.awt.event.KeyEvent.VK_H;
-import static java.awt.event.KeyEvent.VK_I;
-import static java.awt.event.KeyEvent.VK_L;
-import static java.awt.event.KeyEvent.VK_N;
-import static java.awt.event.KeyEvent.VK_O;
-import static java.awt.event.KeyEvent.VK_P;
-import static java.awt.event.KeyEvent.VK_Q;
-import static java.awt.event.KeyEvent.VK_S;
+import static java.awt.event.KeyEvent.*;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.*;
 import java.util.*;
 
 import javax.swing.*;
@@ -33,6 +23,77 @@ import edu.cmu.cs.diamond.opendiamond.*;
 import edu.cmu.cs.diamond.snapfind2.search.CircleAnomalyFilter;
 
 public class SnapFind2 extends JFrame {
+
+    public class SessionVariablesWindow extends JFrame {
+        public SessionVariablesWindow() {
+            super("Session Variables");
+            setLocationByPlatform(true);
+            setMinimumSize(new Dimension(500, 300));
+
+            Box h = Box.createHorizontalBox();
+            JButton save = new JButton("Save");
+            JButton load = new JButton("Load");
+
+            save.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    saveVariables(globalSessionVariables);
+                }
+            });
+
+            load.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    loadVariables(globalSessionVariables);
+                }
+            });
+
+            h.add(save);
+            h.add(Box.createGlue());
+            h.add(load);
+
+            add(h, BorderLayout.SOUTH);
+            
+            pack();
+        }
+
+        protected void loadVariables(Map<String, Double> sv) {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Load Session Variables");
+            int returnVal = chooser.showOpenDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                sv.clear();
+                XMLDecoder d;
+                try {
+                    d = new XMLDecoder(new BufferedInputStream(
+                            new FileInputStream(chooser.getSelectedFile())));
+                    Object result = d.readObject();
+                    d.close();
+                    sv.putAll((Map<? extends String, ? extends Double>) (result));
+                } catch (FileNotFoundException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        protected void saveVariables(Map<String, Double> sv) {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Save Session Variables");
+            int returnVal = chooser.showOpenDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                XMLEncoder e;
+                try {
+                    e = new XMLEncoder(
+                            new BufferedOutputStream(
+                                new FileOutputStream(chooser.getSelectedFile())));
+                    e.writeObject(sv);
+                    e.close();
+                } catch (FileNotFoundException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+            }
+        }
+    }
 
     public class ProgressWindow extends JFrame {
         final private SortedMap<String, JProgressBar> servers = new TreeMap<String, JProgressBar>();
@@ -143,11 +204,14 @@ public class SnapFind2 extends JFrame {
 
     final private Map<String, Double> globalSessionVariables = new HashMap<String, Double>();
 
-    final protected ThumbnailBox results = new ThumbnailBox(globalSessionVariables);
+    final protected ThumbnailBox results = new ThumbnailBox(
+            globalSessionVariables);
 
     private JMenu scopeMenu;
 
     private JFrame progressWindow;
+
+    private JFrame sessionVariablesWindow;
 
     public SnapFind2() {
         super("Diamond Shell");
@@ -332,7 +396,7 @@ public class SnapFind2 extends JFrame {
         populateScopeMenu(scopeMenu);
         jmb.add(scopeMenu);
 
-        // Debug
+        // 
         menu = new JMenu("Debug");
         menu.setMnemonic(VK_D);
         mi = createMenuItem("Stats Window", VK_S, new ActionListener() {
@@ -349,6 +413,15 @@ public class SnapFind2 extends JFrame {
             }
         });
         mi.setAccelerator(KeyStroke.getKeyStroke(VK_P, CTRL_DOWN_MASK));
+        menu.add(mi);
+
+        mi = createMenuItem("Session Variables Window", VK_V,
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        showSessionVariablesWindow();
+                    }
+                });
+        mi.setAccelerator(KeyStroke.getKeyStroke(VK_V, CTRL_DOWN_MASK));
         menu.add(mi);
 
         mi = createMenuItem("Log Window", VK_L, new ActionListener() {
@@ -370,6 +443,13 @@ public class SnapFind2 extends JFrame {
         jmb.add(menu);
 
         setJMenuBar(jmb);
+    }
+
+    protected void showSessionVariablesWindow() {
+        if (sessionVariablesWindow == null) {
+            sessionVariablesWindow = new SessionVariablesWindow();
+        }
+        sessionVariablesWindow.setVisible(true);
     }
 
     protected void showCacheWindow() {
