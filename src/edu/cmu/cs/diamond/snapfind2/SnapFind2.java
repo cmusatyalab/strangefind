@@ -44,7 +44,12 @@ public class SnapFind2 extends JFrame {
 
             clear.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    globalSessionVariables.clear();
+                    // clear on server
+                    search.mergeSessionVariables(globalSessionVariables, new DoubleComposer() {
+                        public double compose(String key, double a, double b) {
+                            return 0;
+                        }
+                    });
                     sessionVariablesTableModel.fireTableDataChanged();
                 }
             });
