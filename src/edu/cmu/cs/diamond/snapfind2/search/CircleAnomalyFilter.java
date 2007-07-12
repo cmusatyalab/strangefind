@@ -15,6 +15,7 @@ import java.util.UUID;
 
 import javax.swing.*;
 
+import edu.cmu.cs.diamond.opendiamond.DoubleComposer;
 import edu.cmu.cs.diamond.opendiamond.Filter;
 import edu.cmu.cs.diamond.opendiamond.FilterCode;
 import edu.cmu.cs.diamond.opendiamond.Result;
@@ -98,7 +99,7 @@ public class CircleAnomalyFilter implements SnapFindSearch {
 
             String anomArgs[] = new String[paramsList.size() + 2];
             anomArgs[0] = ignoreSpinner.getValue().toString(); // skip
-            anomArgs[1] = UUID.randomUUID().toString();  // random value
+            anomArgs[1] = UUID.randomUUID().toString(); // random value
             System.arraycopy(paramsList.toArray(), 0, anomArgs, 2, paramsList
                     .size());
             c = new FilterCode(new FileInputStream("fil_anomaly.so"));
@@ -232,6 +233,16 @@ public class CircleAnomalyFilter implements SnapFindSearch {
                 }
             }
         };
+    }
+
+    private static final DoubleComposer composer = new DoubleComposer() {
+        public double compose(String key, double a, double b) {
+            return a + b;
+        }
+    };
+
+    public DoubleComposer getDoubleComposer() {
+        return composer;
     }
 
     protected void drawCircle(Graphics2D g, Circle circle, double scale,

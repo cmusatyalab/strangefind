@@ -3,6 +3,7 @@ package edu.cmu.cs.diamond.snapfind2;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -10,6 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import edu.cmu.cs.diamond.opendiamond.DoubleComposer;
 import edu.cmu.cs.diamond.opendiamond.Result;
 import edu.cmu.cs.diamond.opendiamond.Search;
 import edu.cmu.cs.diamond.opendiamond.ServerStatistics;
@@ -39,6 +41,8 @@ public class ThumbnailBox extends JPanel {
 
     final protected StatisticsBar stats = new StatisticsBar();
 
+    final protected Map<String, Double> globalSessionVariables;
+
     final protected Timer statsTimer = new Timer(500, new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             // because it is Swing Timer, this is called from the
@@ -59,8 +63,20 @@ public class ThumbnailBox extends JPanel {
         };
     });
 
-    public ThumbnailBox() {
+    final protected Timer sessionVarsTimer = new Timer(5000,
+            new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    search.mergeSessionVariables(globalSessionVariables,
+                            composer);
+                }
+            });
+
+    private DoubleComposer composer;
+
+    public ThumbnailBox(Map<String, Double> globalSessionVariables) {
         super();
+
+        this.globalSessionVariables = globalSessionVariables;
 
         Box v = Box.createVerticalBox();
         add(v);
@@ -111,6 +127,10 @@ public class ThumbnailBox extends JPanel {
 
     public void setDecorator(Decorator d) {
         decorator = d;
+    }
+
+    public void setDoubleComposer(DoubleComposer c) {
+        composer = c;
     }
 
     protected boolean isFull() {
@@ -213,6 +233,7 @@ public class ThumbnailBox extends JPanel {
                 // clean up
                 resultGatherer = null;
                 statsTimer.stop();
+                sessionVarsTimer.stop();
 
                 // one more stats
                 SwingUtilities.invokeLater(new Runnable() {
@@ -262,6 +283,7 @@ public class ThumbnailBox extends JPanel {
                 search.start();
 
                 statsTimer.start();
+                sessionVarsTimer.start();
                 (resultGatherer = new Thread(new ResultsGatherer())).start();
             }
         }).start();

@@ -10,6 +10,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JPanel;
 
+import edu.cmu.cs.diamond.opendiamond.DoubleComposer;
 import edu.cmu.cs.diamond.opendiamond.Filter;
 
 public class SearchList extends JPanel {
@@ -38,7 +39,7 @@ public class SearchList extends JPanel {
 
         validate();
     }
-    
+
     public Filter[] getFilters() {
         List<Filter> f = new ArrayList<Filter>();
         for (SnapFindSearch s : searches) {
@@ -46,7 +47,7 @@ public class SearchList extends JPanel {
         }
         return f.toArray(new Filter[0]);
     }
-    
+
     public Annotator[] getAnnotators() {
         List<Annotator> l = new ArrayList<Annotator>();
         for (SnapFindSearch s : searches) {
@@ -61,5 +62,13 @@ public class SearchList extends JPanel {
             l.addAll(Arrays.asList(s.getDecorator()));
         }
         return l.toArray(new Decorator[0]);
+    }
+
+    public DoubleComposer[] getDoubleComposers() {
+        List<DoubleComposer> l = new ArrayList<DoubleComposer>();
+        for (SnapFindSearch s : searches) {
+            l.addAll(Arrays.asList(s.getDoubleComposer()));
+        }
+        return l.toArray(new DoubleComposer[0]);
     }
 }

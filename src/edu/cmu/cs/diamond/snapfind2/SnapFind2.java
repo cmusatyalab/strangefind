@@ -141,7 +141,9 @@ public class SnapFind2 extends JFrame {
 
     final protected Search search = Search.getSharedInstance();
 
-    final protected ThumbnailBox results = new ThumbnailBox();
+    final private Map<String, Double> globalSessionVariables = new HashMap<String, Double>();
+
+    final protected ThumbnailBox results = new ThumbnailBox(globalSessionVariables);
 
     private JMenu scopeMenu;
 
@@ -165,12 +167,16 @@ public class SnapFind2 extends JFrame {
                 // XXX
                 Annotator[] ans = searchList.getAnnotators();
                 Decorator[] des = searchList.getDecorators();
+                DoubleComposer[] coms = searchList.getDoubleComposers();
 
                 if (ans.length > 0) {
                     results.setAnnotator(ans[0]);
                 }
                 if (des.length > 0) {
                     results.setDecorator(des[0]);
+                }
+                if (coms.length > 0) {
+                    results.setDoubleComposer(coms[0]);
                 }
 
                 results.start(search);
