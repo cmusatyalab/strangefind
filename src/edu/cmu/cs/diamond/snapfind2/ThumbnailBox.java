@@ -76,7 +76,7 @@ public class ThumbnailBox extends JPanel {
 
     private volatile boolean searchRunning;
     
-    private volatile boolean updateSessionVars;
+    private volatile boolean updateSessionVars = true;
     
 
     public ThumbnailBox(Map<String, Double> globalSessionVariables,
