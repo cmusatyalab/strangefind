@@ -62,7 +62,8 @@ public class ThumbnailBox extends JPanel {
         }
     });
 
-    final protected Timer sessionVarsTimer = new Timer(5000,
+    final protected Timer sessionVarsTimer = new Timer(
+            SnapFind2.INITIAL_SESSION_VARIABLES_UPDATE_INTERVAL * 1000,
             new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     search.mergeSessionVariables(globalSessionVariables,
@@ -72,6 +73,11 @@ public class ThumbnailBox extends JPanel {
             });
 
     private DoubleComposer composer;
+
+    private volatile boolean searchRunning;
+    
+    private volatile boolean updateSessionVars;
+    
 
     public ThumbnailBox(Map<String, Double> globalSessionVariables,
             AbstractTableModel sessionVariablesTableModel) {
@@ -235,8 +241,9 @@ public class ThumbnailBox extends JPanel {
 
                 // clean up
                 resultGatherer = null;
-                statsTimer.stop();
-                sessionVarsTimer.stop();
+                
+                searchRunning = false;
+                updateTimers();
 
                 // one more stats
                 SwingUtilities.invokeLater(new Runnable() {
@@ -271,6 +278,20 @@ public class ThumbnailBox extends JPanel {
         }
     }
 
+    public void updateTimers() {
+        if (searchRunning) {
+            statsTimer.start();
+            if (updateSessionVars) {
+                sessionVarsTimer.start();
+            } else {
+                sessionVarsTimer.stop();
+            }
+        } else {
+            statsTimer.stop();
+            sessionVarsTimer.stop();
+        }
+    }
+
     public void start(Search s) {
         search = s;
 
@@ -285,8 +306,8 @@ public class ThumbnailBox extends JPanel {
                 System.out.println("start search");
                 search.start();
 
-                statsTimer.start();
-                sessionVarsTimer.start();
+                searchRunning = true;
+                updateTimers();
                 (resultGatherer = new Thread(new ResultsGatherer())).start();
             }
         }).start();
@@ -298,5 +319,18 @@ public class ThumbnailBox extends JPanel {
                 nextButton.setEnabled(state);
             }
         });
+    }
+
+    public void setSessionVariableUpdateInterval(int value) {
+        if (value == -1) {
+            System.out.println("Stopping session vars timer");
+            updateSessionVars = false;
+            updateTimers();
+        } else {
+            System.out.println("Setting session vars timer to " + value);
+            updateSessionVars = true;
+            sessionVarsTimer.setDelay(value * 1000);
+            updateTimers();
+        }
     }
 }

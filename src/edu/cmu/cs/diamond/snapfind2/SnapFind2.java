@@ -25,13 +25,14 @@ import edu.cmu.cs.diamond.snapfind2.search.CircleAnomalyFilter;
 
 public class SnapFind2 extends JFrame {
 
+    public static final int INITIAL_SESSION_VARIABLES_UPDATE_INTERVAL = 5;
+
     public class SessionVariablesWindow extends JFrame {
         public SessionVariablesWindow() {
             super("Session Variables");
             setLocationByPlatform(true);
             setMinimumSize(new Dimension(500, 300));
 
-            Box h = Box.createHorizontalBox();
             JButton save = new JButton("Save");
             JButton clear = new JButton("Clear");
             JButton load = new JButton("Load");
@@ -45,28 +46,65 @@ public class SnapFind2 extends JFrame {
             clear.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     // clear on server
-                    search.mergeSessionVariables(globalSessionVariables, new DoubleComposer() {
-                        public double compose(String key, double a, double b) {
-                            return 0;
-                        }
-                    });
+                    search.mergeSessionVariables(globalSessionVariables,
+                            new DoubleComposer() {
+                                public double compose(String key, double a,
+                                        double b) {
+                                    return 0;
+                                }
+                            });
                     sessionVariablesTableModel.fireTableDataChanged();
                 }
             });
-            
+
             load.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     loadVariables(globalSessionVariables);
                 }
             });
+            Box v = Box.createVerticalBox();
 
+            Box h = Box.createHorizontalBox();
+
+            final int neverValue = 150;
+            final JSlider interval = new JSlider(5, neverValue, INITIAL_SESSION_VARIABLES_UPDATE_INTERVAL);
+            Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
+            labelTable.put(Integer.valueOf(5), new JLabel("5 s"));
+            labelTable.put(Integer.valueOf(30), new JLabel("30 s"));
+            labelTable.put(Integer.valueOf(60), new JLabel("1 m"));
+            labelTable.put(Integer.valueOf(120), new JLabel("2 m"));
+            labelTable.put(Integer.valueOf(neverValue), new JLabel("Never"));
+            interval.setLabelTable(labelTable);
+
+            interval.setPaintLabels(true);
+            h.add(new JLabel("Synchronization Interval"));
+            h.add(interval);
+            
+            interval.addChangeListener(new ChangeListener() {
+                public void stateChanged(ChangeEvent e) {
+                    if (interval.getValueIsAdjusting()) {
+                        return;
+                    }
+                    int val = interval.getValue();
+                    if (val == neverValue) {
+                        val = -1;
+                    }
+                    results.setSessionVariableUpdateInterval(val);
+                }
+            });
+
+            v.add(h);
+
+            h = Box.createHorizontalBox();
             h.add(save);
             h.add(Box.createGlue());
             h.add(clear);
             h.add(Box.createGlue());
             h.add(load);
 
-            add(h, BorderLayout.SOUTH);
+            v.add(h);
+
+            add(v, BorderLayout.SOUTH);
 
             JTable t = new JTable(sessionVariablesTableModel);
             t.setTableHeader(null);
@@ -77,6 +115,7 @@ public class SnapFind2 extends JFrame {
         }
 
         JFileChooser loadChooser = new JFileChooser();
+
         protected void loadVariables(Map<String, Double> sv) {
             loadChooser.setDialogTitle("Load Session Variables");
             int returnVal = loadChooser.showOpenDialog(this);
@@ -99,14 +138,16 @@ public class SnapFind2 extends JFrame {
         }
 
         JFileChooser saveChooser = new JFileChooser();
+
         protected void saveVariables(Map<String, Double> sv) {
             saveChooser.setDialogTitle("Save Session Variables");
             int returnVal = saveChooser.showSaveDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 XMLEncoder e;
                 try {
-                    e = new XMLEncoder(new BufferedOutputStream(
-                            new FileOutputStream(saveChooser.getSelectedFile())));
+                    e = new XMLEncoder(
+                            new BufferedOutputStream(new FileOutputStream(
+                                    saveChooser.getSelectedFile())));
                     e.writeObject(sv);
                     e.close();
                 } catch (FileNotFoundException e1) {
