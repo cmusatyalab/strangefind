@@ -255,10 +255,10 @@ public class SnapFind2 extends JFrame {
         }
     }
 
-    final private List<Scope> scopes = ScopeSource.getPredefinedScopeList();
-
     final protected SearchList searchList = new SearchList();
 
+    final protected JButton defineScopeButton = new JButton("Define Scope");
+    
     final protected JButton startButton = new JButton("Start");
 
     final protected JButton stopButton = new JButton("Stop");
@@ -292,8 +292,6 @@ public class SnapFind2 extends JFrame {
     final protected ThumbnailBox results = new ThumbnailBox(
             globalSessionVariables, sessionVariablesTableModel);
 
-    private JMenu scopeMenu;
-
     private JFrame progressWindow;
 
     private JFrame sessionVariablesWindow;
@@ -305,6 +303,12 @@ public class SnapFind2 extends JFrame {
         setupMenu();
 
         // buttons
+        defineScopeButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ScopeSource.commitScope();
+            }
+        });
+        
         stopButton.setEnabled(false);
 
         startButton.addActionListener(new ActionListener() {
@@ -366,6 +370,9 @@ public class SnapFind2 extends JFrame {
     }
 
     protected void prepareSearch() {
+        // load scope
+        search.setScope(ScopeSource.getPredefinedScopeList().get(0));
+        
         // read all enabled searches
         Filter[] filters = searchList.getFilters();
 
@@ -410,12 +417,20 @@ public class SnapFind2 extends JFrame {
         // filler.setBorder(BorderFactory.createEtchedBorder());
         c1.add(filler);
 
+        Box v1 = Box.createVerticalBox();
+        Box r2 = Box.createHorizontalBox();
+        r2.add(defineScopeButton);
+        v1.add(r2);
+        v1.add(Box.createVerticalStrut(4));
+        
         Box r1 = Box.createHorizontalBox();
         r1.add(startButton);
         r1.add(Box.createHorizontalStrut(20));
         stopButton.setEnabled(false);
         r1.add(stopButton);
-        c1.add(r1);
+
+        v1.add(r1);
+        c1.add(v1);
 
         b.add(c1);
         // b.add(new JSeparator(SwingConstants.VERTICAL));
@@ -474,12 +489,6 @@ public class SnapFind2 extends JFrame {
         menu.add(mi);
 
         jmb.add(menu);
-
-        // Scope
-        scopeMenu = new JMenu("Scope");
-        scopeMenu.setMnemonic(VK_C);
-        populateScopeMenu(scopeMenu);
-        jmb.add(scopeMenu);
 
         // 
         menu = new JMenu("Debug");
@@ -557,31 +566,6 @@ public class SnapFind2 extends JFrame {
     protected void showStatsWindow() {
         // TODO Auto-generated method stub
 
-    }
-
-    private void populateScopeMenu(JMenu menu) {
-        JRadioButtonMenuItem first = null;
-        ButtonGroup bg = new ButtonGroup();
-
-        for (final Scope s : scopes) {
-            final JRadioButtonMenuItem mi = new JRadioButtonMenuItem(s
-                    .getName());
-            bg.add(mi);
-            mi.addChangeListener(new ChangeListener() {
-                public void stateChanged(ChangeEvent e) {
-                    if (mi.isSelected()) {
-                        System.out.println("Setting scope to " + s);
-                        search.setScope(s);
-                    }
-                }
-            });
-
-            if (first == null) {
-                first = mi;
-                first.setSelected(true);
-            }
-            menu.add(mi);
-        }
     }
 
     protected void newSearchFromExample() {
