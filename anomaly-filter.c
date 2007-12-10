@@ -101,6 +101,7 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
   typedef union {
     double *d;
     unsigned char *c;
+    char *c2;
   } char_double_t;
 
   char_double_t val;
@@ -112,7 +113,22 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
     // get each thing
     err = lf_ref_attr(ohandle, ctx->name_array[i], &len,
 		      &val.c);
-    double d = *(val.d);
+    char *tmp = calloc(len + 1, 1);
+    strncpy(tmp, val.c2, len);
+
+    double d;
+    char *endptr;
+
+    // try to get it as string, or as a raw double
+    d = strtod(tmp, &endptr);
+    if (len != sizeof(double) || endptr != (tmp + sizeof(double))
+	|| strlen(tmp) != len - 1) {
+      d = *(val.d);
+    }
+
+    free(tmp);
+
+
 
     // check
     int count = ctx->stats[(i * 3) + 0]->value;
