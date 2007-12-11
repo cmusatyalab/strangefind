@@ -367,6 +367,8 @@ extern "C" {
     int num_circles;
     int num_circles_in_result = 0;
 
+    char buf[G_ASCII_DTOSTR_BUF_SIZE];
+
     // for attributes from diamond
     size_t len;
     unsigned char *data;
@@ -444,27 +446,37 @@ extern "C" {
 
     // compute aggregate stats
     double n = num_circles_in_result;
-    lf_write_attr(ohandle, "circle-count", sizeof(double), (unsigned char *) &n);
+    g_ascii_dtostr (buf, sizeof (buf), n);
+    lf_write_attr(ohandle, "circle-count", strlen(buf) + 1, (unsigned char *) buf);
 
-    // XXX not really correct!
+
     double area_fraction = total_area / (w * h);
-    lf_write_attr(ohandle, "circle-area-fraction", sizeof(double), (unsigned char *) &area_fraction);
+    g_ascii_dtostr (buf, sizeof (buf), area_fraction);
+    lf_write_attr(ohandle, "circle-area-fraction", strlen(buf) + 1, (unsigned char *) buf);
 
     double area_m1, area_cm2, area_cm3, area_cm4;
     compute_moments(areas, num_circles_in_result, &area_m1, &area_cm2, &area_cm3, &area_cm4);
-    lf_write_attr(ohandle, "circle-area-m1", sizeof(double), (unsigned char *) &area_m1);
-    lf_write_attr(ohandle, "circle-area-cm2", sizeof(double), (unsigned char *) &area_cm2);
-    lf_write_attr(ohandle, "circle-area-cm3", sizeof(double), (unsigned char *) &area_cm3);
-    lf_write_attr(ohandle, "circle-area-cm4", sizeof(double), (unsigned char *) &area_cm4);
+    g_ascii_dtostr (buf, sizeof (buf), area_m1);
+    lf_write_attr(ohandle, "circle-area-m1", strlen(buf) + 1, (unsigned char *) buf);
+    g_ascii_dtostr (buf, sizeof (buf), area_cm2);
+    lf_write_attr(ohandle, "circle-area-cm2", strlen(buf) + 1, (unsigned char *) buf);
+    g_ascii_dtostr (buf, sizeof (buf), area_cm3);
+    lf_write_attr(ohandle, "circle-area-cm3", strlen(buf) + 1, (unsigned char *) buf);
+    g_ascii_dtostr (buf, sizeof (buf), area_cm4);
+    lf_write_attr(ohandle, "circle-area-cm4", strlen(buf) + 1, (unsigned char *) buf);
 
     double eccentricity_m1, eccentricity_cm2, eccentricity_cm3, eccentricity_cm4;
     compute_moments(eccentricities, num_circles_in_result,
 		    &eccentricity_m1, &eccentricity_cm2,
 		    &eccentricity_cm3, &eccentricity_cm4);
-    lf_write_attr(ohandle, "circle-eccentricity-m1", sizeof(double), (unsigned char *) &eccentricity_m1);
-    lf_write_attr(ohandle, "circle-eccentricity-cm2", sizeof(double), (unsigned char *) &eccentricity_cm2);
-    lf_write_attr(ohandle, "circle-eccentricity-cm3", sizeof(double), (unsigned char *) &eccentricity_cm3);
-    lf_write_attr(ohandle, "circle-eccentricity-cm4", sizeof(double), (unsigned char *) &eccentricity_cm4);
+    g_ascii_dtostr (buf, sizeof (buf), eccentricity_m1);
+    lf_write_attr(ohandle, "circle-eccentricity-m1", strlen(buf) + 1, (unsigned char *) buf);
+    g_ascii_dtostr (buf, sizeof (buf), eccentricity_cm2);
+    lf_write_attr(ohandle, "circle-eccentricity-cm2", strlen(buf) + 1, (unsigned char *) buf);
+    g_ascii_dtostr (buf, sizeof (buf), eccentricity_cm3);
+    lf_write_attr(ohandle, "circle-eccentricity-cm3", strlen(buf) + 1, (unsigned char *) buf);
+    g_ascii_dtostr (buf, sizeof (buf), eccentricity_cm4);
+    lf_write_attr(ohandle, "circle-eccentricity-cm4", strlen(buf) + 1, (unsigned char *) buf);
 
     printf("area_fraction: %g\n", area_fraction);
     printf("area moments: %g %g %g %g\n",

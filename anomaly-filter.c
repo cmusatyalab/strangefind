@@ -98,34 +98,17 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
   // get stats
   lf_get_session_variables(ohandle, ctx->stats);
 
-  typedef union {
-    double *d;
-    unsigned char *c;
-    char *c2;
-  } char_double_t;
-
-  char_double_t val;
-
   int result = 0;
   // compute anomalousness for each thing
   // XXX stats done by non-statistician
   for (i = 0; i < ctx->size; i++) {
-    // get each thing
-    err = lf_ref_attr(ohandle, ctx->name_array[i], &len,
-		      &val.c);
+    // get each thing from string
+    unsigned char *str;
+    err = lf_ref_attr(ohandle, ctx->name_array[i], &len, &str);
     char *tmp = calloc(len + 1, 1);
-    strncpy(tmp, val.c2, len);
-
-    double d;
-    char *endptr;
-
-    // try to get it as string, or as a raw double
-    d = strtod(tmp, &endptr);
-    if (len != sizeof(double) || endptr != (tmp + sizeof(double))
-	|| strlen(tmp) != len - 1) {
-      d = *(val.d);
-    }
-
+    strncpy(tmp, (char *) str, len);
+    double d = strtod(tmp, NULL);
+    printf(" %s = %g\n", ctx->name_array[i], d);
     free(tmp);
 
 
