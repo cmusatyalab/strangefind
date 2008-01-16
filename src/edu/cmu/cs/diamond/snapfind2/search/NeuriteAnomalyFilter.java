@@ -113,9 +113,22 @@ public class NeuriteAnomalyFilter implements SnapFindSearch {
     }
 
     public Filter[] getFilters() {
+        Filter neurites = null;
         Filter anom = null;
         try {
             FilterCode c;
+
+            c = new FilterCode(
+                    new FileInputStream(
+                            "/home/agoode/diamond-git/imagejfind/data/filter/fil_imagej_exec.so"));
+
+            byte macroBlob[] = Util.readFully(this.getClass()
+                    .getResourceAsStream("resources/Neurite_Diamond_Anomaly.txt"));
+
+            neurites = new Filter("neurites", c, "f_eval_imagej_exec",
+                    "f_init_imagej_exec", "f_fini_imagej_exec", 0,
+                    new String[] { "rgb" }, new String[] {}, 400, macroBlob);
+            System.out.println(neurites);
 
             List<String> paramsList = new ArrayList<String>();
             for (int i = 0; i < checkboxes.length; i++) {
@@ -134,8 +147,8 @@ public class NeuriteAnomalyFilter implements SnapFindSearch {
             c = new FilterCode(new FileInputStream(
                     "/home/agoode/diamond-git/anomaly-test/fil_anomaly.so"));
             anom = new Filter("anomaly", c, "f_eval_afilter", "f_init_afilter",
-                    "f_fini_afilter", 100, new String[] { "rgb" }, anomArgs,
-                    400);
+                    "f_fini_afilter", 100, new String[] { "neurites" },
+                    anomArgs, 400);
             System.out.println(anom);
 
         } catch (FileNotFoundException e) {
@@ -144,7 +157,7 @@ public class NeuriteAnomalyFilter implements SnapFindSearch {
             e.printStackTrace();
         }
 
-        return new Filter[] { anom };
+        return new Filter[] { neurites, anom };
     }
 
     final private JCheckBox[] checkboxes = new JCheckBox[LABELS.length];
