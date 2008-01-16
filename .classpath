@@ -3,5 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/OpenDiamond java"/>
+	<classpathentry kind="lib" path="/home/agoode/jai_imageio-1_1/lib/clibwrapper_jiio.jar"/>
+	<classpathentry kind="lib" path="/home/agoode/jai_imageio-1_1/lib/jai_imageio.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

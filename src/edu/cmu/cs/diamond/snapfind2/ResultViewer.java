@@ -7,6 +7,9 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
+import java.awt.image.RescaleOp;
+import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
@@ -85,10 +88,15 @@ public class ResultViewer extends JButton implements ActionListener {
             e.printStackTrace();
         }
         if (img != null) {
+            if (img.getType() == BufferedImage.TYPE_USHORT_GRAY) {
+                // XXX better test above (sample models?)
+                normalize(img);
+            }
             return GraphicsUtilities.toCompatibleImage(img);
         }
 
         // ImageIO failed, try manually
+        System.out.println("ImageIO failed, falling back to rgbimage");
         byte data[] = result.getValue("_rgb_image.rgbimage");
         byte tmp[] = result.getValue("_cols.int");
         int w = Util.extractInt(tmp);
@@ -113,6 +121,14 @@ public class ResultViewer extends JButton implements ActionListener {
             }
         }
         return GraphicsUtilities.toCompatibleImage(img);
+    }
+
+    private void normalize(BufferedImage img) {
+        System.out.println("Normalising");
+
+        // XXX: hah
+        RescaleOp r = new RescaleOp(32, 0, null);
+        r.filter(img, img);
     }
 
     public void actionPerformed(ActionEvent e) {

@@ -22,6 +22,7 @@ import javax.swing.table.AbstractTableModel;
 
 import edu.cmu.cs.diamond.opendiamond.*;
 import edu.cmu.cs.diamond.snapfind2.search.CircleAnomalyFilter;
+import edu.cmu.cs.diamond.snapfind2.search.NeuriteAnomalyFilter;
 
 public class SnapFind2 extends JFrame {
 
@@ -604,7 +605,15 @@ public class SnapFind2 extends JFrame {
             }
         });
         itemNew.add(mi);
-    }
+
+        mi = new JMenuItem("Neurite Anomaly Detector");
+        mi.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                searchList.addSearch(new NeuriteAnomalyFilter());
+            }
+        });
+        itemNew.add(mi);
+}
 
     public static void main(String[] args) {
         SnapFind2 sf = new SnapFind2();
