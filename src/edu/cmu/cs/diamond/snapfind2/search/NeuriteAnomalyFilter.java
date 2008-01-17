@@ -181,7 +181,7 @@ public class NeuriteAnomalyFilter implements SnapFindSearch {
         // XXX do this another way
         JPanel result = new JPanel();
         result.setBorder(BorderFactory
-                .createTitledBorder("Circle Anomaly Detector"));
+                .createTitledBorder("Neurite Anomaly Detector"));
         result.setLayout(new SpringLayout());
 
         result.add(new JLabel("Priming count"));
