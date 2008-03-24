@@ -120,7 +120,7 @@ public class NeuriteAnomalyFilter implements SnapFindSearch {
 
             c = new FilterCode(
                     new FileInputStream(
-                            "/home/agoode/diamond-git/imagejfind/data/filter/fil_imagej_exec.so"));
+                            "/usr/share/imagejfind/filter/fil_imagej_exec.so"));
 
             byte macroBlob[] = Util.readFully(this.getClass()
                     .getResourceAsStream("resources/Neurite_Diamond_Anomaly.txt"));
@@ -145,7 +145,7 @@ public class NeuriteAnomalyFilter implements SnapFindSearch {
             System.arraycopy(paramsList.toArray(), 0, anomArgs, 2, paramsList
                     .size());
             c = new FilterCode(new FileInputStream(
-                    "/home/agoode/diamond-git/anomaly-test/fil_anomaly.so"));
+                    "/opt/snapfind/lib/fil_anomaly.so"));
             anom = new Filter("anomaly", c, "f_eval_afilter", "f_init_afilter",
                     "f_fini_afilter", 100, new String[] { "neurites" },
                     anomArgs, 400);

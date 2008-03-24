@@ -82,7 +82,7 @@ public class CircleAnomalyFilter implements SnapFindSearch {
             FilterCode c;
 
             c = new FilterCode(new FileInputStream(
-                    "/home/agoode/diamond-git/anomaly-test/fil_circle.so"));
+                    "/opt/snapfind/lib/fil_circle.so"));
             circles = new Filter("circles", c, "f_eval_circles",
                     "f_init_circles", "f_fini_circles", 0,
                     new String[] { "rgb" }, new String[] { "-1", "-1", "0.4",
@@ -104,7 +104,7 @@ public class CircleAnomalyFilter implements SnapFindSearch {
             System.arraycopy(paramsList.toArray(), 0, anomArgs, 2, paramsList
                     .size());
             c = new FilterCode(new FileInputStream(
-                    "/home/agoode/diamond-git/anomaly-test/fil_anomaly.so"));
+                    "/opt/snapfind/lib/fil_anomaly.so"));
             anom = new Filter("anomaly", c, "f_eval_afilter", "f_init_afilter",
                     "f_fini_afilter", 100, new String[] { "circles" },
                     anomArgs, 400);
