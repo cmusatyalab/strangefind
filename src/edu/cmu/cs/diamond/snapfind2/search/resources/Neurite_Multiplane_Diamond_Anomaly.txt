@@ -1,0 +1,108 @@
+print("MACRO BEGIN");
+
+run("Set Measurements...", "area center perimeter bounding fit circularity area_fraction redirect=None decimal=3");
+
+// get id of stack
+var stackID = getImageID();
+
+// collapse slices
+run("Z Project...", "start=1 stop=5 projection=Median");
+
+// setup
+var orig = getImageID();
+print("MACRO orig = " + orig);
+
+// account for background illumination
+print("MACRO Fit Polynomial");
+run("Fit Polynomial", "x=2 y=2 mixed=2");
+run("16-bit");
+
+// duplicate
+run("Duplicate...", "title=Duplicate");
+var dup = getImageID();
+print("MACRO dup = " + dup);
+run("Duplicate...", "title=Duplicate2");
+var dup2 = getImageID();
+print("MACRO dup2 = " + dup2);
+
+print("MACRO select image " + orig);
+selectImage(orig);
+close();
+selectImage(stackID);
+close();
+
+// process cells
+selectImage(dup);
+print("MACRO multithresholder");
+run("MultiThresholder", "IsoData apply");
+print("MACRO watershed");
+run("Watershed");
+run("Analyze Particles...", "size=10-200 circularity=0.20-1.00 show=Masks include clear record");
+
+// record info about cells
+print("MACRO numCells: " + numCells);
+var numCells = nResults;
+if (numCells != 0) {
+  var totalCellArea = 0;
+  for (i = 0; i < nResults; i++) {
+    totalCellArea += getResult("Area", i);
+  }
+
+  // rename mask and collect selection
+  rename("Cells");
+  var cellMask = getImageID();
+  run("Create Selection");
+
+  // close
+  selectImage(dup);
+  close();
+
+
+  // mask out cells in order to process neurites
+  selectImage(dup2);
+  run("Restore Selection");
+  run("Enlarge...", "enlarge=3");
+  run("Make Inverse");
+
+  //run("MultiThresholder", "IsoData apply");
+  setAutoThreshold();
+  run("Convert to Mask");
+
+  run("Restore Selection");
+
+  // possibly invert (depends on what autothreshold has done)
+  var z;
+  var hist = newArray(256);
+  getStatistics(z, z, z, z, z, hist);
+  if (hist[0] < hist[255]) {
+    run("Invert");
+  }
+
+  // find the neurites
+  run("Analyze Particles...", "size=30-2000 circularity=0.00-0.70 show=Nothing clear record");
+
+  // record info about neurites
+  var numNeurites = nResults;
+  var totalNeuriteArea = 0;
+  for (i = 0; i < nResults; i++) {
+    totalNeuriteArea += getResult("Area", i);
+  }
+
+  // close
+  selectImage(dup2);
+  close();
+  selectImage(cellMask);
+  close();
+}
+
+  // report
+call("ijloader.IJLoader.writeDiamondAttribute", "total.number.of.neurites", numNeurites);
+call("ijloader.IJLoader.writeDiamondAttribute", "total.length.neurites", totalCellArea);
+call("ijloader.IJLoader.writeDiamondAttribute", "number.of.cells,", numCells);
+call("ijloader.IJLoader.writeDiamondAttribute", "average.area.of.cell.body.per.cell", (totalCellArea / numCells));
+call("ijloader.IJLoader.writeDiamondAttribute", "neurites.per.cell", (numNeurites / numCells));
+//call("ijloader.IJLoader.writeDiamondAttribute", "length.neurites.per.cell", "");
+call("ijloader.IJLoader.writeDiamondAttribute", "total.area.neurites", totalNeuriteArea);
+call("ijloader.IJLoader.writeDiamondAttribute", "area.neurites.per.cell", (totalNeuriteArea / numCells));
+
+run("Diamond Filter", "expr=1.0");

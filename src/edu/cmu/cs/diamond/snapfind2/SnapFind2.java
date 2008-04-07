@@ -23,6 +23,7 @@ import javax.swing.table.AbstractTableModel;
 import edu.cmu.cs.diamond.opendiamond.*;
 import edu.cmu.cs.diamond.snapfind2.search.CircleAnomalyFilter;
 import edu.cmu.cs.diamond.snapfind2.search.NeuriteAnomalyFilter;
+import edu.cmu.cs.diamond.snapfind2.search.NeuriteMultiplaneAnomalyFilter;
 
 public class SnapFind2 extends JFrame {
 
@@ -68,7 +69,8 @@ public class SnapFind2 extends JFrame {
             Box h = Box.createHorizontalBox();
 
             final int neverValue = 150;
-            final JSlider interval = new JSlider(5, neverValue, INITIAL_SESSION_VARIABLES_UPDATE_INTERVAL);
+            final JSlider interval = new JSlider(5, neverValue,
+                    INITIAL_SESSION_VARIABLES_UPDATE_INTERVAL);
             Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
             labelTable.put(Integer.valueOf(5), new JLabel("5 s"));
             labelTable.put(Integer.valueOf(30), new JLabel("30 s"));
@@ -80,7 +82,7 @@ public class SnapFind2 extends JFrame {
             interval.setPaintLabels(true);
             h.add(new JLabel("Synchronization Interval"));
             h.add(interval);
-            
+
             interval.addChangeListener(new ChangeListener() {
                 public void stateChanged(ChangeEvent e) {
                     if (interval.getValueIsAdjusting()) {
@@ -259,7 +261,7 @@ public class SnapFind2 extends JFrame {
     final protected SearchList searchList = new SearchList();
 
     final protected JButton defineScopeButton = new JButton("Define Scope");
-    
+
     final protected JButton startButton = new JButton("Start");
 
     final protected JButton stopButton = new JButton("Stop");
@@ -309,7 +311,7 @@ public class SnapFind2 extends JFrame {
                 ScopeSource.commitScope();
             }
         });
-        
+
         stopButton.setEnabled(false);
 
         startButton.addActionListener(new ActionListener() {
@@ -373,7 +375,7 @@ public class SnapFind2 extends JFrame {
     protected void prepareSearch() {
         // load scope
         search.setScope(ScopeSource.getPredefinedScopeList().get(0));
-        
+
         // read all enabled searches
         Filter[] filters = searchList.getFilters();
 
@@ -423,7 +425,7 @@ public class SnapFind2 extends JFrame {
         r2.add(defineScopeButton);
         v1.add(r2);
         v1.add(Box.createVerticalStrut(4));
-        
+
         Box r1 = Box.createHorizontalBox();
         r1.add(startButton);
         r1.add(Box.createHorizontalStrut(20));
@@ -613,7 +615,15 @@ public class SnapFind2 extends JFrame {
             }
         });
         itemNew.add(mi);
-}
+
+        mi = new JMenuItem("Neurite Anomaly Detector (Multiplane)");
+        mi.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                searchList.addSearch(new NeuriteMultiplaneAnomalyFilter());
+            }
+        });
+        itemNew.add(mi);
+    }
 
     public static void main(String[] args) {
         SnapFind2 sf = new SnapFind2();
