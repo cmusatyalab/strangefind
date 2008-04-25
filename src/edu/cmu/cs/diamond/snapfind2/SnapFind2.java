@@ -383,7 +383,7 @@ public class SnapFind2 extends JFrame {
         FilterCode fc;
         try {
             fc = new FilterCode(new FileInputStream(
-                    "/opt/snapfind/lib/fil_rgb.a"));
+                    "/opt/snapfind/lib/fil_rgb.so"));
             Filter f = new Filter("rgb", fc, "f_eval_img2rgb",
                     "f_init_img2rgb", "f_fini_img2rgb", 1, new String[0],
                     new String[0], 400);
