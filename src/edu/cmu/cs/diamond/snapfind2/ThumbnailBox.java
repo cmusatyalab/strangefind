@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Map;
+import java.util.TimerTask;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -62,22 +63,31 @@ public class ThumbnailBox extends JPanel {
         }
     });
 
-    final protected Timer sessionVarsTimer = new Timer(
-            SnapFind2.INITIAL_SESSION_VARIABLES_UPDATE_INTERVAL * 1000,
-            new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    search.mergeSessionVariables(globalSessionVariables,
-                            composer);
-                    sessionVariablesTableModel.fireTableDataChanged();
-                }
-            });
+    final protected java.util.Timer sessionVarsTimer = new java.util.Timer(true);
+
+    protected long sessionVarsInterval = 1000 * SnapFind2.INITIAL_SESSION_VARIABLES_UPDATE_INTERVAL;
+
+    TimerTask createSessionVarsTimerTask() {
+        System.out.println("creating timer task");
+        TimerTask sessionVarsTimerTask = new TimerTask() {
+            @Override
+            public void run() {
+                System.out.println("************timer task running");
+                search.mergeSessionVariables(globalSessionVariables, composer);
+                sessionVariablesTableModel.fireTableDataChanged();
+            }
+        };
+
+        return sessionVarsTimerTask;
+    }
 
     private DoubleComposer composer;
 
     private volatile boolean searchRunning;
-    
+
     private volatile boolean updateSessionVars = true;
-    
+
+    private TimerTask sessionVarsTimerTask;
 
     public ThumbnailBox(Map<String, Double> globalSessionVariables,
             AbstractTableModel sessionVariablesTableModel) {
@@ -241,7 +251,7 @@ public class ThumbnailBox extends JPanel {
 
                 // clean up
                 resultGatherer = null;
-                
+
                 searchRunning = false;
                 updateTimers();
 
@@ -282,13 +292,19 @@ public class ThumbnailBox extends JPanel {
         if (searchRunning) {
             statsTimer.start();
             if (updateSessionVars) {
-                sessionVarsTimer.start();
+                sessionVarsTimerTask = createSessionVarsTimerTask();
+                sessionVarsTimer.schedule(sessionVarsTimerTask, 0,
+                        sessionVarsInterval);
             } else {
-                sessionVarsTimer.stop();
+                if (sessionVarsTimerTask != null) {
+                    sessionVarsTimerTask.cancel();
+                }
             }
         } else {
             statsTimer.stop();
-            sessionVarsTimer.stop();
+            if (sessionVarsTimerTask != null) {
+                sessionVarsTimerTask.cancel();
+            }
         }
     }
 
@@ -328,8 +344,9 @@ public class ThumbnailBox extends JPanel {
             updateTimers();
         } else {
             System.out.println("Setting session vars timer to " + value);
+            updateSessionVars = false;
+            updateTimers();
             updateSessionVars = true;
-            sessionVarsTimer.setDelay(value * 1000);
             updateTimers();
         }
     }
