@@ -25,6 +25,8 @@
 #include "lib_filter.h"
 #include "util.h"
 
+#include <cstring>
+
 #include <sys/time.h>
 #include <time.h>
 #include <math.h>
