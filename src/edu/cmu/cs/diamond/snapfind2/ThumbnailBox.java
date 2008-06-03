@@ -72,7 +72,7 @@ public class ThumbnailBox extends JPanel {
         TimerTask sessionVarsTimerTask = new TimerTask() {
             @Override
             public void run() {
-                System.out.println("************timer task running");
+//                System.out.println("************timer task running");
                 search.mergeSessionVariables(globalSessionVariables, composer);
                 sessionVariablesTableModel.fireTableDataChanged();
             }
