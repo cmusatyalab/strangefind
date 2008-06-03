@@ -7,11 +7,15 @@ import edu.cmu.cs.diamond.opendiamond.Result;
 
 public class AnnotatedResult extends Result {
     final private Result theResult;
+
     final private String annotation;
+
     final private Decorator decorator;
+
     final private String tooltipAnnotation;
 
-    public AnnotatedResult(Result r, String annotation, String tooltipAnnotation, Decorator decorator) {
+    public AnnotatedResult(Result r, String annotation,
+            String tooltipAnnotation, Decorator decorator) {
         theResult = r;
         this.annotation = annotation;
         this.tooltipAnnotation = tooltipAnnotation;
@@ -36,10 +40,10 @@ public class AnnotatedResult extends Result {
     public String getAnnotation() {
         return annotation;
     }
-    
+
     public void decorate(Graphics2D g, double scale) {
         if (decorator != null) {
-        decorator.decorate(this, g, scale);
+            decorator.decorate(this, g, scale);
         }
     }
 
