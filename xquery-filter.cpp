@@ -92,7 +92,7 @@ int f_eval_xquery (lf_obj_handle_t ohandle, void *filter_args) {
       } else {
 	//std::cout << "writing attribute '" << attributeName << "':'" << str << "'" << std::endl;
 	lf_write_attr(ohandle, attributeName,
-		      strlen(str), (unsigned char *) str);
+		      strlen(str) + 1, (unsigned char *) str);
 	free(attributeName);
       }
       free(str);
