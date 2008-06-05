@@ -22,7 +22,7 @@ public class SearchList extends JPanel {
         super();
 
         setMinimumSize(new Dimension(250, 100));
-        setMaximumSize(new Dimension(250, Integer.MAX_VALUE));
+        setMaximumSize(new Dimension(550, Integer.MAX_VALUE));
 
         add(box);
 
@@ -33,7 +33,7 @@ public class SearchList extends JPanel {
         searches.add(f);
         JPanel j = f.getInterface();
         Insets in = getInsets();
-        j.setMaximumSize(new Dimension(250 - in.left - in.right,
+        j.setMaximumSize(new Dimension(550 - in.left - in.right,
                 Integer.MAX_VALUE));
         box.add(j);
 
@@ -70,5 +70,13 @@ public class SearchList extends JPanel {
             l.addAll(Arrays.asList(s.getDoubleComposer()));
         }
         return l.toArray(new DoubleComposer[0]);
+    }
+
+    public String[] getApplicationDependencies() {
+        List<String> f = new ArrayList<String>();
+        for (SnapFindSearch s : searches) {
+            f.addAll(Arrays.asList(s.getApplicationDependencies()));
+        }
+        return f.toArray(new String[0]);
     }
 }

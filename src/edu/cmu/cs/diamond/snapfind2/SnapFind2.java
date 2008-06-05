@@ -1,7 +1,19 @@
 package edu.cmu.cs.diamond.snapfind2;
 
 import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
-import static java.awt.event.KeyEvent.*;
+import static java.awt.event.KeyEvent.VK_A;
+import static java.awt.event.KeyEvent.VK_C;
+import static java.awt.event.KeyEvent.VK_D;
+import static java.awt.event.KeyEvent.VK_E;
+import static java.awt.event.KeyEvent.VK_H;
+import static java.awt.event.KeyEvent.VK_I;
+import static java.awt.event.KeyEvent.VK_L;
+import static java.awt.event.KeyEvent.VK_N;
+import static java.awt.event.KeyEvent.VK_O;
+import static java.awt.event.KeyEvent.VK_P;
+import static java.awt.event.KeyEvent.VK_Q;
+import static java.awt.event.KeyEvent.VK_S;
+import static java.awt.event.KeyEvent.VK_V;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -24,6 +36,7 @@ import edu.cmu.cs.diamond.opendiamond.*;
 import edu.cmu.cs.diamond.snapfind2.search.CircleAnomalyFilter;
 import edu.cmu.cs.diamond.snapfind2.search.NeuriteAnomalyFilter;
 import edu.cmu.cs.diamond.snapfind2.search.NeuriteMultiplaneAnomalyFilter;
+import edu.cmu.cs.diamond.snapfind2.search.XQueryAnomalyFilter;
 
 public class SnapFind2 extends JFrame {
 
@@ -380,26 +393,18 @@ public class SnapFind2 extends JFrame {
         Filter[] filters = searchList.getFilters();
 
         // set up search
-        FilterCode fc;
-        try {
-            fc = new FilterCode(new FileInputStream(
-                    "/opt/snapfind/lib/fil_rgb.so"));
-            Filter f = new Filter("rgb", fc, "f_eval_img2rgb",
-                    "f_init_img2rgb", "f_fini_img2rgb", 1, new String[0],
-                    new String[0], 400);
+        if (filters.length == 0) {
+            search.setSearchlet(null);
+        } else {
             Searchlet s = new Searchlet();
-            s.addFilter(f);
 
             for (Filter ff : filters) {
                 s.addFilter(ff);
             }
 
-            s.setApplicationDependencies(new String[] { "rgb" });
+            s.setApplicationDependencies(searchList
+                    .getApplicationDependencies());
             search.setSearchlet(s);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -620,6 +625,14 @@ public class SnapFind2 extends JFrame {
         mi.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 searchList.addSearch(new NeuriteMultiplaneAnomalyFilter());
+            }
+        });
+        itemNew.add(mi);
+
+        mi = new JMenuItem("XQuery Anomaly Detector");
+        mi.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                searchList.addSearch(new XQueryAnomalyFilter());
             }
         });
         itemNew.add(mi);

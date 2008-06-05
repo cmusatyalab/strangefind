@@ -1,5 +1,6 @@
 package edu.cmu.cs.diamond.snapfind2.search;
 
+import java.awt.Graphics2D;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -15,9 +16,9 @@ import edu.cmu.cs.diamond.snapfind2.Annotator;
 import edu.cmu.cs.diamond.snapfind2.Decorator;
 import edu.cmu.cs.diamond.snapfind2.SnapFindSearch;
 
-public class NeuriteMultiplaneAnomalyFilter implements SnapFindSearch {
+public class XQueryAnomalyFilter implements SnapFindSearch {
 
-    public NeuriteMultiplaneAnomalyFilter() {
+    public XQueryAnomalyFilter() {
         // init GUI elements
         for (int i = 0; i < NICE_LABELS.length; i++) {
             checkboxes[i] = new JCheckBox(NICE_LABELS[i]);
@@ -72,8 +73,10 @@ public class NeuriteMultiplaneAnomalyFilter implements SnapFindSearch {
 
                 double stddev = Util.extractDouble(r
                         .getValue("anomalous-value-stddev.double"));
-                double value = Double.parseDouble(Util.extractString(r
-                        .getValue(selectedLabels.get(key))));
+                String keyValue = selectedLabels.get(key);
+                String strValue = Util.extractString(r.getValue(keyValue));
+                System.out.println("key: " + key + ", value: " + keyValue + ", strValue: " + strValue);
+                double value = Double.parseDouble(strValue);
                 double mean = Util.extractDouble(r
                         .getValue("anomalous-value-mean.double"));
                 double stddevDiff = (value - mean) / stddev;
@@ -98,8 +101,14 @@ public class NeuriteMultiplaneAnomalyFilter implements SnapFindSearch {
     }
 
     public Decorator getDecorator() {
-        // TODO Auto-generated method stub
-        return null;
+        return new Decorator() {
+            public void decorate(Result r, Graphics2D g, double scale) {
+                byte data[] = r.getValue("circle-data");
+                if (data == null) {
+                    return;
+                }
+            }
+        };
     }
 
     private static final DoubleComposer composer = new DoubleComposer() {
@@ -113,26 +122,27 @@ public class NeuriteMultiplaneAnomalyFilter implements SnapFindSearch {
     }
 
     public String[] getApplicationDependencies() {
-        return new String[] { "neurites" };
+        return new String[] { "xquery" };
     }
-    
+
     public Filter[] getFilters() {
-        Filter neurites = null;
+        Filter xquery = null;
         Filter anom = null;
         try {
             FilterCode c;
 
             c = new FilterCode(
                     new FileInputStream(
-                            "/usr/share/imagejfind/filter/fil_imagej_exec.so"));
+                            "/coda/coda.cs.cmu.edu/usr/agoode/diamond-git/anomaly-test/fil_xquery.so"));
 
-            byte macroBlob[] = Util.readFully(this.getClass()
-                    .getResourceAsStream("resources/Neurite_Multiplane_Diamond_Anomaly.txt"));
+            byte queryBlob[] = Util
+                    .readFully(new FileInputStream(
+                            "/coda/coda.cs.cmu.edu/usr/agoode/diamond-git/anomaly-test/item.xql"));
 
-            neurites = new Filter("neurites", c, "f_eval_imagej_exec",
-                    "f_init_imagej_exec", "f_fini_imagej_exec", 0,
-                    new String[0], new String[] {}, 400, macroBlob);
-            System.out.println(neurites);
+            xquery = new Filter("xquery", c, "f_eval_xquery", "f_init_xquery",
+                    "f_fini_xquery", 0, new String[0], new String[] {}, 400,
+                    queryBlob);
+            System.out.println(xquery);
 
             List<String> paramsList = new ArrayList<String>();
             for (int i = 0; i < checkboxes.length; i++) {
@@ -151,8 +161,8 @@ public class NeuriteMultiplaneAnomalyFilter implements SnapFindSearch {
             c = new FilterCode(new FileInputStream(
                     "/opt/snapfind/lib/fil_anomaly.so"));
             anom = new Filter("anomaly", c, "f_eval_afilter", "f_init_afilter",
-                    "f_fini_afilter", 100, new String[] { "neurites" },
-                    anomArgs, 400);
+                    "f_fini_afilter", 100, new String[] { "xquery" }, anomArgs,
+                    400);
             System.out.println(anom);
 
         } catch (FileNotFoundException e) {
@@ -161,7 +171,7 @@ public class NeuriteMultiplaneAnomalyFilter implements SnapFindSearch {
             e.printStackTrace();
         }
 
-        return new Filter[] { neurites, anom };
+        return new Filter[] { xquery, anom };
     }
 
     final private JCheckBox[] checkboxes = new JCheckBox[LABELS.length];
@@ -171,21 +181,15 @@ public class NeuriteMultiplaneAnomalyFilter implements SnapFindSearch {
     final private JSpinner ignoreSpinner = new JSpinner(new SpinnerNumberModel(
             5, 0, 100, 1));
 
-    private static final String[] LABELS = { "total.number.of.neurites",
-            "total.length.neurites", "number.of.cells",
-            "average.area.of.cell.body.per.cell", "neurites.per.cell",
-            "total.area.neurites", "area.neurites.per.cell" };
+    private static final String[] LABELS = { "cell-count", "cell-inner-area-mean", "cell-outer-area-mean" };
 
-    private static final String[] NICE_LABELS = { "Total # neurites",
-            "Total length neurites", "# of cells", "Avg. cell body area",
-            "Neurites per cell", "Total area neurites",
-            "Area neurites per cell" };
+    private static final String[] NICE_LABELS = { "Cell Count", "Cell Inner Area Mean", "Cell Outer Area Mean" };
 
     public JPanel getInterface() {
         // XXX do this another way
         JPanel result = new JPanel();
         result.setBorder(BorderFactory
-                .createTitledBorder("Neurite Multiplane Anomaly Detector"));
+                .createTitledBorder("XQuery Anomaly Detector"));
         result.setLayout(new SpringLayout());
 
         result.add(new JLabel("Priming count"));

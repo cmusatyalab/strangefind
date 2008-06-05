@@ -75,11 +75,21 @@ public class CircleAnomalyFilter implements SnapFindSearch {
         checkboxes[6].setSelected(true);
     }
 
+    public String[] getApplicationDependencies() {
+        return new String[] { "rgb" };
+    }
+
     public Filter[] getFilters() {
+        Filter rgb = null;
         Filter circles = null;
         Filter anom = null;
         try {
             FilterCode c;
+            c = new FilterCode(new FileInputStream(
+                    "/opt/snapfind/lib/fil_rgb.so"));
+            rgb = new Filter("rgb", c, "f_eval_img2rgb",
+                    "f_init_img2rgb", "f_fini_img2rgb", 1, new String[0],
+                    new String[0], 400);
 
             c = new FilterCode(new FileInputStream(
                     "/opt/snapfind/lib/fil_circle.so"));
@@ -116,7 +126,7 @@ public class CircleAnomalyFilter implements SnapFindSearch {
             e.printStackTrace();
         }
 
-        return new Filter[] { circles, anom };
+        return new Filter[] { rgb, circles, anom };
     }
 
     final private JCheckBox[] checkboxes = new JCheckBox[LABELS.length];

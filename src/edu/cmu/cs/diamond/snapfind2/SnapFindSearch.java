@@ -16,4 +16,6 @@ public interface SnapFindSearch {
     Decorator getDecorator();
 
     DoubleComposer getDoubleComposer();
+
+    String[] getApplicationDependencies();
 }

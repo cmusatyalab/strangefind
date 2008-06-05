@@ -234,6 +234,7 @@ public class ThumbnailBox extends JPanel {
                         }
                     } else {
                         // no more objects
+                        System.out.println("no more objects");
                         running = false;
                     }
                 }
