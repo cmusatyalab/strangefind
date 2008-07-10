@@ -12,7 +12,7 @@ fil_anomaly.so: anomaly-filter.c
 	strip $@
 
 fil_xquery.so: xquery-filter.cpp
-	g++ -fPIC ${LDFLAGS} ${CPPFLAGS} -L/opt/diamond-filter-kit/lib `pkg-config opendiamond --cflags` -O2 -g -m32 -Wall -shared  -o $@ -Wp,-D_FORTIFY_SOURCE=2 -fstack-protector --param=ssp-buffer-size=4 xquery-filter.cpp -lxqilla
+	g++ -fPIC ${LDFLAGS} ${CPPFLAGS} -L/opt/diamond-filter-kit/lib `pkg-config opendiamond --cflags` -O2 -g -m32 -Wall -shared  -o $@ -Wp,-D_FORTIFY_SOURCE=2 -fstack-protector --param=ssp-buffer-size=4 xquery-filter.cpp -lxqilla -lxerces-c
 #	strip $@
 
 .PHONY: all clean
