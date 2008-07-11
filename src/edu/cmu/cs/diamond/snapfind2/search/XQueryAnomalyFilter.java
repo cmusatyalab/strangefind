@@ -184,7 +184,7 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
 
             c = new FilterCode(
                     new FileInputStream(
-                            "/coda/coda.cs.cmu.edu/usr/agoode/diamond-git/anomaly-test/fil_xquery.so"));
+                            "/opt/snapfind/lib/fil_xquery.so"));
 
             byte queryBlob[] = generateQueryBlob();
 
