@@ -9,9 +9,6 @@ import java.awt.event.ActionListener;
 import java.awt.image.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -98,18 +95,10 @@ public class ResultViewer extends JButton implements ActionListener {
         // XXX then try loading from kohinoor
         try {
             System.out.println("loading from kohinoor");
-            String image1 = Util.extractString(result.getValue("image-1"));
-            String image2 = Util.extractString(result.getValue("image-2"));
-            String image3 = Util.extractString(result.getValue("image-3"));
-
-            System.out.println(image1);
-            System.out.println(image2);
-            System.out.println(image3);
-
             // load
-            img = makeImageFromKohinoor(image1, image2, image3);
-            if (img != null) {
-                return GraphicsUtilities.toCompatibleImage(img);
+            BufferedImage kohinoorImgs[] = result.getKohinoorImages();
+            if (kohinoorImgs != null) {
+                return GraphicsUtilities.toCompatibleImage(kohinoorImgs[1]);
             }
         } catch (NullPointerException e) {
             // guess we don't have this either
@@ -151,60 +140,6 @@ public class ResultViewer extends JButton implements ActionListener {
             }
         }
         return GraphicsUtilities.toCompatibleImage(img);
-    }
-
-    private BufferedImage makeImageFromKohinoor(String image1, String image2,
-            String image3) {
-        try {
-            URI uri1 = createKohinoorURI(image1);
-            URI uri2 = createKohinoorURI(image2);
-            URI uri3 = createKohinoorURI(image3);
-
-            BufferedImage img1 = ImageIO.read(uri1.toURL());
-            BufferedImage img2 = ImageIO.read(uri2.toURL());
-            BufferedImage img3 = ImageIO.read(uri3.toURL());
-
-            if (img1 != null && img2 != null && img3 != null) {
-                int maxValue = Math.max(Math.max(getMaxValue(img1), getMaxValue(img2)), getMaxValue(img3));
-                
-                DataBufferUShort b1 = (DataBufferUShort) img1.getRaster()
-                        .getDataBuffer();
-                DataBufferUShort b2 = (DataBufferUShort) img2.getRaster()
-                        .getDataBuffer();
-                DataBufferUShort b3 = (DataBufferUShort) img3.getRaster()
-                        .getDataBuffer();
-
-                DataBuffer b = new DataBufferUShort(new short[][] { b1.getData(),
-                        b2.getData(), b3.getData() }, b1.getSize());
-
-                // TODO
-                return img2;
-            }
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private int getMaxValue(BufferedImage img) {
-        DataBuffer db = img.getRaster().getDataBuffer();
-        int max = 0;
-        for (int i = 0; i < db.getSize(); i++) {
-            max = Math.max(max, db.getElem(i));
-        }
-        System.out.println("max: " + max);
-        return max;
-    }
-
-    private URI createKohinoorURI(String image1) throws URISyntaxException {
-        String imagePath = image1.replace('\\', '/').substring(1);
-        URI uri = new URI("http", "kohinoor.diamond.cs.cmu.edu", imagePath,
-                null);
-        return uri;
     }
 
     private void possiblyNormalize(BufferedImage img) {
