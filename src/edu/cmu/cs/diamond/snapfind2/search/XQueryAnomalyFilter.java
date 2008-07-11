@@ -1,15 +1,13 @@
 package edu.cmu.cs.diamond.snapfind2.search;
 
-import java.awt.Graphics2D;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.awt.Component;
+import java.io.*;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.Map.Entry;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import edu.cmu.cs.diamond.opendiamond.*;
 import edu.cmu.cs.diamond.snapfind2.Annotator;
@@ -18,15 +16,74 @@ import edu.cmu.cs.diamond.snapfind2.SnapFindSearch;
 
 public class XQueryAnomalyFilter implements SnapFindSearch {
 
-    public XQueryAnomalyFilter() {
+    public XQueryAnomalyFilter(Component parent) {
+        attrMap = new HashMap<String, String>();
+
+        // load file
+        JFileChooser chooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+                "Attribute Map Files", "attrmap");
+        chooser.setFileFilter(filter);
+        int returnVal = chooser.showOpenDialog(parent);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File f = chooser.getSelectedFile();
+            parseAttrFile(f, attrMap);
+        } else {
+            // XXX
+            throw new RuntimeException("You must choose a file");
+        }
+
         // init GUI elements
-        for (int i = 0; i < NICE_LABELS.length; i++) {
-            checkboxes[i] = new JCheckBox(NICE_LABELS[i]);
+        checkboxes = new JCheckBox[attrMap.size()];
+        stddevs = new JSpinner[attrMap.size()];
+        niceLabels = new String[attrMap.size()];
+        labels = new String[attrMap.size()];
+        queries = new String[attrMap.size()];
+        
+        {
+            int i = 0;
+            for (Entry<String, String> e : attrMap.entrySet()) {
+                labels[i] = "attr" + i;
+                niceLabels[i] = e.getKey();
+                queries[i] = e.getValue();
+                i++;
+            }
+        }
+
+        for (int i = 0; i < niceLabels.length; i++) {
+            checkboxes[i] = new JCheckBox(niceLabels[i]);
+            checkboxes[i].setToolTipText(queries[i]);
             checkboxes[i].setSelected(true);
 
             JSpinner s = new JSpinner(
                     new SpinnerNumberModel(3.0, 1.0, 7.0, 0.5));
             stddevs[i] = s;
+        }
+    }
+
+    private void parseAttrFile(File f, Map<String, String> attrMap) {
+        FileReader fr = null;
+        try {
+            fr = new FileReader(f);
+            BufferedReader in = new BufferedReader(fr);
+
+            String line;
+            while ((line = in.readLine()) != null) {
+                String tokens[] = line.split(":", 2);
+                attrMap.put(tokens[0], tokens[1]);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fr != null) {
+                try {
+                    fr.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -36,8 +93,8 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
         for (int i = 0; i < checkboxes.length; i++) {
             JCheckBox c = checkboxes[i];
             if (c.isSelected()) {
-                selectedLabels.add(LABELS[i]);
-                niceSelectedLabels.add(NICE_LABELS[i]);
+                selectedLabels.add(labels[i]);
+                niceSelectedLabels.add(niceLabels[i]);
             }
         }
 
@@ -75,7 +132,8 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
                         .getValue("anomalous-value-stddev.double"));
                 String keyValue = selectedLabels.get(key);
                 String strValue = Util.extractString(r.getValue(keyValue));
-                System.out.println("key: " + key + ", value: " + keyValue + ", strValue: " + strValue);
+                System.out.println("key: " + key + ", value: " + keyValue
+                        + ", strValue: " + strValue);
                 double value = Double.parseDouble(strValue);
                 double mean = Util.extractDouble(r
                         .getValue("anomalous-value-mean.double"));
@@ -101,14 +159,7 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
     }
 
     public Decorator getDecorator() {
-        return new Decorator() {
-            public void decorate(Result r, Graphics2D g, double scale) {
-                byte data[] = r.getValue("circle-data");
-                if (data == null) {
-                    return;
-                }
-            }
-        };
+        return null;
     }
 
     private static final DoubleComposer composer = new DoubleComposer() {
@@ -135,9 +186,9 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
                     new FileInputStream(
                             "/coda/coda.cs.cmu.edu/usr/agoode/diamond-git/anomaly-test/fil_xquery.so"));
 
-            byte queryBlob[] = Util
-                    .readFully(new FileInputStream(
-                            "/coda/coda.cs.cmu.edu/usr/agoode/diamond-git/anomaly-test/item.xql"));
+            byte queryBlob[] = generateQueryBlob();
+
+            System.out.println("queryBlob: " + new String(queryBlob));
 
             xquery = new Filter("xquery", c, "f_eval_xquery", "f_init_xquery",
                     "f_fini_xquery", 0, new String[0], new String[] {}, 400,
@@ -148,7 +199,7 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
             for (int i = 0; i < checkboxes.length; i++) {
                 JCheckBox cb = checkboxes[i];
                 if (cb.isSelected()) {
-                    paramsList.add(LABELS[i]);
+                    paramsList.add(labels[i]);
                     paramsList.add(stddevs[i].getValue().toString());
                 }
             }
@@ -174,16 +225,40 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
         return new Filter[] { xquery, anom };
     }
 
-    final private JCheckBox[] checkboxes = new JCheckBox[LABELS.length];
+    private byte[] generateQueryBlob() {
+        StringBuilder sb = new StringBuilder();
 
-    final private JSpinner[] stddevs = new JSpinner[LABELS.length];
+        sb.append("document { <attributes>");
+
+        for (int i = 0; i < labels.length; i++) {
+            // TODO(agoode) validate or escape xpath/xquery input
+            sb.append("<attribute name='" + labels[i] + "' value='"
+                    + queries[i] + "'/>");
+        }
+
+        sb
+                .append("<attribute name='image-1' value='{//Images/ImageFile[1]/text()}'/>"
+                        + "<attribute name='image-2' value='{//Images/ImageFile[2]/text()}'/>"
+                        + "<attribute name='image-3' value='{//Images/ImageFile[3]/text()}'/>"
+                        + "</attributes>}");
+
+        return sb.toString().getBytes();
+    }
+
+    final private JCheckBox[] checkboxes;
+
+    final private JSpinner[] stddevs;
 
     final private JSpinner ignoreSpinner = new JSpinner(new SpinnerNumberModel(
             5, 0, 100, 1));
 
-    private static final String[] LABELS = { "cell-count", "cell-inner-area-mean", "cell-outer-area-mean" };
+    final private Map<String, String> attrMap;
 
-    private static final String[] NICE_LABELS = { "Cell Count", "Cell Inner Area Mean", "Cell Outer Area Mean" };
+    final private String labels[];
+
+    final private String niceLabels[];
+
+    final private String queries[];
 
     public JPanel getInterface() {
         // XXX do this another way
@@ -200,12 +275,12 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
 
         result.add(new JLabel("Descriptor"));
         result.add(new JLabel("Std. dev."));
-        for (int i = 0; i < LABELS.length; i++) {
+        for (int i = 0; i < labels.length; i++) {
             result.add(checkboxes[i]);
             result.add(stddevs[i]);
         }
 
-        Util.makeCompactGrid(result, LABELS.length + 3, 2, 5, 5, 2, 2);
+        Util.makeCompactGrid(result, labels.length + 3, 2, 5, 5, 2, 2);
 
         return result;
     }

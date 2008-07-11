@@ -632,7 +632,7 @@ public class SnapFind2 extends JFrame {
         mi = new JMenuItem("XQuery Anomaly Detector");
         mi.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                searchList.addSearch(new XQueryAnomalyFilter());
+                searchList.addSearch(new XQueryAnomalyFilter(SnapFind2.this));
             }
         });
         itemNew.add(mi);
