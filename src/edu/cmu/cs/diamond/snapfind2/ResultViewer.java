@@ -47,7 +47,11 @@ public class ResultViewer extends JButton implements ActionListener {
             return;
         }
 
-        BufferedImage img = getImg();
+        BufferedImage imgs[] = getImg();
+        BufferedImage img = imgs[0];
+        if (imgs.length > 1) {
+            img = imgs[1];  // TODO(agoode) fix this to show all images, not hack for xml well data
+        }
         Insets in = getInsets();
 
         int w = img.getWidth();
@@ -77,7 +81,7 @@ public class ResultViewer extends JButton implements ActionListener {
         }
     }
 
-    private BufferedImage getImg() {
+    private BufferedImage[] getImg() {
         // XXX this is messy and needs to be modularized
         BufferedImage img = null;
 
@@ -89,7 +93,8 @@ public class ResultViewer extends JButton implements ActionListener {
         }
         if (img != null) {
             possiblyNormalize(img);
-            return GraphicsUtilities.toCompatibleImage(img);
+            return new BufferedImage[] { GraphicsUtilities
+                    .toCompatibleImage(img) };
         }
 
         // XXX then try loading from kohinoor
@@ -98,7 +103,12 @@ public class ResultViewer extends JButton implements ActionListener {
             // load
             BufferedImage kohinoorImgs[] = result.getKohinoorImages();
             if (kohinoorImgs != null) {
-                return GraphicsUtilities.toCompatibleImage(kohinoorImgs[1]);
+                BufferedImage result[] = new BufferedImage[kohinoorImgs.length];
+                for (int i = 0; i < kohinoorImgs.length; i++) {
+                    result[i] = GraphicsUtilities
+                            .toCompatibleImage(kohinoorImgs[i]);
+                }
+                return result;
             }
         } catch (NullPointerException e) {
             // guess we don't have this either
@@ -110,14 +120,14 @@ public class ResultViewer extends JButton implements ActionListener {
         byte tmp[] = result.getValue("_cols.int");
 
         if (data == null || tmp == null) {
-            return null;
+            return new BufferedImage[0];
         }
 
         int w = Util.extractInt(tmp);
         tmp = result.getValue("_rows.int");
 
         if (tmp == null) {
-            return null;
+            return new BufferedImage[0];
         }
 
         int h = Util.extractInt(tmp);
@@ -139,7 +149,7 @@ public class ResultViewer extends JButton implements ActionListener {
                 }
             }
         }
-        return GraphicsUtilities.toCompatibleImage(img);
+        return new BufferedImage[] { GraphicsUtilities.toCompatibleImage(img) };
     }
 
     private void possiblyNormalize(BufferedImage img) {
@@ -158,7 +168,7 @@ public class ResultViewer extends JButton implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
-        BufferedImage img = getImg();
+        BufferedImage img = getImg()[0];  // TODO(agoode)
         Graphics2D g = img.createGraphics();
         result.decorate(g, 1.0);
         g.dispose();
