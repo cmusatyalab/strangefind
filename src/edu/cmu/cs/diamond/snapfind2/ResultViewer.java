@@ -1,17 +1,19 @@
 package edu.cmu.cs.diamond.snapfind2;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.RescaleOp;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 
 import org.jdesktop.swingx.graphics.GraphicsUtilities;
 
@@ -47,10 +49,11 @@ public class ResultViewer extends JButton implements ActionListener {
             return;
         }
 
-        BufferedImage imgs[] = getImg();
+        BufferedImage imgs[] = getImgs();
         BufferedImage img = imgs[0];
         if (imgs.length > 1) {
-            img = imgs[1];  // TODO(agoode) fix this to show all images, not hack for xml well data
+            img = imgs[1]; // TODO(agoode) fix this to show all images, not hack
+            // for xml well data
         }
         Insets in = getInsets();
 
@@ -81,7 +84,7 @@ public class ResultViewer extends JButton implements ActionListener {
         }
     }
 
-    private BufferedImage[] getImg() {
+    private BufferedImage[] getImgs() {
         // XXX this is messy and needs to be modularized
         BufferedImage img = null;
 
@@ -135,18 +138,15 @@ public class ResultViewer extends JButton implements ActionListener {
         System.out.println(w + "x" + h);
 
         img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-
-        if (data != null) {
-            // XXX slow?
-            for (int y = 0; y < h; y++) {
-                for (int x = 0; x < w; x++) {
-                    int i = (y * w + x) * 4;
-                    // System.out.println(x);
-                    // System.out.println(y);
-                    int val = (data[i] & 0xFF) << 16
-                            | (data[i + 1] & 0xFF) << 8 | (data[i + 2] & 0xFF);
-                    img.setRGB(x, y, val);
-                }
+        // XXX slow?
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                int i = (y * w + x) * 4;
+                // System.out.println(x);
+                // System.out.println(y);
+                int val = (data[i] & 0xFF) << 16 | (data[i + 1] & 0xFF) << 8
+                        | (data[i + 2] & 0xFF);
+                img.setRGB(x, y, val);
             }
         }
         return new BufferedImage[] { GraphicsUtilities.toCompatibleImage(img) };
@@ -168,22 +168,6 @@ public class ResultViewer extends JButton implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
-        BufferedImage img = getImg()[0];  // TODO(agoode)
-        Graphics2D g = img.createGraphics();
-        result.decorate(g, 1.0);
-        g.dispose();
-
-        JLabel p = new JLabel(new ImageIcon(img));
-        JScrollPane jsp = new JScrollPane(p);
-        JFrame f = new JFrame();
-        jsp.getVerticalScrollBar().setUnitIncrement(40);
-        jsp.getHorizontalScrollBar().setUnitIncrement(40);
-        f.add(jsp);
-        f.add(new JLabel(result.getAnnotation()), BorderLayout.SOUTH);
-
-        f.pack();
-        f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        f.setLocationByPlatform(true);
-        f.setVisible(true);
+        new VerySimpleImageViewer(result, getImgs()).setVisible(true);
     }
 }
