@@ -14,7 +14,11 @@ public class VerySimpleImageViewer extends JFrame {
         public ChannelSelector() {
             String labels[] = new String[imgs.length];
             for (int i = 0; i < labels.length; i++) {
-                labels[i] = "Image " + (i + 1);
+                if (i == 0) {
+                    labels[i] = "Combined Image";
+                } else {
+                    labels[i] = "Image " + i;
+                }
             }
 
             setLayout(new BorderLayout());

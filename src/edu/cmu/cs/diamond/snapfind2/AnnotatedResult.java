@@ -30,6 +30,8 @@ public class AnnotatedResult extends Result {
 
     private BufferedImage img3;
 
+    private BufferedImage combinedImage;
+
     public AnnotatedResult(Result r, String annotation,
             String tooltipAnnotation, Decorator decorator) {
         theResult = r;
@@ -96,21 +98,7 @@ public class AnnotatedResult extends Result {
                 img2 = ImageIO.read(uri2.toURL());
                 img3 = ImageIO.read(uri3.toURL());
 
-                if (img1 != null && img2 != null && img3 != null) {
-                    int maxValue = Math.max(Math.max(getMaxValue(img1),
-                            getMaxValue(img2)), getMaxValue(img3));
-
-                    DataBufferUShort b1 = (DataBufferUShort) img1.getRaster()
-                            .getDataBuffer();
-                    DataBufferUShort b2 = (DataBufferUShort) img2.getRaster()
-                            .getDataBuffer();
-                    DataBufferUShort b3 = (DataBufferUShort) img3.getRaster()
-                            .getDataBuffer();
-
-                    DataBuffer b = new DataBufferUShort(new short[][] {
-                            b1.getData(), b2.getData(), b3.getData() }, b1
-                            .getSize());
-                }
+                combinedImage = combineImage(img1, img2, img3);
             } catch (URISyntaxException e) {
                 e.printStackTrace();
             } catch (MalformedURLException e) {
@@ -119,23 +107,47 @@ public class AnnotatedResult extends Result {
                 e.printStackTrace();
             }
         }
-        return new BufferedImage[] { img1, img2, img3 };
+
+        return new BufferedImage[] { combinedImage, img1, img2, img3 };
     }
 
-    private URI createKohinoorURI(String image1) throws URISyntaxException {
+    static private BufferedImage combineImage(BufferedImage img1,
+            BufferedImage img2, BufferedImage img3) {
+        DataBufferUShort b1 = (DataBufferUShort) img1.getRaster()
+                .getDataBuffer();
+        DataBufferUShort b2 = (DataBufferUShort) img2.getRaster()
+                .getDataBuffer();
+        DataBufferUShort b3 = (DataBufferUShort) img3.getRaster()
+                .getDataBuffer();
+
+        short[] data1 = b1.getData();
+        short[] data2 = b2.getData();
+        short[] data3 = b3.getData();
+
+        final int w = img1.getWidth();
+        final int h = img1.getHeight();
+
+        BufferedImage result = new BufferedImage(w, h,
+                BufferedImage.TYPE_INT_RGB);
+        // XXX slow?
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                int i = y * w + x;
+                int val = ((data2[i] >> 8) & 0xFF) << 16
+                        | ((data1[i] >> 8) & 0xFF) << 8
+                        | ((data3[i] >> 8) & 0xFF);
+                result.setRGB(x, y, val);
+            }
+        }
+
+        return result;
+    }
+
+    static private URI createKohinoorURI(String image1)
+            throws URISyntaxException {
         String imagePath = image1.replace('\\', '/').substring(1);
         URI uri = new URI("http", "kohinoor.diamond.cs.cmu.edu", imagePath,
                 null);
         return uri;
-    }
-
-    private int getMaxValue(BufferedImage img) {
-        DataBuffer db = img.getRaster().getDataBuffer();
-        int max = 0;
-        for (int i = 0; i < db.getSize(); i++) {
-            max = Math.max(max, db.getElem(i));
-        }
-        System.out.println("max: " + max);
-        return max;
     }
 }

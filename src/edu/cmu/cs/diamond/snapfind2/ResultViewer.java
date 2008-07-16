@@ -51,9 +51,10 @@ public class ResultViewer extends JButton implements ActionListener {
 
         BufferedImage imgs[] = getImgs();
         BufferedImage img = imgs[0];
+
+        // for xml well data
         if (imgs.length > 1) {
-            img = imgs[1]; // TODO(agoode) fix this to show all images, not hack
-            // for xml well data
+            img = imgs[0]; // TODO(agoode)
         }
         Insets in = getInsets();
 
