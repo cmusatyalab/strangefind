@@ -188,9 +188,8 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
         try {
             FilterCode c;
 
-            c = new FilterCode(
-                    new FileInputStream(
-                            "/opt/snapfind/lib/fil_xquery.so"));
+            c = new FilterCode(new FileInputStream(
+                    "/opt/snapfind/lib/fil_xquery.so"));
 
             byte queryBlob[] = generateQueryBlob();
 
