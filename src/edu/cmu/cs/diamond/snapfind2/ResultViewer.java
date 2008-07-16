@@ -76,10 +76,12 @@ public class ResultViewer extends JButton implements ActionListener {
     public void commitResult() {
         if (result == null) {
             setToolTipText(null);
+            setText(null);
             setIcon(null);
             setEnabled(false);
         } else {
             setToolTipText(result.getTooltipAnnotation());
+            setText(result.getOneLineAnnotation());
             setIcon(thumbnail);
             setEnabled(true);
         }

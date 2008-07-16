@@ -23,6 +23,8 @@ public class AnnotatedResult extends Result {
     final private Decorator decorator;
 
     final private String tooltipAnnotation;
+    
+    final private String oneLineAnnotation;
 
     private BufferedImage img1;
 
@@ -32,11 +34,12 @@ public class AnnotatedResult extends Result {
 
     private BufferedImage combinedImage;
 
-    public AnnotatedResult(Result r, String annotation,
+    public AnnotatedResult(Result r, String annotation, String oneLineAnnotation,
             String tooltipAnnotation, Decorator decorator) {
         theResult = r;
         this.annotation = annotation;
         this.tooltipAnnotation = tooltipAnnotation;
+        this.oneLineAnnotation = oneLineAnnotation;
         this.decorator = decorator;
     }
 
@@ -149,5 +152,9 @@ public class AnnotatedResult extends Result {
         URI uri = new URI("http", "kohinoor.diamond.cs.cmu.edu", imagePath,
                 null);
         return uri;
+    }
+
+    public String getOneLineAnnotation() {
+        return oneLineAnnotation;
     }
 }

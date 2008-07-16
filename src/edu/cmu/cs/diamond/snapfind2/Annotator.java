@@ -6,4 +6,6 @@ public interface Annotator {
     String annotate(Result r);
     
     String annotateTooltip(Result r);
+
+    String annotateOneLine(Result r);
 }

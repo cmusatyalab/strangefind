@@ -182,16 +182,19 @@ public class ThumbnailBox extends JPanel {
 
         final String annotation;
         final String tooltipAnnotation;
+        final String oneLineAnnotation;
         if (annotator != null) {
             annotation = annotator.annotate(r);
             tooltipAnnotation = annotator.annotateTooltip(r);
+            oneLineAnnotation = annotator.annotateOneLine(r);
         } else {
             annotation = null;
             tooltipAnnotation = null;
+            oneLineAnnotation = null;
         }
 
         // do slow activity of loading the item
-        v.setResult(new AnnotatedResult(r, annotation, tooltipAnnotation,
+        v.setResult(new AnnotatedResult(r, annotation, oneLineAnnotation, tooltipAnnotation,
                 decorator));
 
         // update GUI
