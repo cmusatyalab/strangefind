@@ -39,11 +39,15 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
         niceLabels = new String[attrMap.size()];
         labels = new String[attrMap.size()];
         queries = new String[attrMap.size()];
-        
+
         {
             int i = 0;
             for (Entry<String, String> e : attrMap.entrySet()) {
-                labels[i] = "attr" + i;
+                // convert spaces to underscores, in an attempt to not crash the
+                // lexer?
+                labels[i] = e.getKey().replaceAll("\\t", " ").replaceAll("_",
+                        "__").replaceAll(" ", "_");
+
                 niceLabels[i] = e.getKey();
                 queries[i] = e.getValue();
                 i++;
@@ -61,7 +65,7 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
         }
     }
 
-    private void parseAttrFile(File f, Map<String, String> attrMap) {
+    static private void parseAttrFile(File f, Map<String, String> attrMap) {
         FileReader fr = null;
         try {
             fr = new FileReader(f);
@@ -70,7 +74,9 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
             String line;
             while ((line = in.readLine()) != null) {
                 String tokens[] = line.split(":", 2);
-                attrMap.put(tokens[0], tokens[1]);
+
+                String key = tokens[0].replaceAll("\\t", " ");
+                attrMap.put(key, tokens[1]);
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
