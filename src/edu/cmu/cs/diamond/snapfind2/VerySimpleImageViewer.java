@@ -77,7 +77,24 @@ public class VerySimpleImageViewer extends JFrame {
                 }
             }
         });
+        
+        InputMap inputMap = new InputMap();
+        inputMap.put(KeyStroke.getKeyStroke("PLUS"), "zoom in");
+        inputMap.put(KeyStroke.getKeyStroke("EQUALS"), "zoom in");
+        inputMap.put(KeyStroke.getKeyStroke("MINUS"), "zoom out");
+        
+        ActionMap actionMap = new ActionMap();
+        actionMap.put("zoom in", image.getZoomInAction());
+        actionMap.put("zoom out", image.getZoomOutAction());
+        
+        InputMap oldInputMap = image.getInputMap();
+        ActionMap oldActionMap = image.getActionMap();
+        inputMap.setParent(oldInputMap.getParent());
+        oldInputMap.setParent(inputMap);
+        actionMap.setParent(oldActionMap.getParent());
+        oldActionMap.setParent(actionMap);
 
+        
         setImage(result, imgs[0]);
 
         image.setPreferredSize(new Dimension(imgs[0].getWidth(), imgs[0]
