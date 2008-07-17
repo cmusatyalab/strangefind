@@ -1,8 +1,12 @@
 package edu.cmu.cs.diamond.snapfind2;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
@@ -51,12 +55,33 @@ public class VerySimpleImageViewer extends JFrame {
         this.result = result;
         this.imgs = imgs;
         image = new JXImageView();
-        JScrollPane jsp = new JScrollPane(image);
-        jsp.getVerticalScrollBar().setUnitIncrement(40);
-        jsp.getHorizontalScrollBar().setUnitIncrement(40);
-        add(jsp);
+        add(image);
+
+        image.addMouseWheelListener(new MouseWheelListener() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                int count = e.getWheelRotation();
+
+                Action a;
+                if (count < 0) {
+                    a = image.getZoomInAction();
+                    count = -count;
+                } else {
+                    a = image.getZoomOutAction();
+                }
+
+                while (count > 0) {
+                    a.actionPerformed(new ActionEvent(e.getSource(), e.getID(),
+                            "zoom"));
+                    count--;
+                }
+            }
+        });
 
         setImage(result, imgs[0]);
+
+        image.setPreferredSize(new Dimension(imgs[0].getWidth(), imgs[0]
+                .getHeight()));
 
         JPanel bottomPanel = new JPanel(new GridLayout(1, 2));
         bottomPanel.add(new JLabel(result.getAnnotation()));
@@ -76,11 +101,15 @@ public class VerySimpleImageViewer extends JFrame {
         g.drawImage(img, 0, 0, null);
         result.decorate(g, 1.0);
         g.dispose();
-        
+
         Point2D p = image.getImageLocation();
+        double scale = image.getScale();
+
         image.setImage(newImage);
+
         image.setImageLocation(p);
-        
+        image.setScale(scale);
+
         validate();
     }
 }
