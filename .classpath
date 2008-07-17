@@ -13,5 +13,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/jai_imageio.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/swingx"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

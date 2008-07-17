@@ -3,11 +3,14 @@ package edu.cmu.cs.diamond.snapfind2;
 import java.awt.BorderLayout;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
+import org.jdesktop.swingx.JXImageView;
 
 public class VerySimpleImageViewer extends JFrame {
     public class ChannelSelector extends JPanel {
@@ -40,14 +43,14 @@ public class VerySimpleImageViewer extends JFrame {
 
     final private BufferedImage[] imgs;
 
-    final private JLabel image;
+    final private JXImageView image;
 
     final private AnnotatedResult result;
 
     public VerySimpleImageViewer(AnnotatedResult result, BufferedImage imgs[]) {
         this.result = result;
         this.imgs = imgs;
-        image = new JLabel();
+        image = new JXImageView();
         JScrollPane jsp = new JScrollPane(image);
         jsp.getVerticalScrollBar().setUnitIncrement(40);
         jsp.getHorizontalScrollBar().setUnitIncrement(40);
@@ -73,8 +76,11 @@ public class VerySimpleImageViewer extends JFrame {
         g.drawImage(img, 0, 0, null);
         result.decorate(g, 1.0);
         g.dispose();
-        image.setIcon(new ImageIcon(newImage));
-
+        
+        Point2D p = image.getImageLocation();
+        image.setImage(newImage);
+        image.setImageLocation(p);
+        
         validate();
     }
 }
