@@ -1,6 +1,7 @@
 package edu.cmu.cs.diamond.snapfind2;
 
 import java.awt.Dimension;
+import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -20,9 +21,9 @@ import org.jdesktop.swingx.graphics.GraphicsUtilities;
 import edu.cmu.cs.diamond.opendiamond.Util;
 
 public class ResultViewer extends JButton implements ActionListener {
-    private static final int PREFERRED_HEIGHT = 180;
+    private static final int PREFERRED_HEIGHT = 200;
 
-    private static final int PREFERRED_WIDTH = 240;
+    private static final int PREFERRED_WIDTH = 200;
 
     private volatile AnnotatedResult result;
 
@@ -30,6 +31,9 @@ public class ResultViewer extends JButton implements ActionListener {
 
     public ResultViewer() {
         super();
+
+        setHorizontalTextPosition(CENTER);
+        setVerticalTextPosition(BOTTOM);
 
         Dimension d = new Dimension(PREFERRED_WIDTH, PREFERRED_HEIGHT);
         setMinimumSize(d);
@@ -54,14 +58,22 @@ public class ResultViewer extends JButton implements ActionListener {
 
         // for xml well data
         if (imgs.length > 1) {
-            img = imgs[0]; // TODO(agoode)
+            img = imgs[0]; // suspect
         }
         Insets in = getInsets();
 
         int w = img.getWidth();
         int h = img.getHeight();
+
+        // calculate 2 lines
+        FontMetrics metrics = getFontMetrics(getFont());
+        int labelHeight = metrics.getHeight() * 2;
+        
+        System.out.println(labelHeight);
+
         double scale = Util.getScaleForResize(w, h, PREFERRED_WIDTH - in.left
-                - in.right, PREFERRED_HEIGHT - in.top - in.bottom);
+                - in.right,
+                (PREFERRED_HEIGHT - in.top - in.bottom - labelHeight));
         BufferedImage newImg;
 
         newImg = Util.scaleImage(img, scale);

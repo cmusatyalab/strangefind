@@ -226,6 +226,11 @@ public class CircleAnomalyFilter implements SnapFindSearch {
                         + "</b><hr><p>" + name + "<p>" + server + " ["
                         + samples + "]</html>";
             }
+
+            @Override
+            public String annotateOneLine(Result r) {
+                return null;
+            }
         };
     }
 
