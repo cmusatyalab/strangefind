@@ -700,8 +700,7 @@ public class SnapFind2 extends JFrame {
     }
 
     static String getImageHost() {
-        String host = prefs.get("http-image-host",
-                "kohinoor.diamond.cs.cmu.edu");
+        String host = prefs.get("http-image-host", "localhost");
         return host;
     }
 
