@@ -121,7 +121,7 @@ public class AnnotatedResult extends Result {
         return theResult.getObjectName();
     }
 
-    public BufferedImage[] getKohinoorImages() {
+    public BufferedImage[] getImagesByHTTP() {
         String image1 = Util.extractString(getValue("image-1"));
         String image2 = Util.extractString(getValue("image-2"));
         String image3 = Util.extractString(getValue("image-3"));
@@ -132,9 +132,9 @@ public class AnnotatedResult extends Result {
 
         if (img1 == null || img2 == null || img3 == null) {
             try {
-                URI uri1 = createKohinoorURI(image1);
-                URI uri2 = createKohinoorURI(image2);
-                URI uri3 = createKohinoorURI(image3);
+                URI uri1 = createImageURI(image1);
+                URI uri2 = createImageURI(image2);
+                URI uri3 = createImageURI(image3);
 
                 img1 = ImageIO.read(uri1.toURL());
                 img2 = ImageIO.read(uri2.toURL());
@@ -185,11 +185,11 @@ public class AnnotatedResult extends Result {
         return result;
     }
 
-    static private URI createKohinoorURI(String image1)
-            throws URISyntaxException {
+    static private URI createImageURI(String image1) throws URISyntaxException {
         String imagePath = image1.replace('\\', '/').substring(1);
-        URI uri = new URI("http", "kohinoor.diamond.cs.cmu.edu", imagePath,
-                null);
+        String host = SnapFind2.getImageHost();
+
+        URI uri = new URI("http", host, imagePath, null);
         return uri;
     }
 

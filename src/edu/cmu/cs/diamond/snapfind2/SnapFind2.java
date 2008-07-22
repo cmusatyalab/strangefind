@@ -65,6 +65,7 @@ import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.*;
 import java.util.*;
+import java.util.prefs.Preferences;
 
 import javax.swing.*;
 import javax.swing.Timer;
@@ -81,6 +82,9 @@ import edu.cmu.cs.diamond.snapfind2.search.XQueryAnomalyFilter;
 public class SnapFind2 extends JFrame {
 
     public static final int INITIAL_SESSION_VARIABLES_UPDATE_INTERVAL = 5;
+
+    final private static Preferences prefs = Preferences
+            .userNodeForPackage(SnapFind2.class);
 
     public class SessionVariablesWindow extends JFrame {
         public SessionVariablesWindow() {
@@ -676,6 +680,12 @@ public class SnapFind2 extends JFrame {
             }
         });
         itemNew.add(mi);
+    }
+
+    static String getImageHost() {
+        String host = prefs.get("http-image-host",
+                "kohinoor.diamond.cs.cmu.edu");
+        return host;
     }
 
     public static void main(String[] args) {

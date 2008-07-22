@@ -155,16 +155,16 @@ public class ResultViewer extends JButton implements ActionListener {
                     .toCompatibleImage(img) };
         }
 
-        // XXX then try loading from kohinoor
+        // then try loading from image server
         try {
-            System.out.println("loading from kohinoor");
+            System.out.println("loading from image host");
             // load
-            BufferedImage kohinoorImgs[] = result.getKohinoorImages();
-            if (kohinoorImgs != null) {
-                BufferedImage result[] = new BufferedImage[kohinoorImgs.length];
-                for (int i = 0; i < kohinoorImgs.length; i++) {
+            BufferedImage serverImgs[] = result.getImagesByHTTP();
+            if (serverImgs != null) {
+                BufferedImage result[] = new BufferedImage[serverImgs.length];
+                for (int i = 0; i < serverImgs.length; i++) {
                     result[i] = GraphicsUtilities
-                            .toCompatibleImage(kohinoorImgs[i]);
+                            .toCompatibleImage(serverImgs[i]);
                 }
                 return result;
             }
