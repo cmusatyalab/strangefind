@@ -81,6 +81,8 @@ import edu.cmu.cs.diamond.snapfind2.search.XQueryAnomalyFilter;
 
 public class SnapFind2 extends JFrame {
 
+    private static final String HTTP_IMAGE_HOST_PREFS_KEY = "http-image-host";
+
     public static final int INITIAL_SESSION_VARIABLES_UPDATE_INTERVAL = 5;
 
     final private static Preferences prefs = Preferences
@@ -532,6 +534,14 @@ public class SnapFind2 extends JFrame {
                 saveAsSearch();
             }
         }));
+        menu.add(createMenuItem("Configure Image Server...", VK_C,
+                new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        configureImageServer();
+                    }
+                }));
+
         menu.addSeparator();
         mi = createMenuItem("Quit", VK_Q, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -590,7 +600,7 @@ public class SnapFind2 extends JFrame {
 
         // Help
         menu = new JMenu("Help");
-        menu.add(createMenuItem("About", VK_A, new ActionListener() {
+        menu.add(createMenuItem("About...", VK_A, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 showAboutBox();
@@ -598,14 +608,26 @@ public class SnapFind2 extends JFrame {
         }));
 
         jmb.add(menu);
-        
+
         setJMenuBar(jmb);
     }
 
+    protected void configureImageServer() {
+        String newHost = JOptionPane.showInputDialog(this,
+                "Enter the name of the image server:", getImageHost());
+        if (newHost != null) {
+            setImageHost(newHost);
+        }
+    }
+
+    private void setImageHost(String newHost) {
+        prefs.put(HTTP_IMAGE_HOST_PREFS_KEY, newHost);
+    }
+
     protected void showAboutBox() {
-        JOptionPane.showMessageDialog(this, "The Diamond Shell\n" +
-        		"Copyright 2007-2008 Carnegie Mellon University\n" +
-        		"Licensed under the GNU GPL v2");
+        JOptionPane.showMessageDialog(this, "The Diamond Shell\n"
+                + "Copyright 2007-2008 Carnegie Mellon University\n"
+                + "Licensed under the GNU GPL v2");
     }
 
     protected void showSessionVariablesWindow() {
@@ -700,7 +722,7 @@ public class SnapFind2 extends JFrame {
     }
 
     static String getImageHost() {
-        String host = prefs.get("http-image-host", "localhost");
+        String host = prefs.get(HTTP_IMAGE_HOST_PREFS_KEY, "localhost");
         return host;
     }
 
