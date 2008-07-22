@@ -62,7 +62,7 @@ public class AnnotatedResult extends Result {
     final private Decorator decorator;
 
     final private String tooltipAnnotation;
-    
+
     final private String oneLineAnnotation;
 
     private BufferedImage img1;
@@ -73,8 +73,9 @@ public class AnnotatedResult extends Result {
 
     private BufferedImage combinedImage;
 
-    public AnnotatedResult(Result r, String annotation, String oneLineAnnotation,
-            String tooltipAnnotation, Decorator decorator) {
+    public AnnotatedResult(Result r, String annotation,
+            String oneLineAnnotation, String tooltipAnnotation,
+            Decorator decorator) {
         theResult = r;
         this.annotation = annotation;
         this.tooltipAnnotation = tooltipAnnotation;
