@@ -93,8 +93,15 @@ public class VerySimpleImageViewer extends JFrame {
 
     public VerySimpleImageViewer(AnnotatedResult result, BufferedImage imgs[]) {
         this.result = result;
-        this.imgs = new BufferedImage[imgs.length];
-        System.arraycopy(imgs, 0, this.imgs, 0, imgs.length);
+
+        if (imgs.length > 0) {
+            this.imgs = new BufferedImage[imgs.length];
+            System.arraycopy(imgs, 0, this.imgs, 0, imgs.length);
+        } else {
+            this.imgs = new BufferedImage[1];
+            this.imgs[0] = new BufferedImage(256, 256, BufferedImage.TYPE_INT_RGB);
+        }
+
         image = new JXImageView();
         add(image);
 
@@ -118,16 +125,16 @@ public class VerySimpleImageViewer extends JFrame {
                 }
             }
         });
-        
+
         InputMap inputMap = new InputMap();
         inputMap.put(KeyStroke.getKeyStroke("PLUS"), "zoom in");
         inputMap.put(KeyStroke.getKeyStroke("EQUALS"), "zoom in");
         inputMap.put(KeyStroke.getKeyStroke("MINUS"), "zoom out");
-        
+
         ActionMap actionMap = new ActionMap();
         actionMap.put("zoom in", image.getZoomInAction());
         actionMap.put("zoom out", image.getZoomOutAction());
-        
+
         InputMap oldInputMap = image.getInputMap();
         ActionMap oldActionMap = image.getActionMap();
         inputMap.setParent(oldInputMap.getParent());
@@ -135,10 +142,9 @@ public class VerySimpleImageViewer extends JFrame {
         actionMap.setParent(oldActionMap.getParent());
         oldActionMap.setParent(actionMap);
 
-        
-        setImage(result, imgs[0]);
+        setImage(result, this.imgs[0]);
 
-        image.setPreferredSize(new Dimension(imgs[0].getWidth(), imgs[0]
+        image.setPreferredSize(new Dimension(this.imgs[0].getWidth(), this.imgs[0]
                 .getHeight()));
 
         JPanel bottomPanel = new JPanel(new GridLayout(1, 2));

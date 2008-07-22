@@ -94,12 +94,18 @@ public class ResultViewer extends JButton implements ActionListener {
         }
 
         BufferedImage imgs[] = getImgs();
-        BufferedImage img = imgs[0];
 
-        // for xml well data
-        if (imgs.length > 1) {
-            img = imgs[0]; // suspect
+        BufferedImage img = null;
+
+        if (imgs.length > 0) {
+            img = imgs[0];
         }
+
+        if (img == null) {
+            img = new BufferedImage(PREFERRED_WIDTH, PREFERRED_HEIGHT,
+                    BufferedImage.TYPE_INT_RGB);
+        }
+
         Insets in = getInsets();
 
         int w = img.getWidth();
@@ -108,7 +114,7 @@ public class ResultViewer extends JButton implements ActionListener {
         // calculate 2 lines
         FontMetrics metrics = getFontMetrics(getFont());
         int labelHeight = metrics.getHeight() * 2;
-        
+
         System.out.println(labelHeight);
 
         double scale = Util.getScaleForResize(w, h, PREFERRED_WIDTH - in.left

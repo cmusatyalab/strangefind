@@ -147,7 +147,7 @@ public class AnnotatedResult extends Result {
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {
-                e.printStackTrace();
+//                e.printStackTrace();
             }
         }
 
