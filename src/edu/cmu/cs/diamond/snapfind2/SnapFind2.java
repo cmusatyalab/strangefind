@@ -588,7 +588,24 @@ public class SnapFind2 extends JFrame {
 
         jmb.add(menu);
 
+        // Help
+        menu = new JMenu("Help");
+        menu.add(createMenuItem("About", VK_A, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showAboutBox();
+            }
+        }));
+
+        jmb.add(menu);
+        
         setJMenuBar(jmb);
+    }
+
+    protected void showAboutBox() {
+        JOptionPane.showMessageDialog(this, "The Diamond Shell\n" +
+        		"Copyright 2007-2008 Carnegie Mellon University\n" +
+        		"Licensed under the GNU GPL v2");
     }
 
     protected void showSessionVariablesWindow() {
