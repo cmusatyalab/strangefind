@@ -55,7 +55,7 @@ import edu.cmu.cs.diamond.snapfind2.Annotator;
 import edu.cmu.cs.diamond.snapfind2.Decorator;
 import edu.cmu.cs.diamond.snapfind2.SnapFindSearch;
 
-public class NeuriteMultiplaneAnomalyFilter implements SnapFindSearch {
+final public class NeuriteMultiplaneAnomalyFilter implements SnapFindSearch {
 
     public NeuriteMultiplaneAnomalyFilter() {
         // init GUI elements

@@ -93,7 +93,8 @@ public class VerySimpleImageViewer extends JFrame {
 
     public VerySimpleImageViewer(AnnotatedResult result, BufferedImage imgs[]) {
         this.result = result;
-        this.imgs = imgs;
+        this.imgs = new BufferedImage[imgs.length];
+        System.arraycopy(imgs, 0, this.imgs, 0, imgs.length);
         image = new JXImageView();
         add(image);
 

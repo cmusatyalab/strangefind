@@ -107,9 +107,10 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
 
     static private void parseAttrFile(File f, Map<String, String> attrMap) {
         FileReader fr = null;
+        BufferedReader in = null;
         try {
             fr = new FileReader(f);
-            BufferedReader in = new BufferedReader(fr);
+            in = new BufferedReader(fr);
 
             String line;
             while ((line = in.readLine()) != null) {
@@ -126,6 +127,13 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
             if (fr != null) {
                 try {
                     fr.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (in != null) {
+                try {
+                    in.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
