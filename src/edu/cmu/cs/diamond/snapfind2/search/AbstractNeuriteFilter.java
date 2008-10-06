@@ -40,9 +40,7 @@
 
 package edu.cmu.cs.diamond.snapfind2.search;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,12 +55,12 @@ import edu.cmu.cs.diamond.snapfind2.SnapFindSearch;
 
 public abstract class AbstractNeuriteFilter implements SnapFindSearch {
 
-    final private String macroPath;
+    final private String macroName;
 
     final private String title;
 
-    public AbstractNeuriteFilter(String macroPath, String title) {
-        this.macroPath = macroPath;
+    public AbstractNeuriteFilter(String macroName, String title) {
+        this.macroName = macroName;
         this.title = title;
 
         // init GUI elements
@@ -177,12 +175,16 @@ public abstract class AbstractNeuriteFilter implements SnapFindSearch {
             c = new FilterCode(new FileInputStream(
                     "/usr/share/imagejfind/filter/fil_imagej_exec.so"));
 
-            byte macroBlob[] = Util.readFully(this.getClass()
-                    .getResourceAsStream(macroPath));
+            String macroName2 = macroName.replace(' ', '_');
+            ByteArrayOutputStream macroOut = new ByteArrayOutputStream();
 
+            quickTarResources(new DataOutputStream(macroOut), new String[] {
+                    macroName2 + ".txt", "Fit_Polynomial.jar" });
+
+            byte macroBytes[] = macroOut.toByteArray();
             neurites = new Filter("neurites", c, "f_eval_imagej_exec",
                     "f_init_imagej_exec", "f_fini_imagej_exec", 0,
-                    new String[0], new String[] {}, 400, macroBlob);
+                    new String[0], new String[] { macroName2 }, 400, macroBytes);
             System.out.println(neurites);
 
             List<String> paramsList = new ArrayList<String>();
@@ -213,6 +215,16 @@ public abstract class AbstractNeuriteFilter implements SnapFindSearch {
         }
 
         return new Filter[] { neurites, anom };
+    }
+
+    private void quickTarResources(DataOutputStream macroOut, String[] resources)
+            throws IOException {
+        for (String r : resources) {
+            InputStream in = this.getClass().getResourceAsStream(
+                    "resources/" + r);
+            byte bb[] = Util.readFully(in);
+            Util.quickTar1(macroOut, bb, r);
+        }
     }
 
     final private JCheckBox[] checkboxes = new JCheckBox[LABELS.length];

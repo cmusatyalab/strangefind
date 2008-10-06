@@ -40,11 +40,9 @@
 
 package edu.cmu.cs.diamond.snapfind2.search;
 
-
 final public class NeuriteAnomalyFilter extends AbstractNeuriteFilter {
 
     public NeuriteAnomalyFilter() {
-        super("resources/Neurite_Diamond_Anomaly.txt",
-                "Neurite Anomaly Detector");
+        super("Neurite Diamond Anomaly", "Neurite Anomaly Detector");
     }
 }
