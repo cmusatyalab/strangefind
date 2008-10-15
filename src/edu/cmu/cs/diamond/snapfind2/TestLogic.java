@@ -15,7 +15,9 @@ public class TestLogic {
      */
     public static void main(String[] args) throws Exception {
         // TODO Auto-generated method stub
-        String logic = "and(NOT(NOT(OR($1,AND(OR($2,AND(NOT($3),$4)),OR($1,$2))))),$3)";
+        // String logic =
+        // "and(NOT(NOT(OR($1,AND(OR($2,AND(NOT($3),$4)),OR($1,$2))))),$3)";
+        String logic = args[0];
 
         ANTLRStringStream stream = new ANTLRStringStream(logic);
 
