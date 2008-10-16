@@ -464,8 +464,8 @@ public class SnapFind2 extends JFrame {
         c1.add(searchList);
 
         Dimension minSize = new Dimension(100, 5);
-        Dimension prefSize = new Dimension(250, 5);
-        Dimension maxSize = new Dimension(250, 5);
+        Dimension prefSize = new Dimension(300, 5);
+        Dimension maxSize = new Dimension(450, 5);
 
         JComponent filler = new Box.Filler(minSize, prefSize, maxSize);
         // filler.setBorder(BorderFactory.createEtchedBorder());
