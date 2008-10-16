@@ -42,7 +42,6 @@ package edu.cmu.cs.diamond.snapfind2.search;
 
 import java.awt.Component;
 import java.io.*;
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -52,6 +51,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import edu.cmu.cs.diamond.opendiamond.*;
 import edu.cmu.cs.diamond.snapfind2.Annotator;
 import edu.cmu.cs.diamond.snapfind2.Decorator;
+import edu.cmu.cs.diamond.snapfind2.LogicEngine;
 import edu.cmu.cs.diamond.snapfind2.SnapFindSearch;
 
 public class XQueryAnomalyFilter implements SnapFindSearch {
@@ -154,55 +154,57 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
 
         return new Annotator() {
             public String annotate(Result r) {
-                int key = getKey(r);
-                String anomStr = "<html><p>Anomalous descriptor: <b>"
-                        + niceSelectedLabels.get(key)
-                        + "</b>: "
-                        + Util.extractString(r
-                                .getValue(selectedLabels.get(key)))
-                        + "<p>mean: "
-                        + Util.extractDouble(r
-                                .getValue("anomalous-value-mean.double"))
-                        + "<p>stddev: "
-                        + Util.extractDouble(r
-                                .getValue("anomalous-value-stddev.double"))
-                        + "<p>object count: "
-                        + Util.extractInt(r
-                                .getValue("anomalous-value-count.int"))
-                        + "<p>server: "
-                        + Util.extractString(r.getValue("Device-Name"))
-                        + "</html>";
-
+                // int key = getKey(r);
+                // String anomStr = "<html><p>Anomalous descriptor: <b>"
+                // + niceSelectedLabels.get(key)
+                // + "</b>: "
+                // + Util.extractString(r
+                // .getValue(selectedLabels.get(key)))
+                // + "<p>mean: "
+                // + Util.extractDouble(r
+                // .getValue("anomalous-value-mean.double"))
+                // + "<p>stddev: "
+                // + Util.extractDouble(r
+                // .getValue("anomalous-value-stddev.double"))
+                // + "<p>object count: "
+                // + Util.extractInt(r
+                // .getValue("anomalous-value-count.int"))
+                // + "<p>server: "
+                // + Util.extractString(r.getValue("Device-Name"))
+                // + "</html>";
+                //
+                String anomStr = "";
                 return anomStr;
             }
 
             public String annotateTooltip(Result r) {
-                DecimalFormat df = new DecimalFormat("0.###");
-
-                int key = getKey(r);
-                String descriptor = niceSelectedLabels.get(key);
-
-                double stddev = getStddev(r);
-                String keyValue = selectedLabels.get(key);
-                String strValue = Util.extractString(r.getValue(keyValue));
-                System.out.println("key: " + key + ", value: " + keyValue
-                        + ", strValue: " + strValue);
-                double value = getValue(strValue);
-                double mean = getMean(r);
-                double stddevDiff = getStddevDiff(stddev, value, mean);
-
-                int samples = getSamples(r);
-                String aboveOrBelow = getAboveOrBelow(stddevDiff);
-
-                String server = r.getServerName();
-                String name = getName(r);
-
-                return "<html><p><b>" + descriptor + "</b> = "
-                        + df.format(value) + "<p><b>"
-                        + df.format(Math.abs(stddevDiff)) + "</b> stddev <b>"
-                        + aboveOrBelow + "</b> mean of <b>" + df.format(mean)
-                        + "</b><hr><p>" + name + "<p>" + server + " ["
-                        + samples + "]</html>";
+                return "";
+                // DecimalFormat df = new DecimalFormat("0.###");
+                //
+                // int key = getKey(r);
+                // String descriptor = niceSelectedLabels.get(key);
+                //
+                // double stddev = getStddev(r);
+                // String keyValue = selectedLabels.get(key);
+                // String strValue = Util.extractString(r.getValue(keyValue));
+                // System.out.println("key: " + key + ", value: " + keyValue
+                // + ", strValue: " + strValue);
+                // double value = getValue(strValue);
+                // double mean = getMean(r);
+                // double stddevDiff = getStddevDiff(stddev, value, mean);
+                //
+                // int samples = getSamples(r);
+                // String aboveOrBelow = getAboveOrBelow(stddevDiff);
+                //
+                // String server = r.getServerName();
+                // String name = getName(r);
+                //
+                // return "<html><p><b>" + descriptor + "</b> = "
+                // + df.format(value) + "<p><b>"
+                // + df.format(Math.abs(stddevDiff)) + "</b> stddev <b>"
+                // + aboveOrBelow + "</b> mean of <b>" + df.format(mean)
+                // + "</b><hr><p>" + name + "<p>" + server + " ["
+                // + samples + "]</html>";
             }
 
             private String getAboveOrBelow(double stddevDiff) {
@@ -215,16 +217,25 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
                 return name;
             }
 
-            private String getAboveOrBelow(double stddevDiff, String above, String below) {
+            private String getAboveOrBelow(double stddevDiff, String above,
+                    String below) {
                 String aboveOrBelow = Math.signum(stddevDiff) >= 0.0 ? above
                         : below;
                 return aboveOrBelow;
             }
 
-            private int getSamples(Result r) {
+            private int getSamples(Result r, int descriptor) {
                 int samples = Util.extractInt(r
-                        .getValue("anomalous-value-count.int"));
+                        .getValue("anomaly-descriptor-count-" + descriptor
+                                + ".int"));
                 return samples;
+            }
+
+            private double getValue(Result r, int descriptor) {
+                double value = Util.extractDouble(r
+                        .getValue("anomaly-descriptor-value-" + descriptor
+                                + ".double"));
+                return value;
             }
 
             private double getStddevDiff(double stddev, double value,
@@ -233,9 +244,10 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
                 return stddevDiff;
             }
 
-            private double getMean(Result r) {
+            private double getMean(Result r, int descriptor) {
                 double mean = Util.extractDouble(r
-                        .getValue("anomalous-value-mean.double"));
+                        .getValue("anomaly-descriptor-mean-" + descriptor
+                                + ".double"));
                 return mean;
             }
 
@@ -244,36 +256,32 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
                 return value;
             }
 
-            private int getKey(Result r) {
-                int key = Util.extractInt(r.getValue("anomalous-value.int"));
-                return key;
-            }
-
-            private double getStddev(Result r) {
+            private double getStddev(Result r, int descriptor) {
                 double stddev = Util.extractDouble(r
-                        .getValue("anomalous-value-stddev.double"));
+                        .getValue("anomaly-descriptor-stddev-" + descriptor
+                                + ".double"));
                 return stddev;
             }
 
             @Override
             public String annotateOneLine(Result r) {
-                DecimalFormat df = new DecimalFormat("0.###");
-
-                int key = getKey(r);
-                String descriptor = niceSelectedLabels.get(key);
-
-                double stddev = getStddev(r);
-                String keyValue = selectedLabels.get(key);
-                String strValue = Util.extractString(r.getValue(keyValue));
-                double value = getValue(strValue);
-                double mean = getMean(r);
-                double stddevDiff = getStddevDiff(stddev, value, mean);
-                String aboveOrBelow = getAboveOrBelow(stddevDiff, "+", "−");
-                
-                return "<html><p>" + descriptor + "<br>"
-                        + "= " + df.format(mean) + " " + aboveOrBelow + " "
-                        + df.format(Math.abs(stddevDiff)) + "σ"
-                        + "</html>";
+                return "";
+                // DecimalFormat df = new DecimalFormat("0.###");
+                //
+                // int key = getKey(r);
+                // String descriptor = niceSelectedLabels.get(key);
+                //
+                // double stddev = getStddev(r);
+                // String keyValue = selectedLabels.get(key);
+                // String strValue = Util.extractString(r.getValue(keyValue));
+                // double value = getValue(strValue);
+                // double mean = getMean(r);
+                // double stddevDiff = getStddevDiff(stddev, value, mean);
+                // String aboveOrBelow = getAboveOrBelow(stddevDiff, "+", "−");
+                //
+                // return "<html><p>" + descriptor + "<br>" + "= "
+                // + df.format(mean) + " " + aboveOrBelow + " "
+                // + df.format(Math.abs(stddevDiff)) + "σ" + "</html>";
             }
         };
     }
@@ -314,24 +322,41 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
                     queryBlob);
             System.out.println(xquery);
 
+            StringBuilder logicExpression = new StringBuilder("OR(");
+
+            boolean firstSelected = true;
             List<String> paramsList = new ArrayList<String>();
             for (int i = 0; i < checkboxes.length; i++) {
                 JCheckBox cb = checkboxes[i];
+                paramsList.add(labels[i]);
+                paramsList.add(stddevs[i].getValue().toString());
+
                 if (cb.isSelected()) {
-                    paramsList.add(labels[i]);
-                    paramsList.add(stddevs[i].getValue().toString());
+                    if (!firstSelected) {
+                        logicExpression.append(", ");
+                    } else {
+                        firstSelected = false;
+                    }
+
+                    logicExpression.append("$" + i);
                 }
             }
+            logicExpression.append(")");
 
-            String anomArgs[] = new String[paramsList.size() + 2];
+            System.out.println(logicExpression);
+
+            String anomArgs[] = new String[paramsList.size() + 3];
             anomArgs[0] = ignoreSpinner.getValue().toString(); // skip
             anomArgs[1] = UUID.randomUUID().toString(); // random value
-            System.arraycopy(paramsList.toArray(), 0, anomArgs, 2, paramsList
+            anomArgs[2] = LogicEngine
+                    .getMachineCodeForExpression(logicExpression.toString()); // machine
+            // code
+            System.arraycopy(paramsList.toArray(), 0, anomArgs, 3, paramsList
                     .size());
             c = new FilterCode(new FileInputStream(
-                    "/opt/snapfind/lib/fil_anomaly.so"));
+                    "/home/agoode/diamond-git/snapfind2/native/fil_anomaly.so"));
             anom = new Filter("anomaly", c, "f_eval_afilter", "f_init_afilter",
-                    "f_fini_afilter", 100, new String[] { "xquery" }, anomArgs,
+                    "f_fini_afilter", 1, new String[] { "xquery" }, anomArgs,
                     400);
             System.out.println(anom);
 
