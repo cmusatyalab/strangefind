@@ -38,7 +38,6 @@
  *  which carries forward this exception.
  */
 
-#define _GNU_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -122,7 +121,7 @@ int f_init_afilter (int num_arg, char **args,
   }
 
   // make space for things to examine
-  context_t *ctx = (context_t *) malloc(sizeof(context_t));
+  context_t *ctx = g_slice_new(context_t);
 
   // args is:
   // 1. min_count
@@ -134,8 +133,8 @@ int f_init_afilter (int num_arg, char **args,
   printf("uuid: %s\n", args[1]);
 
   // fill in
-  ctx->name_array = (char **) calloc(ctx->size, sizeof(char *));
-  ctx->stddev_array = (double *) calloc(ctx->size, sizeof(double));
+  ctx->name_array = (char **) g_slice_alloc0(ctx->size * sizeof(char *));
+  ctx->stddev_array = (double *) g_slice_alloc0(ctx->size * sizeof(double));
   ctx->min_count = strtol(args[0], NULL, 10);
   ctx->logic_code = g_strsplit(args[2], "_", -1);
 
@@ -144,9 +143,9 @@ int f_init_afilter (int num_arg, char **args,
 
   // null terminated stats list
   int stats_len = 3 * ctx->size;
-  ctx->stats = calloc(stats_len + 1, sizeof(lf_session_variable_t *));
+  ctx->stats = g_malloc0((stats_len + 1) * sizeof(lf_session_variable_t *));
   for (i = 0; i < stats_len; i++) {
-    ctx->stats[i] = malloc(sizeof(lf_session_variable_t));
+    ctx->stats[i] = g_slice_new(lf_session_variable_t);
     ctx->stats[i]->composer = composer_sum;
   }
 
@@ -155,15 +154,16 @@ int f_init_afilter (int num_arg, char **args,
     ctx->name_array[i] = strdup(args[(i*2)+3]);
     ctx->stddev_array[i] = strtod(args[(i*2)+4], NULL);
 
-    char *name;
-    asprintf(&name, "%s_%s", ctx->name_array[i], COUNT_KEY);
-    ctx->stats[(i * 3) + 0]->name = name;
+    ctx->stats[(i * 3) + 0]->name
+      = g_strdup_printf("%s_%s", ctx->name_array[i], COUNT_KEY);
     printf(" %d: %s\n", i, ctx->stats[(i * 3) + 0]->name);
-    asprintf(&name, "%s_%s", ctx->name_array[i], SUM_KEY);
-    ctx->stats[(i * 3) + 1]->name = name;
+
+    ctx->stats[(i * 3) + 1]->name
+      = g_strdup_printf("%s_%s", ctx->name_array[i], SUM_KEY);
     printf(" %d: %s\n", i, ctx->stats[(i * 3) + 1]->name);
-    asprintf(&name, "%s_%s", ctx->name_array[i], SUM_OF_SQUARES_KEY);
-    ctx->stats[(i * 3) + 2]->name = name;
+
+    ctx->stats[(i * 3) + 2]->name
+      = g_strdup_printf("%s_%s", ctx->name_array[i], SUM_OF_SQUARES_KEY);
     printf(" %d: %s\n", i, ctx->stats[(i * 3) + 2]->name);
   }
 
@@ -188,7 +188,7 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
   lf_get_session_variables(ohandle, ctx->stats);
 
   // make array for logic literals
-  bool *logic_values = calloc(ctx->size, sizeof(bool));
+  bool *logic_values = g_slice_alloc0(ctx->size * sizeof(bool));
 
   // compute anomalousness for each thing
   // XXX stats done by non-statistician
@@ -196,11 +196,11 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
     // get each thing from string
     unsigned char *str;
     err = lf_ref_attr(ohandle, ctx->name_array[i], &len, &str);
-    char *tmp = calloc(len + 1, 1);
+    char *tmp = g_malloc0(len + 1);
     strncpy(tmp, (char *) str, len);
     double d = strtod(tmp, NULL);
     printf(" %s = %g\n", ctx->name_array[i], d);
-    free(tmp);
+    g_free(tmp);
 
 
     // check
@@ -224,21 +224,21 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
     }
 
     // record for posterity
-    asprintf(&tmp, "anomaly-value-%d.int", i);
+    tmp = g_strdup_printf("anomaly-value-%d.int", i);
     lf_write_attr(ohandle, tmp, sizeof(int), (unsigned char *) &i);
-    free(tmp);
+    g_free(tmp);
 
-    asprintf(&tmp, "anomaly-value-count-%d.int", i);
+    tmp = g_strdup_printf("anomaly-value-count-%d.int", i);
     lf_write_attr(ohandle, tmp, sizeof(int), (unsigned char *) &count);
-    free(tmp);
+    g_free(tmp);
 
-    asprintf(&tmp, "anomaly-value-mean-%d.int", i);
+    tmp = g_strdup_printf("anomaly-value-mean-%d.int", i);
     lf_write_attr(ohandle, tmp, sizeof(double), (unsigned char *) &mean);
-    free(tmp);
+    g_free(tmp);
 
-    asprintf(&tmp, "anomaly-value-stddev-%d.int", i);
+    tmp = g_strdup_printf("anomaly-value-stddev-%d.int", i);
     lf_write_attr(ohandle, tmp, sizeof(double), (unsigned char *) &stddev);
-    free(tmp);
+    g_free(tmp);
 
     // add to sum
     printf("%s: %g\n", ctx->name_array[i], d);
@@ -254,7 +254,7 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
   int result = run_logic_engine(ctx->logic_code,
 				logic_values,
 				ctx->lsmr, ctx->size);
-  free(logic_values);
+  g_slice_free1(ctx->size * sizeof(bool), logic_values);
 
   return result;
 }
@@ -266,19 +266,19 @@ int f_fini_afilter (void *filter_args) {
 
   int i;
   for (i = 0; i < ctx->size; i++) {
-    free(ctx->name_array[i]);
+    g_free(ctx->name_array[i]);
   }
 
   for (i = 0; i < ctx->size * 3; i++) {
-    free(ctx->stats[i]);
+    g_slice_free(lf_session_variable_t, ctx->stats[i]);
   }
 
   lsm_destroy(ctx->lsmr);
   g_strfreev(ctx->logic_code);
-  free(ctx->name_array);
-  free(ctx->stddev_array);
-  free(ctx->stats);
+  g_slice_free1(ctx->size * sizeof(char *), ctx->name_array);
+  g_slice_free1(ctx->size * sizeof(double), ctx->stddev_array);
+  g_free(ctx->stats);
 
-  free(ctx);
+  g_slice_free(context_t, ctx);
   return 0;
 }
