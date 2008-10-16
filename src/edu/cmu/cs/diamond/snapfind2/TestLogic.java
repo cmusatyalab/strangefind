@@ -2,6 +2,7 @@ package edu.cmu.cs.diamond.snapfind2;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
+import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.Tree;
 
@@ -19,23 +20,32 @@ public class TestLogic {
         // "and(NOT(NOT(OR($1,AND(OR($2,AND(NOT($3),$4)),OR($1,$2))))),$3)";
         String logic = args[0];
 
-        ANTLRStringStream stream = new ANTLRStringStream(logic);
+        System.out.println(getMachineCodeForExpression(logic));
+    }
 
-        LogicExpressionLexer lexer = new LogicExpressionLexer(stream);
+    public static String getMachineCodeForExpression(String expression) {
+        try {
+            ANTLRStringStream stream = new ANTLRStringStream(expression);
 
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
+            LogicExpressionLexer lexer = new LogicExpressionLexer(stream);
 
-        LogicExpressionParser parser = new LogicExpressionParser(tokens);
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
 
-        expr_return expr = parser.expr();
+            LogicExpressionParser parser = new LogicExpressionParser(tokens);
 
-        CommonTree ct = (CommonTree) expr.getTree();
+            expr_return expr = parser.expr();
 
-        System.out.println(ct.toStringTree());
+            CommonTree ct = (CommonTree) expr.getTree();
 
-        String opcodes = createStackMachineCode(ct);
+            System.out.println(ct.toStringTree());
 
-        System.out.println(opcodes);
+            return createStackMachineCode(ct);
+        } catch (RecognitionException e) {
+            e.printStackTrace();
+        }
+
+        // fail
+        return "";
     }
 
     private static String createStackMachineCode(Tree ct) {
