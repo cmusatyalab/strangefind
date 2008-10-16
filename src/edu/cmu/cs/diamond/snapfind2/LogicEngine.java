@@ -10,6 +10,9 @@ import edu.cmu.cs.diamond.snapfind2.LogicExpressionParser.expr_return;
 
 public class LogicEngine {
 
+    private LogicEngine() {
+    }
+
     /**
      * @param args
      * @throws Exception
