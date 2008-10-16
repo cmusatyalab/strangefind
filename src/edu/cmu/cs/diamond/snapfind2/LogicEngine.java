@@ -84,7 +84,8 @@ public class LogicEngine {
             sb.append("!" + DELIMITER);
             break;
         case LogicExpressionParser.NUMBER:
-            sb.append(t.getText() + DELIMITER);
+            int literal = Integer.parseInt(t.getText()) - 1;
+            sb.append(literal + DELIMITER);
             break;
         default:
             throw new IllegalStateException("Invalid node: " + t);

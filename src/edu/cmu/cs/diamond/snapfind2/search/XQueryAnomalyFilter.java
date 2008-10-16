@@ -40,12 +40,16 @@
 
 package edu.cmu.cs.diamond.snapfind2.search;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.io.*;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.Map.Entry;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import edu.cmu.cs.diamond.opendiamond.*;
@@ -55,6 +59,8 @@ import edu.cmu.cs.diamond.snapfind2.LogicEngine;
 import edu.cmu.cs.diamond.snapfind2.SnapFindSearch;
 
 public class XQueryAnomalyFilter implements SnapFindSearch {
+
+    private boolean negateEasyOp;
 
     public XQueryAnomalyFilter(Component parent) {
         attrMap = new HashMap<String, String>();
@@ -95,14 +101,66 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
         }
 
         for (int i = 0; i < niceLabels.length; i++) {
-            checkboxes[i] = new JCheckBox(niceLabels[i]);
+            checkboxes[i] = new JCheckBox(niceLabels[i] + " ($" + (i + 1) + ")");
             checkboxes[i].setToolTipText(queries[i]);
             checkboxes[i].setSelected(true);
+            checkboxes[i].addChangeListener(new ChangeListener() {
+
+                @Override
+                public void stateChanged(ChangeEvent e) {
+                    updateEasyLogicExpression();
+                }
+            });
 
             JSpinner s = new JSpinner(
                     new SpinnerNumberModel(3.0, 1.0, 7.0, 0.5));
             stddevs[i] = s;
         }
+    }
+
+    protected void updateEasyLogicExpression() {
+        if (easyOp == "") {
+            return; // not easy
+        }
+
+        JTextArea t = logicalExpressionTextArea;
+
+        StringBuilder sb = new StringBuilder();
+        if (negateEasyOp) {
+            sb.append("NOT(");
+        }
+
+        sb.append(easyOp + "(");
+
+        boolean someSelected = false;
+        boolean first = true;
+
+        for (int i = 0; i < checkboxes.length; i++) {
+            JCheckBox c = checkboxes[i];
+            if (c.isSelected()) {
+                someSelected = true;
+
+                if (!first) {
+                    sb.append(", ");
+                } else {
+                    first = false;
+                }
+                sb.append("$" + (i + 1));
+            }
+        }
+        sb.append(")");
+        if (negateEasyOp) {
+            sb.append(")");
+        }
+
+        String text;
+        if (someSelected) {
+            text = sb.toString();
+        } else {
+            text = "";
+        }
+
+        t.setText(text);
     }
 
     static private void parseAttrFile(File f, Map<String, String> attrMap) {
@@ -178,7 +236,49 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
             }
 
             public String annotateTooltip(Result r) {
-                return "";
+                DecimalFormat df = new DecimalFormat("0.###");
+                StringBuilder sb = new StringBuilder("<html>");
+
+                String server = r.getServerName();
+                String name = getName(r);
+                int samples = getSamples(r, 0);
+
+                for (int i = 0; i < labels.length; i++) {
+                    boolean isA = getIsAnomalous(r, i);
+
+                    sb.append("<p>");
+                    if (isA) {
+                        sb.append("<b>*");
+                    }
+
+                    String descriptor = niceSelectedLabels.get(i);
+                    double stddev = getStddev(r, i);
+                    double value = getValue(r, i);
+                    double mean = getMean(r, i);
+                    double stddevDiff = getStddevDiff(stddev, value, mean);
+                    String aboveOrBelow = getAboveOrBelow(stddevDiff, "+", "−");
+
+                    sb.append(descriptor);
+                    if (isA) {
+                        sb.append("</b>");
+                    }
+                    sb.append(" = " + format(mean, df) + " " + aboveOrBelow
+                            + " " + format(Math.abs(stddevDiff), df) + "σ ("
+                            + format(value, df) + ")");
+                }
+
+                sb.append("<hr><p>" + name + "<p>" + server + " [" + samples
+                        + "]</html>");
+
+                return sb.toString();
+
+                //
+                // double stddev = getStddev(r);
+                // String keyValue = selectedLabels.get(key);
+                // String strValue = Util.extractString(r.getValue(keyValue));
+                //
+                // return "<html><p>" + descriptor + "<br>" + "= "
+
                 // DecimalFormat df = new DecimalFormat("0.###");
                 //
                 // int key = getKey(r);
@@ -193,11 +293,8 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
                 // double mean = getMean(r);
                 // double stddevDiff = getStddevDiff(stddev, value, mean);
                 //
-                // int samples = getSamples(r);
                 // String aboveOrBelow = getAboveOrBelow(stddevDiff);
                 //
-                // String server = r.getServerName();
-                // String name = getName(r);
                 //
                 // return "<html><p><b>" + descriptor + "</b> = "
                 // + df.format(value) + "<p><b>"
@@ -263,27 +360,38 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
                 return stddev;
             }
 
+            private boolean getIsAnomalous(Result r, int descriptor) {
+                int isAnomalous = Util.extractInt(r
+                        .getValue("anomaly-descriptor-is_anomalous-"
+                                + descriptor + ".int"));
+                return isAnomalous == 1 ? true : false;
+            }
+
             @Override
             public String annotateOneLine(Result r) {
-                return "";
-                // DecimalFormat df = new DecimalFormat("0.###");
-                //
-                // int key = getKey(r);
-                // String descriptor = niceSelectedLabels.get(key);
-                //
-                // double stddev = getStddev(r);
-                // String keyValue = selectedLabels.get(key);
-                // String strValue = Util.extractString(r.getValue(keyValue));
-                // double value = getValue(strValue);
-                // double mean = getMean(r);
-                // double stddevDiff = getStddevDiff(stddev, value, mean);
-                // String aboveOrBelow = getAboveOrBelow(stddevDiff, "+", "−");
-                //
-                // return "<html><p>" + descriptor + "<br>" + "= "
-                // + df.format(mean) + " " + aboveOrBelow + " "
-                // + df.format(Math.abs(stddevDiff)) + "σ" + "</html>";
+                StringBuilder sb = new StringBuilder();
+
+                for (int i = 0; i < labels.length; i++) {
+                    if (getIsAnomalous(r, i)) {
+                        sb.append("$" + (i + 1) + " ");
+                    }
+                }
+
+                if (sb.toString().equals("")) {
+                    sb.append("none");
+                }
+
+                return "<html><p>Anomalous: " + sb.toString() + "</html>";
             }
         };
+    }
+
+    protected String format(double d, DecimalFormat df) {
+        if (Double.isNaN(d)) {
+            return "NaN";
+        } else {
+            return df.format(d);
+        }
     }
 
     public Decorator getDecorator() {
@@ -322,35 +430,18 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
                     queryBlob);
             System.out.println(xquery);
 
-            StringBuilder logicExpression = new StringBuilder("OR(");
-
-            boolean firstSelected = true;
             List<String> paramsList = new ArrayList<String>();
             for (int i = 0; i < checkboxes.length; i++) {
-                JCheckBox cb = checkboxes[i];
                 paramsList.add(labels[i]);
                 paramsList.add(stddevs[i].getValue().toString());
-
-                if (cb.isSelected()) {
-                    if (!firstSelected) {
-                        logicExpression.append(", ");
-                    } else {
-                        firstSelected = false;
-                    }
-
-                    logicExpression.append("$" + i);
-                }
             }
-            logicExpression.append(")");
-
-            System.out.println(logicExpression);
 
             String anomArgs[] = new String[paramsList.size() + 3];
             anomArgs[0] = ignoreSpinner.getValue().toString(); // skip
             anomArgs[1] = UUID.randomUUID().toString(); // random value
             anomArgs[2] = LogicEngine
-                    .getMachineCodeForExpression(logicExpression.toString()); // machine
-            // code
+                    .getMachineCodeForExpression(logicalExpressionTextArea
+                            .getText()); // machine code
             System.arraycopy(paramsList.toArray(), 0, anomArgs, 3, paramsList
                     .size());
             c = new FilterCode(new FileInputStream(
@@ -404,27 +495,108 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
 
     final private String queries[];
 
+    final private JTextArea logicalExpressionTextArea = new JTextArea();
+
+    protected String easyOp;
+
     public JPanel getInterface() {
         // XXX do this another way
         JPanel result = new JPanel();
         result.setBorder(BorderFactory
                 .createTitledBorder("XQuery Anomaly Detector"));
-        result.setLayout(new SpringLayout());
+        result.setLayout(new BorderLayout());
 
-        result.add(new JLabel("Priming count"));
-        result.add(ignoreSpinner);
+        Box b = Box.createVerticalBox();
+        result.add(b);
 
-        result.add(new JLabel(" "));
-        result.add(new JLabel(" "));
+        JPanel innerResult = new JPanel();
+        innerResult.setLayout(new SpringLayout());
 
-        result.add(new JLabel("Descriptor"));
-        result.add(new JLabel("Std. dev."));
+        innerResult.add(new JLabel("Priming count"));
+        innerResult.add(ignoreSpinner);
+
+        innerResult.add(new JLabel(" "));
+        innerResult.add(new JLabel(" "));
+
+        innerResult.add(new JLabel("Descriptor"));
+        innerResult.add(new JLabel("Std. dev."));
         for (int i = 0; i < labels.length; i++) {
-            result.add(checkboxes[i]);
-            result.add(stddevs[i]);
+            innerResult.add(checkboxes[i]);
+            innerResult.add(stddevs[i]);
         }
 
-        Util.makeCompactGrid(result, labels.length + 3, 2, 5, 5, 2, 2);
+        Util.makeCompactGrid(innerResult, labels.length + 3, 2, 5, 5, 2, 2);
+
+        b.add(innerResult);
+
+        // logic
+        ButtonGroup bg = new ButtonGroup();
+
+        Box h = Box.createHorizontalBox();
+        b.add(h);
+
+        JRadioButton cb = new JRadioButton("OR");
+        bg.add(cb);
+        h.add(cb);
+        cb.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (((JRadioButton) e.getSource()).isSelected()) {
+                    easyOp = "OR";
+                    negateEasyOp = false;
+                    updateEasyLogicExpression();
+                }
+            }
+        });
+        cb.setSelected(true);
+
+        cb = new JRadioButton("AND");
+        cb.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (((JRadioButton) e.getSource()).isSelected()) {
+                    easyOp = "AND";
+                    negateEasyOp = false;
+                    updateEasyLogicExpression();
+                }
+            }
+        });
+        bg.add(cb);
+        h.add(cb);
+
+        cb = new JRadioButton("NOT");
+        bg.add(cb);
+        h.add(cb);
+        cb.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (((JRadioButton) e.getSource()).isSelected()) {
+                    easyOp = "OR";
+                    negateEasyOp = true;
+                    updateEasyLogicExpression();
+                }
+            }
+        });
+
+        cb = new JRadioButton("Custom:");
+        cb.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (((JRadioButton) e.getSource()).isSelected()) {
+                    easyOp = "";
+                    logicalExpressionTextArea.setEnabled(true);
+                } else {
+                    logicalExpressionTextArea.setEnabled(false);
+                }
+            }
+        });
+        bg.add(cb);
+        h.add(cb);
+
+        logicalExpressionTextArea.setRows(4);
+        logicalExpressionTextArea.setLineWrap(true);
+        logicalExpressionTextArea.setEnabled(false);
+        b.add(new JScrollPane(logicalExpressionTextArea));
 
         return result;
     }
