@@ -213,6 +213,8 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
     double stddev = sqrt(variance);
 
     double num_stddev = ctx->stddev_array[i];
+
+    int is_anomalous = 0;
     if (count > ctx->min_count
 	&& (d > mean + (num_stddev * stddev)
 	    || d < mean - (num_stddev * stddev))) {
@@ -221,6 +223,7 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
 	     ctx->name_array[i], d, mean, stddev);
 
       logic_values[i] = true;
+      is_anomalous = 1;
     }
 
     // record for posterity
@@ -238,6 +241,10 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
 
     tmp = g_strdup_printf("anomaly-descriptor-stddev-%d.double", i);
     lf_write_attr(ohandle, tmp, sizeof(double), (unsigned char *) &stddev);
+    g_free(tmp);
+
+    tmp = g_strdup_printf("anomaly-descriptor-is_anomalous-%d.int", i);
+    lf_write_attr(ohandle, tmp, sizeof(int), (unsigned char *) &is_anomalous);
     g_free(tmp);
 
     // add to sum
