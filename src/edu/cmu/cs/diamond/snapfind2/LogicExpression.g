@@ -2,6 +2,7 @@ grammar LogicExpression;
 
 options {
     output = AST;
+    backtrack = true;
 }
 
 tokens {
@@ -29,13 +30,19 @@ literal	:	DOLLAR NUMBER -> NUMBER;
 
 func	:	(and | or | not);
 
-and	:	AND LPAREN term ',' term RPAREN -> ^(OP_AND term term);
+andsecondhalf
+	:	term RPAREN -> term
+	|       term ',' andsecondhalf -> ^(OP_AND term andsecondhalf);
 
-or	:	OR LPAREN term ',' term RPAREN -> ^(OP_OR term term);
+and	:	AND LPAREN term ',' andsecondhalf -> ^(OP_AND term andsecondhalf);
+
+orsecondhalf
+	:	term RPAREN -> term
+	|       term ',' orsecondhalf -> ^(OP_OR term orsecondhalf);
+
+or	:	OR LPAREN term ',' orsecondhalf -> ^(OP_OR term orsecondhalf);
 
 not	:	NOT LPAREN term RPAREN -> ^(OP_NOT term);
-
-
 
 
 
