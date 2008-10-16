@@ -43,8 +43,10 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <glib.h>
 
 #include "lib_filter.h"
+#include "logic-stack-machine.h"
 
 
 static const char *COUNT_KEY = "count";
@@ -57,11 +59,53 @@ typedef struct {
   double *stddev_array;
   lf_session_variable_t **stats;
   int min_count;
+
+  gchar **logic_code;
+  logic_stack_machine_t *lsmr;
 } context_t;
 
 static double composer_sum(double a, double b) {
   printf(" %g + %g\n", a, b);
   return a + b;
+}
+
+
+static bool run_logic_engine(gchar **logic_code,
+			     const bool *logic_values,
+			     logic_stack_machine_t *lsmr,
+			     int size) {
+  for (gchar **ptr = logic_code; *ptr != NULL; ptr++) {
+    const gchar *inst = *ptr;
+    int i;
+
+    switch(inst[0]) {
+    case '&':
+      lsm_and(lsmr);
+      break;
+
+    case '|':
+      lsm_or(lsmr);
+      break;
+
+    case '!':
+      lsm_not(lsmr);
+      break;
+
+    default:
+      // number
+      i = atoi(inst);
+      g_assert(i < size);
+      lsm_push(lsmr, logic_values[i]);
+    }
+  }
+
+  int val = lsm_pop(lsmr);
+  g_assert(val != -1);
+
+  // make sure stack is empty
+  g_assert(lsm_pop(lsmr) == -1);
+
+  return val;
 }
 
 
@@ -83,8 +127,9 @@ int f_init_afilter (int num_arg, char **args,
   // args is:
   // 1. min_count
   // 2. random string to supress caching
+  // 3. code for the logic stack machine
   // rest. pairs of attribute names and standard deviations
-  ctx->size = (num_arg - 2) / 2;
+  ctx->size = (num_arg - 3) / 2;
 
   printf("uuid: %s\n", args[1]);
 
@@ -92,6 +137,10 @@ int f_init_afilter (int num_arg, char **args,
   ctx->name_array = (char **) calloc(ctx->size, sizeof(char *));
   ctx->stddev_array = (double *) calloc(ctx->size, sizeof(double));
   ctx->min_count = strtol(args[0], NULL, 10);
+  ctx->logic_code = g_strsplit(args[2], "_", -1);
+
+  // initialize logic
+  ctx->lsmr = lsm_create();
 
   // null terminated stats list
   int stats_len = 3 * ctx->size;
@@ -103,8 +152,8 @@ int f_init_afilter (int num_arg, char **args,
 
   // fill in arrays
   for (i = 0; i < ctx->size; i++) {
-    ctx->name_array[i] = strdup(args[(i*2)+2]);
-    ctx->stddev_array[i] = strtod(args[(i*2)+3], NULL);
+    ctx->name_array[i] = strdup(args[(i*2)+3]);
+    ctx->stddev_array[i] = strtod(args[(i*2)+4], NULL);
 
     char *name;
     asprintf(&name, "%s_%s", ctx->name_array[i], COUNT_KEY);
@@ -138,7 +187,9 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
   // get stats
   lf_get_session_variables(ohandle, ctx->stats);
 
-  int result = 0;
+  // make array for logic literals
+  bool *logic_values = calloc(ctx->size, sizeof(bool));
+
   // compute anomalousness for each thing
   // XXX stats done by non-statistician
   for (i = 0; i < ctx->size; i++) {
@@ -150,7 +201,6 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
     double d = strtod(tmp, NULL);
     printf(" %s = %g\n", ctx->name_array[i], d);
     free(tmp);
-
 
 
     // check
@@ -169,18 +219,26 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
       // flag it
       printf(" *** %s is anomalous: %g (mean: %g, stddev: %g)\n",
 	     ctx->name_array[i], d, mean, stddev);
-      if (!result) {
-	result = 100;
-	lf_write_attr(ohandle, "anomalous-value.int", sizeof(int),
-		      (unsigned char *) &i);
-	lf_write_attr(ohandle, "anomalous-value-count.int", sizeof(int),
-		      (unsigned char *) &count);
-	lf_write_attr(ohandle, "anomalous-value-mean.double", sizeof(double),
-		      (unsigned char *) &mean);
-	lf_write_attr(ohandle, "anomalous-value-stddev.double", sizeof(double),
-		      (unsigned char *) &stddev);
-      }
+
+      logic_values[i] = true;
     }
+
+    // record for posterity
+    asprintf(&tmp, "anomaly-value-%d.int", i);
+    lf_write_attr(ohandle, tmp, sizeof(int), (unsigned char *) &i);
+    free(tmp);
+
+    asprintf(&tmp, "anomaly-value-count-%d.int", i);
+    lf_write_attr(ohandle, tmp, sizeof(int), (unsigned char *) &count);
+    free(tmp);
+
+    asprintf(&tmp, "anomaly-value-mean-%d.int", i);
+    lf_write_attr(ohandle, tmp, sizeof(double), (unsigned char *) &mean);
+    free(tmp);
+
+    asprintf(&tmp, "anomaly-value-stddev-%d.int", i);
+    lf_write_attr(ohandle, tmp, sizeof(double), (unsigned char *) &stddev);
+    free(tmp);
 
     // add to sum
     printf("%s: %g\n", ctx->name_array[i], d);
@@ -191,6 +249,12 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
 
   // update
   lf_update_session_variables(ohandle, ctx->stats);
+
+  // run the logic engine
+  int result = run_logic_engine(ctx->logic_code,
+				logic_values,
+				ctx->lsmr, ctx->size);
+  free(logic_values);
 
   return result;
 }
@@ -209,6 +273,8 @@ int f_fini_afilter (void *filter_args) {
     free(ctx->stats[i]);
   }
 
+  lsm_destroy(ctx->lsmr);
+  g_strfreev(ctx->logic_code);
   free(ctx->name_array);
   free(ctx->stddev_array);
   free(ctx->stats);

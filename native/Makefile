@@ -7,8 +7,8 @@ fil_circle.so: circles4.cpp circles4.h util.h util.c
 	g++ -fPIC ${LDFLAGS} ${CPPFLAGS} -I/opt/diamond-filter-kit/include -L/opt/diamond-filter-kit/lib `pkg-config opendiamond glib-2.0 --cflags` `lti-config nogtk --cxxflags` -O2 -g -m32 -Wall -shared  -o $@ circles4.cpp util.c `lti-config nogtk --libs` `pkg-config glib-2.0 --libs` -Wl,--version-script=filters.map
 	strip $@
 
-fil_anomaly.so: anomaly-filter.c
-	gcc -fPIC ${LDFLAGS} ${CPPFLAGS} -I/opt/diamond-filter-kit/include -L/opt/diamond-filter-kit/lib `pkg-config opendiamond glib-2.0 --cflags` -O2 -g -m32 -Wall -shared  -o $@ anomaly-filter.c -Wl,--version-script=filters.map
+fil_anomaly.so: anomaly-filter.c logic-stack-machine.h logic-stack-machine.c
+	gcc -std=gnu99 -fPIC ${LDFLAGS} ${CPPFLAGS} -I/opt/diamond-filter-kit/include -L/opt/diamond-filter-kit/lib `pkg-config opendiamond glib-2.0 --cflags` -O2 -g -m32 -Wall -shared  -o $@ anomaly-filter.c logic-stack-machine.c -Wl,--version-script=filters.map
 	strip $@
 
 fil_xquery.so: xquery-filter.cpp
