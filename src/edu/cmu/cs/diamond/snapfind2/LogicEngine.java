@@ -8,7 +8,7 @@ import org.antlr.runtime.tree.Tree;
 
 import edu.cmu.cs.diamond.snapfind2.LogicExpressionParser.expr_return;
 
-public class TestLogic {
+public class LogicEngine {
 
     /**
      * @param args
