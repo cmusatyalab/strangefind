@@ -58,6 +58,8 @@ void lsm_destroy(logic_stack_machine_t *lsmr) {
 
 void lsm_push(logic_stack_machine_t *lsmr, bool value) {
   lsmr->stack = g_slist_prepend(lsmr->stack, (gpointer) value);
+
+  g_debug("PUSH! %d", value);
 }
 
 int lsm_pop(logic_stack_machine_t *lsmr) {
@@ -67,6 +69,8 @@ int lsm_pop(logic_stack_machine_t *lsmr) {
 
   bool val = (bool) lsmr->stack->data;
   lsmr->stack = g_slist_delete_link(lsmr->stack, lsmr->stack);
+
+  g_debug("POP! %d", val);
 
   return val;
 }
@@ -78,6 +82,8 @@ int lsm_and(logic_stack_machine_t *lsmr) {
   if (val1 == -1 || val2 == -1) {
     return -1;
   }
+
+  g_debug("AND! %d %d", val1, val2);
 
   bool val = val1 && val2;
   lsm_push(lsmr, val);
@@ -93,6 +99,8 @@ int lsm_or(logic_stack_machine_t *lsmr) {
     return -1;
   }
 
+  g_debug("OR! %d %d", val1, val2);
+
   bool val = val1 || val2;
   lsm_push(lsmr, val);
 
@@ -105,6 +113,8 @@ int lsm_not(logic_stack_machine_t *lsmr) {
   if (val1 == -1) {
     return -1;
   }
+
+  g_debug("NOT! %d", val1);
 
   bool val = !val1;
   lsm_push(lsmr, val);

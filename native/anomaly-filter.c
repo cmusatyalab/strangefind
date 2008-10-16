@@ -256,6 +256,8 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
 				ctx->lsmr, ctx->size);
   g_slice_free1(ctx->size * sizeof(bool), logic_values);
 
+  g_debug("result: %d", result);
+
   return result;
 }
 
