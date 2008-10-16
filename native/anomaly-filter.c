@@ -224,19 +224,19 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
     }
 
     // record for posterity
-    tmp = g_strdup_printf("anomaly-value-%d.int", i);
-    lf_write_attr(ohandle, tmp, sizeof(int), (unsigned char *) &i);
+    tmp = g_strdup_printf("anomaly-descriptor-value-%d.double", i);
+    lf_write_attr(ohandle, tmp, sizeof(double), (unsigned char *) &d);
     g_free(tmp);
 
-    tmp = g_strdup_printf("anomaly-value-count-%d.int", i);
+    tmp = g_strdup_printf("anomaly-descriptor-count-%d.int", i);
     lf_write_attr(ohandle, tmp, sizeof(int), (unsigned char *) &count);
     g_free(tmp);
 
-    tmp = g_strdup_printf("anomaly-value-mean-%d.int", i);
+    tmp = g_strdup_printf("anomaly-descriptor-mean-%d.double", i);
     lf_write_attr(ohandle, tmp, sizeof(double), (unsigned char *) &mean);
     g_free(tmp);
 
-    tmp = g_strdup_printf("anomaly-value-stddev-%d.int", i);
+    tmp = g_strdup_printf("anomaly-descriptor-stddev-%d.double", i);
     lf_write_attr(ohandle, tmp, sizeof(double), (unsigned char *) &stddev);
     g_free(tmp);
 
