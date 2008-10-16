@@ -251,7 +251,7 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
                         sb.append("<b>*");
                     }
 
-                    String descriptor = niceSelectedLabels.get(i);
+                    String descriptor = niceLabels[i];
                     double stddev = getStddev(r, i);
                     double value = getValue(r, i);
                     double mean = getMean(r, i);
