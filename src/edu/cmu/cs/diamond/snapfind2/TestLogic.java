@@ -44,8 +44,11 @@ public class TestLogic {
 
         createStackMachineCode(ct, sb);
 
-        return sb.toString();
+        String opcodes = sb.toString();
+        return opcodes.substring(0, opcodes.length() - 1);
     }
+
+    final private static String DELIMITER = "_";
 
     private static void createStackMachineCode(Tree t, StringBuilder sb) {
         int type = t.getType();
@@ -56,19 +59,19 @@ public class TestLogic {
         case LogicExpressionParser.OP_AND:
             createStackMachineCode(t.getChild(0), sb);
             createStackMachineCode(t.getChild(1), sb);
-            sb.append(" &");
+            sb.append("&" + DELIMITER);
             break;
         case LogicExpressionParser.OP_OR:
             createStackMachineCode(t.getChild(0), sb);
             createStackMachineCode(t.getChild(1), sb);
-            sb.append(" |");
+            sb.append("|" + DELIMITER);
             break;
         case LogicExpressionParser.OP_NOT:
             createStackMachineCode(t.getChild(0), sb);
-            sb.append(" !");
+            sb.append("!" + DELIMITER);
             break;
         case LogicExpressionParser.NUMBER:
-            sb.append(" " + t.getText());
+            sb.append(t.getText() + DELIMITER);
             break;
         default:
             throw new IllegalStateException("Invalid node: " + t);
