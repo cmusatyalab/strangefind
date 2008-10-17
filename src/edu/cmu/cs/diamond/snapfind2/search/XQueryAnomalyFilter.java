@@ -212,27 +212,7 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
 
         return new Annotator() {
             public String annotate(Result r) {
-                // int key = getKey(r);
-                // String anomStr = "<html><p>Anomalous descriptor: <b>"
-                // + niceSelectedLabels.get(key)
-                // + "</b>: "
-                // + Util.extractString(r
-                // .getValue(selectedLabels.get(key)))
-                // + "<p>mean: "
-                // + Util.extractDouble(r
-                // .getValue("anomalous-value-mean.double"))
-                // + "<p>stddev: "
-                // + Util.extractDouble(r
-                // .getValue("anomalous-value-stddev.double"))
-                // + "<p>object count: "
-                // + Util.extractInt(r
-                // .getValue("anomalous-value-count.int"))
-                // + "<p>server: "
-                // + Util.extractString(r.getValue("Device-Name"))
-                // + "</html>";
-                //
-                String anomStr = "";
-                return anomStr;
+                return annotateTooltip(r);
             }
 
             public String annotateTooltip(Result r) {
