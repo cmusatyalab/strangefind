@@ -246,7 +246,7 @@ public class SnapFind2 extends JFrame {
 
                 // update
                 for (ServerStatistics s : stats) {
-                    String name = s.getAddress().getHostName();
+                    String name = s.getHostname();
                     JProgressBar jp = servers.get(name);
                     if (jp == null) {
                         // create new
