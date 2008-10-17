@@ -65,6 +65,7 @@ import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.*;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.prefs.Preferences;
 
 import javax.swing.*;
@@ -106,6 +107,12 @@ public class SnapFind2 extends JFrame {
 
             clear.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
+                    // clear locally
+                    for (Entry<String, Double> entry : globalSessionVariables
+                            .entrySet()) {
+                        globalSessionVariables.put(entry.getKey(), 0.0);
+                    }
+
                     // clear on server
                     search.mergeSessionVariables(globalSessionVariables,
                             new DoubleComposer() {
