@@ -584,9 +584,9 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
             public void stateChanged(ChangeEvent e) {
                 if (((JRadioButton) e.getSource()).isSelected()) {
                     easyOp = "";
-                    logicalExpressionTextArea.setEnabled(true);
+                    logicalExpressionTextArea.setEditable(true);
                 } else {
-                    logicalExpressionTextArea.setEnabled(false);
+                    logicalExpressionTextArea.setEditable(false);
                 }
             }
         });
@@ -595,7 +595,7 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
 
         logicalExpressionTextArea.setRows(4);
         logicalExpressionTextArea.setLineWrap(true);
-        logicalExpressionTextArea.setEnabled(false);
+        logicalExpressionTextArea.setEditable(false);
         b.add(new JScrollPane(logicalExpressionTextArea));
 
         return result;
