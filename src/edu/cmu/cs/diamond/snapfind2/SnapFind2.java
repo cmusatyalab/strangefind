@@ -107,21 +107,7 @@ public class SnapFind2 extends JFrame {
 
             clear.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    // clear locally
-                    for (Entry<String, Double> entry : globalSessionVariables
-                            .entrySet()) {
-                        globalSessionVariables.put(entry.getKey(), 0.0);
-                    }
-
-                    // clear on server
-                    search.mergeSessionVariables(globalSessionVariables,
-                            new DoubleComposer() {
-                                public double compose(String key, double a,
-                                        double b) {
-                                    return 0;
-                                }
-                            });
-                    sessionVariablesTableModel.fireTableDataChanged();
+                    clearSessionVariables();
                 }
             });
 
@@ -332,6 +318,8 @@ public class SnapFind2 extends JFrame {
 
     final protected JButton stopButton = new JButton("Stop");
 
+    final protected JButton resetStateButton = new JButton("Clear Session");
+
     final protected Search search = Search.getSharedInstance();
 
     final private Map<String, Double> globalSessionVariables = new TreeMap<String, Double>();
@@ -433,6 +421,19 @@ public class SnapFind2 extends JFrame {
             }
         });
 
+        resetStateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int result = JOptionPane.showConfirmDialog(SnapFind2.this,
+                        "Really clear state?", "Confirm",
+                        JOptionPane.OK_CANCEL_OPTION);
+
+                if (result == JOptionPane.OK_OPTION) {
+                    clearSessionVariables();
+                }
+            }
+        });
+
         setupWindow();
 
         pack();
@@ -491,6 +492,12 @@ public class SnapFind2 extends JFrame {
         r1.add(stopButton);
 
         v1.add(r1);
+
+        v1.add(Box.createVerticalStrut(4));
+        r2 = Box.createHorizontalBox();
+        r2.add(resetStateButton);
+        v1.add(r2);
+
         c1.add(v1);
 
         b.add(c1);
@@ -726,6 +733,22 @@ public class SnapFind2 extends JFrame {
             }
         });
         itemNew.add(mi);
+    }
+
+    private void clearSessionVariables() {
+        // clear locally
+        for (Entry<String, Double> entry : globalSessionVariables.entrySet()) {
+            globalSessionVariables.put(entry.getKey(), 0.0);
+        }
+
+        // clear on server
+        search.mergeSessionVariables(globalSessionVariables,
+                new DoubleComposer() {
+                    public double compose(String key, double a, double b) {
+                        return 0;
+                    }
+                });
+        sessionVariablesTableModel.fireTableDataChanged();
     }
 
     static String getImageHost() {
