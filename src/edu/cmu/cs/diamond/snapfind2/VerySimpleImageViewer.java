@@ -45,10 +45,12 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.io.*;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -155,9 +157,14 @@ public class VerySimpleImageViewer extends JFrame {
         image.setPreferredSize(new Dimension(this.imgs[0].getWidth(),
                 this.imgs[0].getHeight()));
 
-        JPanel bottomPanel = new JPanel(new GridLayout(1, 2));
-        bottomPanel.add(new JLabel(result.getAnnotation()));
-        bottomPanel.add(new ChannelSelector());
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        JPanel bottomPanel2 = new JPanel(new GridLayout(1, 2));
+        bottomPanel2.add(new JLabel(result.getAnnotation()));
+        bottomPanel2.add(new ChannelSelector());
+
+        bottomPanel.add(bottomPanel2);
+
+        bottomPanel.add(createSaveButton(), BorderLayout.SOUTH);
 
         add(bottomPanel, BorderLayout.SOUTH);
 
@@ -166,6 +173,48 @@ public class VerySimpleImageViewer extends JFrame {
         jsp.getVerticalScrollBar().setValue(0);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationByPlatform(true);
+    }
+
+    private JButton createSaveButton() {
+        JButton button = new JButton("Save");
+
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser chooser = new JFileChooser();
+                int returnVal = chooser
+                        .showSaveDialog(VerySimpleImageViewer.this);
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    File f = chooser.getSelectedFile();
+
+                    FileOutputStream out = null;
+                    try {
+                        out = new FileOutputStream(f);
+
+                        PrintWriter writer = new PrintWriter(out);
+
+                        writer.println(result.getAnnotationNonHTML());
+                        writer.println();
+                        writer.println("-----");
+                        writer.println();
+                        writer.println(result.getVerboseAnnotation());
+                        writer.close();
+                    } catch (FileNotFoundException e1) {
+                        e1.printStackTrace();
+                    } finally {
+                        if (out != null) {
+                            try {
+                                out.close();
+                            } catch (IOException e1) {
+                                e1.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        return button;
     }
 
     private void setImage(AnnotatedResult result, BufferedImage img) {
