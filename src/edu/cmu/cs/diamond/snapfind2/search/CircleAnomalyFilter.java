@@ -55,11 +55,7 @@ import java.util.UUID;
 
 import javax.swing.*;
 
-import edu.cmu.cs.diamond.opendiamond.DoubleComposer;
-import edu.cmu.cs.diamond.opendiamond.Filter;
-import edu.cmu.cs.diamond.opendiamond.FilterCode;
-import edu.cmu.cs.diamond.opendiamond.Result;
-import edu.cmu.cs.diamond.opendiamond.Util;
+import edu.cmu.cs.diamond.opendiamond.*;
 import edu.cmu.cs.diamond.snapfind2.Annotator;
 import edu.cmu.cs.diamond.snapfind2.Decorator;
 import edu.cmu.cs.diamond.snapfind2.SnapFindSearch;
@@ -127,9 +123,8 @@ public class CircleAnomalyFilter implements SnapFindSearch {
             FilterCode c;
             c = new FilterCode(new FileInputStream(
                     "/opt/snapfind/lib/fil_rgb.so"));
-            rgb = new Filter("rgb", c, "f_eval_img2rgb",
-                    "f_init_img2rgb", "f_fini_img2rgb", 1, new String[0],
-                    new String[0], 400);
+            rgb = new Filter("rgb", c, "f_eval_img2rgb", "f_init_img2rgb",
+                    "f_fini_img2rgb", 1, new String[0], new String[0], 400);
 
             c = new FilterCode(new FileInputStream(
                     "/opt/snapfind/lib/fil_circle.so"));
