@@ -144,6 +144,11 @@ public abstract class AbstractNeuriteFilter implements SnapFindSearch {
             public String annotateOneLine(Result r) {
                 return null;
             }
+
+            @Override
+            public String annotateVerbose(Result r) {
+                return null;
+            }
         };
     }
 

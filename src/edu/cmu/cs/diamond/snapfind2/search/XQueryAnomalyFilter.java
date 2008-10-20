@@ -363,6 +363,39 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
 
                 return "<html><p>Anomalous: " + sb.toString() + "</html>";
             }
+
+            @Override
+            public String annotateVerbose(Result r) {
+                // TODO do this with XML parser
+                // XXX
+                ByteArrayInputStream in = new ByteArrayInputStream(r.getData());
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(in));
+
+                String line;
+                StringBuilder output = new StringBuilder();
+
+                boolean skip = false;
+                try {
+                    while ((line = reader.readLine()) != null) {
+                        if (line.equals("<ResultType name=\"Cell\">")) {
+                            skip = true;
+                        }
+
+                        if (skip == true && line.equals("</ResultType>")) {
+                            skip = false;
+                        }
+
+                        if (!skip) {
+                            output.append(line);
+                            output.append('\n');
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return output.toString();
+            }
         };
     }
 

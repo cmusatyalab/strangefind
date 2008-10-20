@@ -73,13 +73,16 @@ public class AnnotatedResult extends Result {
 
     private BufferedImage combinedImage;
 
+    final private String verboseAnnotation;
+
     public AnnotatedResult(Result r, String annotation,
             String oneLineAnnotation, String tooltipAnnotation,
-            Decorator decorator) {
+            String verboseAnnotation, Decorator decorator) {
         theResult = r;
         this.annotation = annotation;
         this.tooltipAnnotation = tooltipAnnotation;
         this.oneLineAnnotation = oneLineAnnotation;
+        this.verboseAnnotation = verboseAnnotation;
         this.decorator = decorator;
     }
 
@@ -147,7 +150,7 @@ public class AnnotatedResult extends Result {
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {
-//                e.printStackTrace();
+                // e.printStackTrace();
             }
         }
 
@@ -196,5 +199,9 @@ public class AnnotatedResult extends Result {
 
     public String getOneLineAnnotation() {
         return oneLineAnnotation;
+    }
+
+    public String getVerboseAnnotation() {
+        return verboseAnnotation;
     }
 }

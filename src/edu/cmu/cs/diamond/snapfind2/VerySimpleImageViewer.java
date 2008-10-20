@@ -99,11 +99,19 @@ public class VerySimpleImageViewer extends JFrame {
             System.arraycopy(imgs, 0, this.imgs, 0, imgs.length);
         } else {
             this.imgs = new BufferedImage[1];
-            this.imgs[0] = new BufferedImage(256, 256, BufferedImage.TYPE_INT_RGB);
+            this.imgs[0] = new BufferedImage(256, 256,
+                    BufferedImage.TYPE_INT_RGB);
         }
 
         image = new JXImageView();
-        add(image);
+        JTextArea verboseTextArea = new JTextArea();
+        verboseTextArea.setEditable(false);
+        verboseTextArea.setText(result.getVerboseAnnotation());
+        JScrollPane jsp = new JScrollPane(verboseTextArea);
+
+        JSplitPane splitpane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true,
+                image, jsp);
+        add(splitpane);
 
         image.addMouseWheelListener(new MouseWheelListener() {
             @Override
@@ -144,8 +152,8 @@ public class VerySimpleImageViewer extends JFrame {
 
         setImage(result, this.imgs[0]);
 
-        image.setPreferredSize(new Dimension(this.imgs[0].getWidth(), this.imgs[0]
-                .getHeight()));
+        image.setPreferredSize(new Dimension(this.imgs[0].getWidth(),
+                this.imgs[0].getHeight()));
 
         JPanel bottomPanel = new JPanel(new GridLayout(1, 2));
         bottomPanel.add(new JLabel(result.getAnnotation()));
@@ -154,6 +162,8 @@ public class VerySimpleImageViewer extends JFrame {
         add(bottomPanel, BorderLayout.SOUTH);
 
         pack();
+        splitpane.setDividerLocation(1.0);
+        jsp.getVerticalScrollBar().setValue(0);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationByPlatform(true);
     }
