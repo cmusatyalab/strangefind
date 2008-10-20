@@ -221,24 +221,28 @@ public class ThumbnailBox extends JPanel {
         });
 
         final String annotation;
+        final String nonHTMLAnnotation;
         final String tooltipAnnotation;
         final String oneLineAnnotation;
         final String verboseAnnotation;
         if (annotator != null) {
             annotation = annotator.annotate(r);
+            nonHTMLAnnotation = annotator.annotateNonHTML(r);
             tooltipAnnotation = annotator.annotateTooltip(r);
             oneLineAnnotation = annotator.annotateOneLine(r);
             verboseAnnotation = annotator.annotateVerbose(r);
         } else {
             annotation = null;
+            nonHTMLAnnotation = null;
             tooltipAnnotation = null;
             oneLineAnnotation = null;
             verboseAnnotation = null;
         }
 
         // do slow activity of loading the item
-        v.setResult(new AnnotatedResult(r, annotation, oneLineAnnotation,
-                tooltipAnnotation, verboseAnnotation, decorator));
+        v.setResult(new AnnotatedResult(r, annotation, nonHTMLAnnotation,
+                oneLineAnnotation, tooltipAnnotation, verboseAnnotation,
+                decorator));
 
         // update GUI
         SwingUtilities.invokeLater(new Runnable() {

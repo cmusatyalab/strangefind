@@ -215,9 +215,22 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
                 return annotateTooltip(r);
             }
 
+            public String annotateNonHTML(Result r) {
+                return annotateTooltip(r, false);
+            }
+
             public String annotateTooltip(Result r) {
+                return annotateTooltip(r, true);
+            }
+
+            private String annotateTooltip(Result r, boolean useHTML) {
+
                 DecimalFormat df = new DecimalFormat("0.###");
-                StringBuilder sb = new StringBuilder("<html>");
+                StringBuilder sb = new StringBuilder();
+
+                if (useHTML) {
+                    sb.append("<html>");
+                }
 
                 String server = r.getServerName();
                 String name = getName(r);
@@ -226,9 +239,14 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
                 for (int i = 0; i < labels.length; i++) {
                     boolean isA = getIsAnomalous(r, i);
 
-                    sb.append("<p>");
+                    if (useHTML) {
+                        sb.append("<p>");
+                    }
                     if (isA) {
-                        sb.append("<b>*");
+                        if (useHTML) {
+                            sb.append("<b>");
+                        }
+                        sb.append("*");
                     }
 
                     String descriptor = niceLabels[i];
@@ -240,15 +258,22 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
 
                     sb.append(descriptor);
                     if (isA) {
-                        sb.append("</b>");
+                        if (useHTML) {
+                            sb.append("</b>");
+                        }
                     }
                     sb.append(" = " + format(mean, df) + " " + aboveOrBelow
                             + " " + format(Math.abs(stddevDiff), df) + "σ ("
                             + format(value, df) + ")");
                 }
 
-                sb.append("<hr><p>" + name + "<p>" + server + " [" + samples
-                        + "]</html>");
+                if (useHTML) {
+                    sb.append("<hr><p>" + name + "<p>" + server + " ["
+                            + samples + "]</html>");
+                } else {
+                    sb.append("\n\n---\n\n" + name + "\n\n" + server + " ["
+                            + samples + "]");
+                }
 
                 return sb.toString();
 

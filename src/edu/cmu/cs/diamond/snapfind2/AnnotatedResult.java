@@ -75,14 +75,18 @@ public class AnnotatedResult extends Result {
 
     final private String verboseAnnotation;
 
+    final private String nonHTMLAnnotation;
+
     public AnnotatedResult(Result r, String annotation,
-            String oneLineAnnotation, String tooltipAnnotation,
-            String verboseAnnotation, Decorator decorator) {
+            String nonHTMLAnnotation, String oneLineAnnotation,
+            String tooltipAnnotation, String verboseAnnotation,
+            Decorator decorator) {
         theResult = r;
         this.annotation = annotation;
         this.tooltipAnnotation = tooltipAnnotation;
         this.oneLineAnnotation = oneLineAnnotation;
         this.verboseAnnotation = verboseAnnotation;
+        this.nonHTMLAnnotation = nonHTMLAnnotation;
         this.decorator = decorator;
     }
 
@@ -203,5 +207,9 @@ public class AnnotatedResult extends Result {
 
     public String getVerboseAnnotation() {
         return verboseAnnotation;
+    }
+
+    public String getAnnotationNonHTML() {
+        return nonHTMLAnnotation;
     }
 }

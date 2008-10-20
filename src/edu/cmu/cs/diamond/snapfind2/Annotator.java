@@ -50,4 +50,6 @@ public interface Annotator {
     String annotateTooltip(Result r);
 
     String annotateOneLine(Result r);
+
+    String annotateNonHTML(Result r);
 }
