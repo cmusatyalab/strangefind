@@ -241,6 +241,8 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
 
                     if (useHTML) {
                         sb.append("<p>");
+                    } else {
+                        sb.append("\n\n");
                     }
                     if (isA) {
                         if (useHTML) {
@@ -271,7 +273,7 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
                     sb.append("<hr><p>" + name + "<p>" + server + " ["
                             + samples + "]</html>");
                 } else {
-                    sb.append("\n\n---\n\n" + name + "\n\n" + server + " ["
+                    sb.append("\n---\n\n" + name + "\n\n" + server + " ["
                             + samples + "]");
                 }
 
