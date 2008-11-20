@@ -485,7 +485,7 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
             System.arraycopy(paramsList.toArray(), 0, anomArgs, 3, paramsList
                     .size());
             c = new FilterCode(new FileInputStream(
-                    "/home/agoode/diamond-git/snapfind2/native/fil_anomaly.so"));
+                    "/opt/snapfind/lib/fil_anomaly.so"));
             anom = new Filter("anomaly", c, "f_eval_afilter", "f_init_afilter",
                     "f_fini_afilter", 1, new String[] { "xquery" }, anomArgs,
                     400);
