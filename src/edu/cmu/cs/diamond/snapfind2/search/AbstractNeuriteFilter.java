@@ -51,6 +51,7 @@ import javax.swing.*;
 import edu.cmu.cs.diamond.opendiamond.*;
 import edu.cmu.cs.diamond.snapfind2.Annotator;
 import edu.cmu.cs.diamond.snapfind2.Decorator;
+import edu.cmu.cs.diamond.snapfind2.LogicEngine;
 import edu.cmu.cs.diamond.snapfind2.SnapFindSearch;
 
 public abstract class AbstractNeuriteFilter implements SnapFindSearch {
@@ -87,57 +88,120 @@ public abstract class AbstractNeuriteFilter implements SnapFindSearch {
 
         return new Annotator() {
             public String annotate(Result r) {
-                int key = Util.extractInt(r.getValue("anomalous-value.int"));
-                String anomStr = "<html><p>Anomalous descriptor: <b>"
-                        + niceSelectedLabels.get(key)
-                        + "</b>: "
-                        + Util.extractString(r
-                                .getValue(selectedLabels.get(key)))
-                        + "<p>mean: "
-                        + Util.extractDouble(r
-                                .getValue("anomalous-value-mean.double"))
-                        + "<p>stddev: "
-                        + Util.extractDouble(r
-                                .getValue("anomalous-value-stddev.double"))
-                        + "<p>object count: "
-                        + Util.extractInt(r
-                                .getValue("anomalous-value-count.int"))
-                        + "<p>server: "
-                        + Util.extractString(r.getValue("Device-Name"))
-                        + "</html>";
 
-                return anomStr;
+                boolean useHTML = true;
+
+                DecimalFormat df = new DecimalFormat("0.###");
+                StringBuilder sb = new StringBuilder();
+
+                if (useHTML) {
+                    sb.append("<html>");
+                }
+
+                String server = r.getServerName();
+                String name = getName(r);
+                int samples = getSamples(r, 0);
+
+                for (int i = 0; i < LABELS.length; i++) {
+                    boolean isA = getIsAnomalous(r, i);
+
+                    if (useHTML) {
+                        sb.append("<p>");
+                    } else {
+                        sb.append("\n\n");
+                    }
+                    if (isA) {
+                        if (useHTML) {
+                            sb.append("<b>");
+                        }
+                        sb.append("*");
+                    }
+
+                    String descriptor = NICE_LABELS[i];
+                    double stddev = getStddev(r, i);
+                    double value = getValue(r, i);
+                    double mean = getMean(r, i);
+                    double stddevDiff = getStddevDiff(stddev, value, mean);
+                    String aboveOrBelow = getAboveOrBelow(stddevDiff, "+", "−");
+
+                    sb.append(descriptor);
+                    if (isA) {
+                        if (useHTML) {
+                            sb.append("</b>");
+                        }
+                    }
+                    sb.append(" = " + format(mean, df) + " " + aboveOrBelow
+                            + " " + format(Math.abs(stddevDiff), df) + "σ ("
+                            + format(value, df) + ")");
+                }
+
+                if (useHTML) {
+                    sb.append("<hr><p>" + name + "<p>" + server + " ["
+                            + samples + "]</html>");
+                } else {
+                    sb.append("\n---\n\n" + name + "\n\n" + server + " ["
+                            + samples + "]");
+                }
+
+                return sb.toString();
+            }
+
+            private double getValue(Result r, int descriptor) {
+                double value = Util.extractDouble(r
+                        .getValue("anomaly-descriptor-value-" + descriptor
+                                + ".double"));
+                return value;
+            }
+
+            private double getStddevDiff(double stddev, double value,
+                    double mean) {
+                double stddevDiff = (value - mean) / stddev;
+                return stddevDiff;
+            }
+
+            private double getMean(Result r, int descriptor) {
+                double mean = Util.extractDouble(r
+                        .getValue("anomaly-descriptor-mean-" + descriptor
+                                + ".double"));
+                return mean;
+            }
+
+            private double getStddev(Result r, int descriptor) {
+                double stddev = Util.extractDouble(r
+                        .getValue("anomaly-descriptor-stddev-" + descriptor
+                                + ".double"));
+                return stddev;
+            }
+
+            private boolean getIsAnomalous(Result r, int descriptor) {
+                int isAnomalous = Util.extractInt(r
+                        .getValue("anomaly-descriptor-is_anomalous-"
+                                + descriptor + ".int"));
+                return isAnomalous == 1 ? true : false;
+            }
+
+            private String getName(Result r) {
+                String name = r.getObjectName();
+                name = name.substring(name.lastIndexOf('/') + 1);
+                return name;
+            }
+
+            private String getAboveOrBelow(double stddevDiff, String above,
+                    String below) {
+                String aboveOrBelow = Math.signum(stddevDiff) >= 0.0 ? above
+                        : below;
+                return aboveOrBelow;
+            }
+
+            private int getSamples(Result r, int descriptor) {
+                int samples = Util.extractInt(r
+                        .getValue("anomaly-descriptor-count-" + descriptor
+                                + ".int"));
+                return samples;
             }
 
             public String annotateTooltip(Result r) {
-                DecimalFormat df = new DecimalFormat("0.###");
-
-                int key = Util.extractInt(r.getValue("anomalous-value.int"));
-                String descriptor = niceSelectedLabels.get(key);
-
-                double stddev = Util.extractDouble(r
-                        .getValue("anomalous-value-stddev.double"));
-                double value = Double.parseDouble(Util.extractString(r
-                        .getValue(selectedLabels.get(key))));
-                double mean = Util.extractDouble(r
-                        .getValue("anomalous-value-mean.double"));
-                double stddevDiff = (value - mean) / stddev;
-
-                int samples = Util.extractInt(r
-                        .getValue("anomalous-value-count.int"));
-                String aboveOrBelow = Math.signum(stddevDiff) >= 0.0 ? "above"
-                        : "below";
-
-                String server = r.getServerName();
-                String name = r.getObjectName();
-                name = name.substring(name.lastIndexOf('/') + 1);
-
-                return "<html><p><b>" + descriptor + "</b> = "
-                        + df.format(value) + "<p><b>"
-                        + df.format(Math.abs(stddevDiff)) + "</b> stddev <b>"
-                        + aboveOrBelow + "</b> mean of <b>" + df.format(mean)
-                        + "</b><hr><p>" + name + "<p>" + server + " ["
-                        + samples + "]</html>";
+                return annotate(r);
             }
 
             @Override
@@ -155,6 +219,14 @@ public abstract class AbstractNeuriteFilter implements SnapFindSearch {
                 return "TODO: not implemented";
             }
         };
+    }
+
+    protected String format(double d, DecimalFormat df) {
+        if (Double.isNaN(d)) {
+            return "NaN";
+        } else {
+            return df.format(d);
+        }
     }
 
     public Decorator getDecorator() {
@@ -183,7 +255,7 @@ public abstract class AbstractNeuriteFilter implements SnapFindSearch {
             FilterCode c;
 
             c = new FilterCode(new FileInputStream(
-                    "/usr/share/imagejfind/filter/fil_imagej_exec.so"));
+                    "/opt/snapfind/lib/fil_imagej_exec.so"));
 
             String macroName2 = macroName.replace(' ', '_');
             ByteArrayOutputStream macroOut = new ByteArrayOutputStream();
@@ -199,23 +271,40 @@ public abstract class AbstractNeuriteFilter implements SnapFindSearch {
 
             List<String> paramsList = new ArrayList<String>();
             for (int i = 0; i < checkboxes.length; i++) {
-                JCheckBox cb = checkboxes[i];
-                if (cb.isSelected()) {
-                    paramsList.add(LABELS[i]);
-                    paramsList.add(stddevs[i].getValue().toString());
-                }
+                paramsList.add(LABELS[i]);
+                paramsList.add(stddevs[i].getValue().toString());
             }
 
-            String anomArgs[] = new String[paramsList.size() + 2];
+            StringBuilder logicalExpression = new StringBuilder();
+            boolean anySelected = false;
+            logicalExpression.append("OR(");
+            for (int i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].isSelected()) {
+                    if (anySelected) {
+                        logicalExpression.append(",");
+                    }
+                    logicalExpression.append("$" + (i + 1));
+                    anySelected = true;
+                }
+            }
+            logicalExpression.append(")");
+
+            if (!anySelected) {
+                logicalExpression = new StringBuilder(); // clear
+            }
+
+            String anomArgs[] = new String[paramsList.size() + 3];
             anomArgs[0] = ignoreSpinner.getValue().toString(); // skip
             anomArgs[1] = UUID.randomUUID().toString(); // random value
-            System.arraycopy(paramsList.toArray(), 0, anomArgs, 2, paramsList
+            anomArgs[2] = LogicEngine
+                    .getMachineCodeForExpression(logicalExpression.toString());
+            System.arraycopy(paramsList.toArray(), 0, anomArgs, 3, paramsList
                     .size());
             c = new FilterCode(new FileInputStream(
                     "/opt/snapfind/lib/fil_anomaly.so"));
             anom = new Filter("anomaly", c, "f_eval_afilter", "f_init_afilter",
-                    "f_fini_afilter", 100, new String[] { "neurites" },
-                    anomArgs, 400);
+                    "f_fini_afilter", 1, new String[] { "neurites" }, anomArgs,
+                    400);
             System.out.println(anom);
 
         } catch (FileNotFoundException e) {
