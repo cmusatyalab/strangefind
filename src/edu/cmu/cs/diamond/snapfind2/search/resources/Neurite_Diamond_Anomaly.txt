@@ -71,8 +71,8 @@ run("Watershed");
 run("Analyze Particles...", "size=10-200 circularity=0.20-1.00 show=Masks include clear record");
 
 // record info about cells
-print("MACRO numCells: " + numCells);
 var numCells = nResults;
+print("MACRO numCells: " + numCells);
 if (numCells != 0) {
   var totalCellArea = 0;
   for (i = 0; i < nResults; i++) {
