@@ -90,6 +90,14 @@ static bool run_logic_engine(gchar **logic_code,
       lsm_not(lsmr);
       break;
 
+    case 'T':
+      lsm_push(lsmr, true);
+      break;
+
+    case 'F':
+      lsm_push(lsmr, false);
+      break;
+
     default:
       // number
       i = atoi(inst);
