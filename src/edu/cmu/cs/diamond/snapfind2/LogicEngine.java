@@ -27,6 +27,10 @@ public class LogicEngine {
     }
 
     public static String getMachineCodeForExpression(String expression) {
+        if (expression.trim().equals("")) {
+            return "F"; // false
+        }
+
         try {
             ANTLRStringStream stream = new ANTLRStringStream(expression);
 
