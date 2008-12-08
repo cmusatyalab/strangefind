@@ -126,13 +126,11 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
         JTextArea t = logicalExpressionTextArea;
 
         StringBuilder sb = new StringBuilder();
-        if (negateEasyOp) {
-            sb.append("NOT(");
-        }
-
-        sb.append(easyOp + "(");
 
         boolean someSelected = false;
+
+        // if we have exactly one, we cannot have AND or OR
+        boolean exactlyOneSelected = false;
         boolean first = true;
 
         for (int i = 0; i < checkboxes.length; i++) {
@@ -142,21 +140,29 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
 
                 if (!first) {
                     sb.append(", ");
+                    exactlyOneSelected = false;
                 } else {
                     first = false;
+                    exactlyOneSelected = true;
                 }
                 sb.append("$" + (i + 1));
             }
         }
-        sb.append(")");
-        if (negateEasyOp) {
-            sb.append(")");
-        }
 
         String text;
         if (someSelected) {
-            text = sb.toString();
+            if (exactlyOneSelected) {
+                text = sb.toString();
+            } else {
+                text = easyOp + "(" + sb.toString() + ")";
+            }
+            if (negateEasyOp) {
+                text = "NOT(" + text + ")";
+            }
         } else {
+            // should perhaps be extended to make AND or OR of the empty set
+            // equal to FALSE, and NOT of the empty set equal to TRUE,
+            // instead of always the empty string with is FALSE
             text = "";
         }
 

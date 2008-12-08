@@ -143,13 +143,19 @@ public class CircleAnomalyFilter implements SnapFindSearch {
 
             StringBuilder logicalExpression = new StringBuilder();
             boolean anySelected = false;
+            boolean exactlyOneSelected = false;
+            String lastSelected = null;
             logicalExpression.append("OR(");
             for (int i = 0; i < checkboxes.length; i++) {
                 if (checkboxes[i].isSelected()) {
                     if (anySelected) {
+                        exactlyOneSelected = false;
                         logicalExpression.append(",");
+                    } else {
+                        exactlyOneSelected = true;
                     }
-                    logicalExpression.append("$" + (i + 1));
+                    lastSelected = "$" + (i + 1);
+                    logicalExpression.append(lastSelected);
                     anySelected = true;
                 }
             }
@@ -157,6 +163,8 @@ public class CircleAnomalyFilter implements SnapFindSearch {
 
             if (!anySelected) {
                 logicalExpression = new StringBuilder(); // clear
+            } else if (exactlyOneSelected) {
+                logicalExpression = new StringBuilder(lastSelected);
             }
 
             String anomArgs[] = new String[paramsList.size() + 3];
