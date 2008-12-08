@@ -1,23 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- WARNING: Eclipse auto-generated file.
-              Any modifications will be overwritten.
-              To include a user specific buildfile here, simply create one in the same
-              directory with the processing instruction <?eclipse.ant.import?>
-              as the first entry and export the buildfile again. -->
 <project basedir="." default="build" name="SnapFind 2">
     <property environment="env"/>
-    <property name="OpenDiamond java.location" value="../opendiamond-java"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.6"/>
     <property name="source" value="1.6"/>
-    <path id="OpenDiamond java.classpath">
-        <pathelement location="${OpenDiamond java.location}/bin"/>
-    </path>
     <path id="SnapFind 2.classpath">
-        <pathelement location="bin"/>
-        <path refid="OpenDiamond java.classpath"/>
-        <pathelement location="lib/clibwrapper_jiio.jar"/>
-        <pathelement location="lib/jai_imageio.jar"/>
+        <pathelement location="/usr/lib/opendiamond-java/opendiamondjava.jar"/>
+        <pathelement location="/usr/lib64/opendiamond-java/opendiamondjava.jar"/>
+        <pathelement location="lib/antlr-3.1.1.jar"/>
         <pathelement location="lib/swingx.jar"/>
     </path>
     <target name="init">
@@ -28,37 +18,17 @@
     </target>
     <target name="clean">
         <delete dir="bin"/>
+        <delete file="src/edu/cmu/cs/diamond/snapfind2/LogicExpressionLexer.java" />
+        <delete file="src/edu/cmu/cs/diamond/snapfind2/LogicExpressionParser.java" />
     </target>
-    <target depends="clean" name="cleanall">
-        <ant antfile="${OpenDiamond java.location}/build.xml" inheritAll="false" target="clean"/>
-    </target>
-    <target depends="build-subprojects,build-project" name="build"/>
-    <target name="build-subprojects">
-        <ant antfile="${OpenDiamond java.location}/build.xml" inheritAll="false" target="build-project">
-            <propertyset>
-                <propertyref name="build.compiler"/>
-            </propertyset>
-        </ant>
-    </target>
-    <target depends="init" name="build-project">
+	<target name="build" depends="init">
         <echo message="${ant.project.name}: ${ant.file}"/>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
             <src path="src"/>
             <classpath refid="SnapFind 2.classpath"/>
         </javac>
     </target>
-    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
-    <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
-        <copy todir="${ant.library.dir}">
-            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
-        </copy>
-        <unzip dest="${ant.library.dir}">
-            <patternset includes="jdtCompilerAdapter.jar"/>
-            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
-        </unzip>
-    </target>
-    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
-        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
-        <antcall target="build"/>
+    <target depends="build" name="jar">
+        <jar destfile="snapfind2.jar" basedir="bin"/>
     </target>
 </project>
