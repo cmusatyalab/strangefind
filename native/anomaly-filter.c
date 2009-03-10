@@ -63,12 +63,6 @@ typedef struct {
   logic_stack_machine_t *lsmr;
 } context_t;
 
-static double composer_sum(double a, double b) {
-  printf(" %g + %g\n", a, b);
-  return a + b;
-}
-
-
 static bool run_logic_engine(gchar **logic_code,
 			     const bool *logic_values,
 			     logic_stack_machine_t *lsmr,
@@ -154,7 +148,6 @@ int f_init_afilter (int num_arg, char **args,
   ctx->stats = g_malloc0((stats_len + 1) * sizeof(lf_session_variable_t *));
   for (i = 0; i < stats_len; i++) {
     ctx->stats[i] = g_slice_new(lf_session_variable_t);
-    ctx->stats[i]->composer = composer_sum;
   }
 
   // fill in arrays
