@@ -56,10 +56,7 @@ import java.util.UUID;
 import javax.swing.*;
 
 import edu.cmu.cs.diamond.opendiamond.*;
-import edu.cmu.cs.diamond.snapfind2.Annotator;
-import edu.cmu.cs.diamond.snapfind2.Decorator;
-import edu.cmu.cs.diamond.snapfind2.LogicEngine;
-import edu.cmu.cs.diamond.snapfind2.SnapFindSearch;
+import edu.cmu.cs.diamond.snapfind2.*;
 
 public class CircleAnomalyFilter implements SnapFindSearch {
     public enum CircleFill {
@@ -224,7 +221,7 @@ public class CircleAnomalyFilter implements SnapFindSearch {
 
     public Decorator getDecorator() {
         return new Decorator() {
-            public void decorate(Result r, Graphics2D g, double scale) {
+            public void decorate(AnnotatedResult r, Graphics2D g, double scale) {
                 byte data[] = r.getValue("circle-data");
                 if (data == null) {
                     return;

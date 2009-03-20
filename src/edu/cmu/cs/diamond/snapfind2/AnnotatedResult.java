@@ -47,14 +47,13 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 
 import javax.imageio.ImageIO;
 
 import edu.cmu.cs.diamond.opendiamond.Result;
 import edu.cmu.cs.diamond.opendiamond.Util;
 
-public class AnnotatedResult extends Result {
+public class AnnotatedResult {
     final private Result theResult;
 
     final private String annotation;
@@ -90,21 +89,6 @@ public class AnnotatedResult extends Result {
         this.decorator = decorator;
     }
 
-    @Override
-    public byte[] getData() {
-        return theResult.getData();
-    }
-
-    @Override
-    public List<String> getKeys() {
-        return theResult.getKeys();
-    }
-
-    @Override
-    public byte[] getValue(String key) {
-        return theResult.getValue(key);
-    }
-
     public String getAnnotation() {
         return annotation;
     }
@@ -119,20 +103,10 @@ public class AnnotatedResult extends Result {
         return tooltipAnnotation;
     }
 
-    @Override
-    public String getServerName() {
-        return theResult.getServerName();
-    }
-
-    @Override
-    public String getObjectName() {
-        return theResult.getObjectName();
-    }
-
     public BufferedImage[] getImagesByHTTP() {
-        String image1 = Util.extractString(getValue("image-1"));
-        String image2 = Util.extractString(getValue("image-2"));
-        String image3 = Util.extractString(getValue("image-3"));
+        String image1 = Util.extractString(theResult.getValue("image-1"));
+        String image2 = Util.extractString(theResult.getValue("image-2"));
+        String image3 = Util.extractString(theResult.getValue("image-3"));
 
         System.out.println(image1);
         System.out.println(image2);
@@ -211,5 +185,13 @@ public class AnnotatedResult extends Result {
 
     public String getAnnotationNonHTML() {
         return nonHTMLAnnotation;
+    }
+
+    public byte[] getData() {
+        return theResult.getData();
+    }
+
+    public byte[] getValue(String key) {
+        return theResult.getValue(key);
     }
 }
