@@ -199,7 +199,7 @@ public class ThumbnailBox extends JPanel {
     protected void clearAll() {
         nextEmpty = 0;
         for (ResultViewer r : pics) {
-            r.setResult(null);
+            r.setResult(null, null);
             r.commitResult();
         }
     }
@@ -242,7 +242,7 @@ public class ThumbnailBox extends JPanel {
         // do slow activity of loading the item
         v.setResult(new AnnotatedResult(r, annotation, nonHTMLAnnotation,
                 oneLineAnnotation, tooltipAnnotation, verboseAnnotation,
-                decorator));
+                decorator), search);
 
         // update GUI
         SwingUtilities.invokeLater(new Runnable() {

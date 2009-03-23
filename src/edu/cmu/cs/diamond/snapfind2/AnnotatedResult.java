@@ -194,4 +194,8 @@ public class AnnotatedResult {
     public byte[] getValue(String key) {
         return theResult.getValue(key);
     }
+
+    Result getResult() {
+        return theResult;
+    }
 }

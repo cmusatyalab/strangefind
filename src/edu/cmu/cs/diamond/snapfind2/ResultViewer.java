@@ -50,6 +50,8 @@ import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
@@ -58,6 +60,7 @@ import javax.swing.JButton;
 
 import org.jdesktop.swingx.graphics.GraphicsUtilities;
 
+import edu.cmu.cs.diamond.opendiamond.Search;
 import edu.cmu.cs.diamond.opendiamond.Util;
 
 public class ResultViewer extends JButton implements ActionListener {
@@ -67,6 +70,8 @@ public class ResultViewer extends JButton implements ActionListener {
 
     private volatile AnnotatedResult result;
 
+    private volatile Search search;
+
     private volatile Icon thumbnail;
 
     public ResultViewer() {
@@ -75,7 +80,7 @@ public class ResultViewer extends JButton implements ActionListener {
         setHorizontalTextPosition(CENTER);
         setVerticalTextPosition(BOTTOM);
 
-        Dimension d = new Dimension(PREFERRED_WIDTH, PREFERRED_HEIGHT);
+        Dimension d = new Dimension(getPreferredWidth(), getPreferredHeight());
         setMinimumSize(d);
         setPreferredSize(d);
         setMaximumSize(d);
@@ -85,24 +90,19 @@ public class ResultViewer extends JButton implements ActionListener {
         addActionListener(this);
     }
 
-    public void setResult(AnnotatedResult r) {
+    public void setResult(AnnotatedResult r, Search s) {
         result = r;
+        search = s;
 
         if (result == null) {
             thumbnail = null;
             return;
         }
 
-        BufferedImage imgs[] = getImgs();
-
-        BufferedImage img = null;
-
-        if (imgs.length > 0) {
-            img = imgs[0];
-        }
+        BufferedImage img = getImageForThumbnail();
 
         if (img == null) {
-            img = new BufferedImage(PREFERRED_WIDTH, PREFERRED_HEIGHT,
+            img = new BufferedImage(getPreferredWidth(), getPreferredHeight(),
                     BufferedImage.TYPE_INT_RGB);
         }
 
@@ -117,9 +117,9 @@ public class ResultViewer extends JButton implements ActionListener {
 
         System.out.println(labelHeight);
 
-        double scale = Util.getScaleForResize(w, h, PREFERRED_WIDTH - in.left
-                - in.right,
-                (PREFERRED_HEIGHT - in.top - in.bottom - labelHeight));
+        double scale = Util.getScaleForResize(w, h, getPreferredWidth()
+                - in.left - in.right, (getPreferredHeight() - in.top
+                - in.bottom - labelHeight));
         BufferedImage newImg;
 
         newImg = Util.scaleImage(img, scale);
@@ -129,6 +129,30 @@ public class ResultViewer extends JButton implements ActionListener {
         g.dispose();
 
         thumbnail = new ImageIcon(newImg);
+    }
+
+    private BufferedImage getImageForThumbnail() {
+        BufferedImage img = null;
+
+        // first try thumbnail (with ImageIO)
+        try {
+            img = ImageIO.read(new ByteArrayInputStream(result
+                    .getValue("thumbnail.jpeg")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (img != null) {
+            return img;
+        }
+
+        // next, fallback
+        BufferedImage imgs[] = getImgs();
+        if (imgs.length > 0) {
+            img = imgs[0];
+        }
+
+        return img;
     }
 
     public void commitResult() {
@@ -149,8 +173,16 @@ public class ResultViewer extends JButton implements ActionListener {
         // XXX this is messy and needs to be modularized
         BufferedImage img = null;
 
-        // first try ImageIO
+        // first try data (with ImageIO)
         try {
+            byte data[] = result.getData();
+            if (data.length == 0) {
+                // refetch
+                search
+                        .reevaluateResult(result.getResult(),
+                                new HashSet<String>(Arrays
+                                        .asList(new String[] { "" })));
+            }
             img = ImageIO.read(new ByteArrayInputStream(result.getData()));
         } catch (IOException e) {
             e.printStackTrace();
@@ -178,39 +210,8 @@ public class ResultViewer extends JButton implements ActionListener {
             // guess we don't have this either
         }
 
-        // everything failed, try manually
-        System.out.println("ImageIO failed, falling back to rgbimage");
-        byte data[] = result.getValue("_rgb_image.rgbimage");
-        byte tmp[] = result.getValue("_cols.int");
-
-        if (data == null || tmp == null) {
-            return new BufferedImage[0];
-        }
-
-        int w = Util.extractInt(tmp);
-        tmp = result.getValue("_rows.int");
-
-        if (tmp == null) {
-            return new BufferedImage[0];
-        }
-
-        int h = Util.extractInt(tmp);
-
-        System.out.println(w + "x" + h);
-
-        img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-        // XXX slow?
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-                int i = (y * w + x) * 4;
-                // System.out.println(x);
-                // System.out.println(y);
-                int val = (data[i] & 0xFF) << 16 | (data[i + 1] & 0xFF) << 8
-                        | (data[i + 2] & 0xFF);
-                img.setRGB(x, y, val);
-            }
-        }
-        return new BufferedImage[] { GraphicsUtilities.toCompatibleImage(img) };
+        // everything failed
+        return new BufferedImage[0];
     }
 
     private void possiblyNormalize(BufferedImage img) {
@@ -230,5 +231,13 @@ public class ResultViewer extends JButton implements ActionListener {
 
     public void actionPerformed(ActionEvent e) {
         new VerySimpleImageViewer(result, getImgs()).setVisible(true);
+    }
+
+    public static int getPreferredWidth() {
+        return PREFERRED_WIDTH;
+    }
+
+    public static int getPreferredHeight() {
+        return PREFERRED_HEIGHT;
     }
 }
