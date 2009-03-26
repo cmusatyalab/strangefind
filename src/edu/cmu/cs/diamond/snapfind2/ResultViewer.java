@@ -60,10 +60,17 @@ import javax.swing.JButton;
 
 import org.jdesktop.swingx.graphics.GraphicsUtilities;
 
+import edu.cmu.cs.diamond.opendiamond.Result;
 import edu.cmu.cs.diamond.opendiamond.Search;
 import edu.cmu.cs.diamond.opendiamond.Util;
 
 public class ResultViewer extends JButton implements ActionListener {
+    private static class ImageAndScale {
+        public BufferedImage img;
+
+        public double scale;
+    }
+
     private static final int PREFERRED_HEIGHT = 200;
 
     private static final int PREFERRED_WIDTH = 200;
@@ -99,7 +106,8 @@ public class ResultViewer extends JButton implements ActionListener {
             return;
         }
 
-        BufferedImage img = getImageForThumbnail();
+        ImageAndScale ias = getImageForThumbnail();
+        BufferedImage img = ias.img;
 
         if (img == null) {
             img = new BufferedImage(getPreferredWidth(), getPreferredHeight(),
@@ -125,34 +133,38 @@ public class ResultViewer extends JButton implements ActionListener {
         newImg = Util.scaleImage(img, scale);
 
         Graphics2D g = newImg.createGraphics();
-        result.decorate(g, scale);
+        result.decorate(g, scale * ias.scale);
         g.dispose();
 
         thumbnail = new ImageIcon(newImg);
     }
 
-    private BufferedImage getImageForThumbnail() {
-        BufferedImage img = null;
+    private ImageAndScale getImageForThumbnail() {
+        ImageAndScale ias = new ImageAndScale();
+        ias.scale = 1.0;
 
         // first try thumbnail (with ImageIO)
         try {
-            img = ImageIO.read(new ByteArrayInputStream(result
+            ias.img = ImageIO.read(new ByteArrayInputStream(result
                     .getValue("thumbnail.jpeg")));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        if (img != null) {
-            return img;
+        if (ias.img != null) {
+            // compute server scale for thumbnail
+            ias.scale = (double) ias.img.getWidth()
+                    / (double) Util.extractInt(result.getValue("_cols.int"));
+            return ias;
         }
 
         // next, fallback
         BufferedImage imgs[] = getImgs();
         if (imgs.length > 0) {
-            img = imgs[0];
+            ias.img = imgs[0];
         }
 
-        return img;
+        return ias;
     }
 
     public void commitResult() {
@@ -174,16 +186,17 @@ public class ResultViewer extends JButton implements ActionListener {
         BufferedImage img = null;
 
         // first try data (with ImageIO)
+        Result diamondResult = result.getResult();
         try {
-            byte data[] = result.getData();
+            byte data[] = diamondResult.getData();
             if (data.length == 0) {
                 // refetch
-                search
-                        .reevaluateResult(result.getResult(),
-                                new HashSet<String>(Arrays
-                                        .asList(new String[] { "" })));
+                diamondResult = search
+                        .reevaluateResult(diamondResult, new HashSet<String>(
+                                Arrays.asList(new String[] { "" })));
             }
-            img = ImageIO.read(new ByteArrayInputStream(result.getData()));
+            img = ImageIO
+                    .read(new ByteArrayInputStream(diamondResult.getData()));
         } catch (IOException e) {
             e.printStackTrace();
         }

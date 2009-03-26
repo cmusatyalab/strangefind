@@ -40,6 +40,8 @@
 
 package edu.cmu.cs.diamond.snapfind2;
 
+import java.util.Set;
+
 import javax.swing.JPanel;
 
 import edu.cmu.cs.diamond.opendiamond.DoubleComposer;
@@ -58,4 +60,6 @@ public interface SnapFindSearch {
     DoubleComposer getDoubleComposer();
 
     String[] getApplicationDependencies();
+
+    Set<String> getPushAttributes();
 }

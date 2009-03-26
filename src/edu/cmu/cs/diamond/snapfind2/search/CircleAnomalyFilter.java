@@ -49,9 +49,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.UUID;
 
 import javax.swing.*;
 
@@ -484,5 +483,30 @@ public class CircleAnomalyFilter implements SnapFindSearch {
         }
 
         return circles;
+    }
+
+    @Override
+    public Set<String> getPushAttributes() {
+        Set<String> set = new HashSet<String>();
+        addAnomalyAttributesToSet(set);
+        set.add("thumbnail.jpeg");
+        set.add("circle-data");
+        set.add("Device-Name");
+        set.add("Display-Name");
+        set.add("_cols.int");
+        set.add("_rows.int");
+
+        return set;
+    }
+
+    private void addAnomalyAttributesToSet(Set<String> set) {
+        String a = "anomaly-descriptor-";
+        for (int i = 0; i < LABELS.length; i++) {
+            set.add(a + "value-" + i + ".double");
+            set.add(a + "mean-" + i + ".double");
+            set.add(a + "stddev-" + i + ".double");
+            set.add(a + "count-" + i + ".int");
+            set.add(a + "is_anomalous-" + i + ".int");
+        }
     }
 }

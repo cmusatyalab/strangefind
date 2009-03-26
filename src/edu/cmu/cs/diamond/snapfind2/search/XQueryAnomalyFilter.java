@@ -647,4 +647,8 @@ public class XQueryAnomalyFilter implements SnapFindSearch {
         return result;
     }
 
+    @Override
+    public Set<String> getPushAttributes() {
+        return null;
+    }
 }

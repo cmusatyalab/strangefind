@@ -44,6 +44,7 @@ import java.io.*;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.swing.*;
@@ -375,4 +376,8 @@ public abstract class AbstractNeuriteFilter implements SnapFindSearch {
         return result;
     }
 
+    @Override
+    public Set<String> getPushAttributes() {
+        return null;
+    }
 }

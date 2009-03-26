@@ -459,6 +459,11 @@ public class SnapFind2 extends JFrame {
             s.setApplicationDependencies(searchList
                     .getApplicationDependencies());
             search.setSearchlet(s);
+
+            Set<String> pushAttributes = searchList.getPushAttributes();
+            if (pushAttributes != null) {
+                search.setPushAttributes(pushAttributes);
+            }
         }
     }
 

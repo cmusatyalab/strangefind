@@ -42,9 +42,7 @@ package edu.cmu.cs.diamond.snapfind2;
 
 import java.awt.Dimension;
 import java.awt.Insets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -118,5 +116,18 @@ public class SearchList extends JPanel {
             f.addAll(Arrays.asList(s.getApplicationDependencies()));
         }
         return f.toArray(new String[0]);
+    }
+
+    public Set<String> getPushAttributes() {
+        Set<String> set = new HashSet<String>();
+        for (SnapFindSearch s : searches) {
+            set.addAll(s.getPushAttributes());
+        }
+
+        if (set.contains(null)) {
+            return null;
+        } else {
+            return set;
+        }
     }
 }
