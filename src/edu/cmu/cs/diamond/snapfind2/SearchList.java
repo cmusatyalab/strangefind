@@ -119,12 +119,18 @@ public class SearchList extends JPanel {
     }
 
     public Set<String> getPushAttributes() {
+        boolean anyPushAttributes = false;
+
         Set<String> set = new HashSet<String>();
         for (SnapFindSearch s : searches) {
-            set.addAll(s.getPushAttributes());
+            Set<String> z = s.getPushAttributes();
+            if (z != null) {
+                anyPushAttributes = true;
+                set.addAll(s.getPushAttributes());
+            }
         }
 
-        if (set.contains(null)) {
+        if (set.contains(null) || !anyPushAttributes) {
             return null;
         } else {
             return set;

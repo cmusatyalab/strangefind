@@ -145,8 +145,10 @@ public class ResultViewer extends JButton implements ActionListener {
 
         // first try thumbnail (with ImageIO)
         try {
-            ias.img = ImageIO.read(new ByteArrayInputStream(result
-                    .getValue("thumbnail.jpeg")));
+            byte[] data = result.getValue("thumbnail.jpeg");
+            if (data != null) {
+                ias.img = ImageIO.read(new ByteArrayInputStream(data));
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
