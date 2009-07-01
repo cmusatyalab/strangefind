@@ -362,7 +362,7 @@ public class SnapFind2 extends JFrame {
         // buttons
         defineScopeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                ScopeSource.commitScope();
+                search.defineScope();
             }
         });
 
@@ -440,9 +440,6 @@ public class SnapFind2 extends JFrame {
     }
 
     protected void prepareSearch() {
-        // load scope
-        search.setScope(ScopeSource.getPredefinedScopeList().get(0));
-
         // read all enabled searches
         Filter[] filters = searchList.getFilters();
 
@@ -462,6 +459,8 @@ public class SnapFind2 extends JFrame {
 
             Set<String> pushAttributes = searchList.getPushAttributes();
             if (pushAttributes != null) {
+                System.out
+                        .println("setting push attributes: " + pushAttributes);
                 search.setPushAttributes(pushAttributes);
             }
         }
