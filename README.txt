@@ -1,4 +1,3 @@
-SnapFind 2
 StrangeFind
 
 Carnegie Mellon University

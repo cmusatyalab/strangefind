@@ -1,36 +1,36 @@
 /*
- *  SnapFind 2, the Java-based Diamond shell
+ *  StrangeFind, an anomaly detector for the OpenDiamond platform
  *
  *  Copyright (c) 2007-2008 Carnegie Mellon University
  *  All rights reserved.
  *
- *  SnapFind 2 is free software: you can redistribute it and/or modify
+ *  StrangeFind is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, version 2.
  *
- *  SnapFind 2 is distributed in the hope that it will be useful,
+ *  StrangeFind is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with SnapFind 2. If not, see <http://www.gnu.org/licenses/>.
+ *  along with StrangeFind. If not, see <http://www.gnu.org/licenses/>.
  *
- *  Linking SnapFind 2 statically or dynamically with other modules is
- *  making a combined work based on SnapFind 2. Thus, the terms and
+ *  Linking StrangeFind statically or dynamically with other modules is
+ *  making a combined work based on StrangeFind. Thus, the terms and
  *  conditions of the GNU General Public License cover the whole
  *  combination.
  * 
  *  In addition, as a special exception, the copyright holders of
- *  SnapFind 2 give you permission to combine SnapFind 2 with free software
+ *  StrangeFind give you permission to combine StrangeFind with free software
  *  programs or libraries that are released under the GNU LGPL or the
  *  Eclipse Public License 1.0. You may copy and distribute such a system
- *  following the terms of the GNU GPL for SnapFind 2 and the licenses of
+ *  following the terms of the GNU GPL for StrangeFind and the licenses of
  *  the other code concerned, provided that you include the source code of
  *  that other code when and as the GNU GPL requires distribution of source
  *  code.
  *
- *  Note that people who make modified versions of SnapFind 2 are not
+ *  Note that people who make modified versions of StrangeFind are not
  *  obligated to grant this special exception for their modified versions;
  *  it is their choice whether to do so. The GNU General Public License
  *  gives permission to release a modified version without this exception;
@@ -38,7 +38,7 @@
  *  which carries forward this exception.
  */
 
-package edu.cmu.cs.diamond.snapfind2;
+package edu.cmu.cs.diamond.strangefind;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

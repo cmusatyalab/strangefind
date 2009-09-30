@@ -38,7 +38,7 @@
  *  which carries forward this exception.
  */
 
-package edu.cmu.cs.diamond.snapfind2.search;
+package edu.cmu.cs.diamond.strangefind.search;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -55,9 +55,9 @@ import java.util.List;
 import javax.swing.*;
 
 import edu.cmu.cs.diamond.opendiamond.*;
-import edu.cmu.cs.diamond.snapfind2.*;
+import edu.cmu.cs.diamond.strangefind.*;
 
-public class CircleAnomalyFilter implements SnapFindSearch {
+public class CircleAnomalyFilter implements StrangeFindSearch {
     public enum CircleFill {
         CIRCLE_FILL_DASHED, CIRCLE_FILL_SOLID, CIRCLE_FILL_HAIRLINE
     }

@@ -38,7 +38,7 @@
  *  which carries forward this exception.
  */
 
-package edu.cmu.cs.diamond.snapfind2.search;
+package edu.cmu.cs.diamond.strangefind.search;
 
 import java.io.*;
 import java.text.DecimalFormat;
@@ -50,12 +50,12 @@ import java.util.UUID;
 import javax.swing.*;
 
 import edu.cmu.cs.diamond.opendiamond.*;
-import edu.cmu.cs.diamond.snapfind2.Annotator;
-import edu.cmu.cs.diamond.snapfind2.Decorator;
-import edu.cmu.cs.diamond.snapfind2.LogicEngine;
-import edu.cmu.cs.diamond.snapfind2.SnapFindSearch;
+import edu.cmu.cs.diamond.strangefind.Annotator;
+import edu.cmu.cs.diamond.strangefind.Decorator;
+import edu.cmu.cs.diamond.strangefind.LogicEngine;
+import edu.cmu.cs.diamond.strangefind.StrangeFindSearch;
 
-public abstract class AbstractNeuriteFilter implements SnapFindSearch {
+public abstract class AbstractNeuriteFilter implements StrangeFindSearch {
 
     final private String macroName;
 

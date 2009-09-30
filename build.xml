@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project basedir="." default="build" name="SnapFind 2">
+<project basedir="." default="build" name="StrangeFind">
     <property environment="env"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.6"/>
     <property name="source" value="1.6"/>
-    <path id="SnapFind 2.classpath">
+    <path id="StrangeFind.classpath">
         <pathelement location="/usr/lib/opendiamond-java/opendiamondjava.jar"/>
         <pathelement location="/usr/lib64/opendiamond-java/opendiamondjava.jar"/>
         <pathelement location="lib/antlr-3.1.1.jar"/>
@@ -18,17 +18,17 @@
     </target>
     <target name="clean">
         <delete dir="bin"/>
-        <delete file="src/edu/cmu/cs/diamond/snapfind2/LogicExpressionLexer.java" />
-        <delete file="src/edu/cmu/cs/diamond/snapfind2/LogicExpressionParser.java" />
+        <delete file="src/edu/cmu/cs/diamond/strangefind/LogicExpressionLexer.java" />
+        <delete file="src/edu/cmu/cs/diamond/strangefind/LogicExpressionParser.java" />
     </target>
 	<target name="build" depends="init">
         <echo message="${ant.project.name}: ${ant.file}"/>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" encoding="UTF-8">
             <src path="src"/>
-            <classpath refid="SnapFind 2.classpath"/>
+            <classpath refid="StrangeFind.classpath"/>
         </javac>
     </target>
     <target depends="build" name="jar">
-        <jar destfile="snapfind2.jar" basedir="bin"/>
+        <jar destfile="strangefind.jar" basedir="bin"/>
     </target>
 </project>

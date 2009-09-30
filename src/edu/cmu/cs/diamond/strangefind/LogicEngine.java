@@ -1,4 +1,4 @@
-package edu.cmu.cs.diamond.snapfind2;
+package edu.cmu.cs.diamond.strangefind;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
@@ -6,7 +6,7 @@ import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.Tree;
 
-import edu.cmu.cs.diamond.snapfind2.LogicExpressionParser.expr_return;
+import edu.cmu.cs.diamond.strangefind.LogicExpressionParser.expr_return;
 
 public class LogicEngine {
 

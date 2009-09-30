@@ -38,7 +38,7 @@
  *  which carries forward this exception.
  */
 
-package edu.cmu.cs.diamond.snapfind2.search;
+package edu.cmu.cs.diamond.strangefind.search;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -53,12 +53,12 @@ import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import edu.cmu.cs.diamond.opendiamond.*;
-import edu.cmu.cs.diamond.snapfind2.Annotator;
-import edu.cmu.cs.diamond.snapfind2.Decorator;
-import edu.cmu.cs.diamond.snapfind2.LogicEngine;
-import edu.cmu.cs.diamond.snapfind2.SnapFindSearch;
+import edu.cmu.cs.diamond.strangefind.Annotator;
+import edu.cmu.cs.diamond.strangefind.Decorator;
+import edu.cmu.cs.diamond.strangefind.LogicEngine;
+import edu.cmu.cs.diamond.strangefind.StrangeFindSearch;
 
-public class XQueryAnomalyFilter implements SnapFindSearch {
+public class XQueryAnomalyFilter implements StrangeFindSearch {
 
     private boolean negateEasyOp;
 

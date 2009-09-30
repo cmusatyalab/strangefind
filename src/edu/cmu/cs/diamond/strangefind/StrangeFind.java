@@ -1,36 +1,36 @@
 /*
- *  SnapFind 2, the Java-based Diamond shell
+ *  StrangeFind, an anomaly detector for the OpenDiamond platform
  *
  *  Copyright (c) 2007-2008 Carnegie Mellon University
  *  All rights reserved.
  *
- *  SnapFind 2 is free software: you can redistribute it and/or modify
+ *  StrangeFind is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, version 2.
  *
- *  SnapFind 2 is distributed in the hope that it will be useful,
+ *  StrangeFind is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with SnapFind 2. If not, see <http://www.gnu.org/licenses/>.
+ *  along with StrangeFind. If not, see <http://www.gnu.org/licenses/>.
  *
- *  Linking SnapFind 2 statically or dynamically with other modules is
- *  making a combined work based on SnapFind 2. Thus, the terms and
+ *  Linking StrangeFind statically or dynamically with other modules is
+ *  making a combined work based on StrangeFind. Thus, the terms and
  *  conditions of the GNU General Public License cover the whole
  *  combination.
  * 
  *  In addition, as a special exception, the copyright holders of
- *  SnapFind 2 give you permission to combine SnapFind 2 with free software
+ *  StrangeFind give you permission to combine StrangeFind with free software
  *  programs or libraries that are released under the GNU LGPL or the
  *  Eclipse Public License 1.0. You may copy and distribute such a system
- *  following the terms of the GNU GPL for SnapFind 2 and the licenses of
+ *  following the terms of the GNU GPL for StrangeFind and the licenses of
  *  the other code concerned, provided that you include the source code of
  *  that other code when and as the GNU GPL requires distribution of source
  *  code.
  *
- *  Note that people who make modified versions of SnapFind 2 are not
+ *  Note that people who make modified versions of StrangeFind are not
  *  obligated to grant this special exception for their modified versions;
  *  it is their choice whether to do so. The GNU General Public License
  *  gives permission to release a modified version without this exception;
@@ -38,7 +38,7 @@
  *  which carries forward this exception.
  */
 
-package edu.cmu.cs.diamond.snapfind2;
+package edu.cmu.cs.diamond.strangefind;
 
 import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
 import static java.awt.event.KeyEvent.VK_A;
@@ -75,19 +75,19 @@ import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
 
 import edu.cmu.cs.diamond.opendiamond.*;
-import edu.cmu.cs.diamond.snapfind2.search.CircleAnomalyFilter;
-import edu.cmu.cs.diamond.snapfind2.search.NeuriteAnomalyFilter;
-import edu.cmu.cs.diamond.snapfind2.search.NeuriteMultiplaneAnomalyFilter;
-import edu.cmu.cs.diamond.snapfind2.search.XQueryAnomalyFilter;
+import edu.cmu.cs.diamond.strangefind.search.CircleAnomalyFilter;
+import edu.cmu.cs.diamond.strangefind.search.NeuriteAnomalyFilter;
+import edu.cmu.cs.diamond.strangefind.search.NeuriteMultiplaneAnomalyFilter;
+import edu.cmu.cs.diamond.strangefind.search.XQueryAnomalyFilter;
 
-public class SnapFind2 extends JFrame {
+public class StrangeFind extends JFrame {
 
     private static final String HTTP_IMAGE_HOST_PREFS_KEY = "http-image-host";
 
     public static final int INITIAL_SESSION_VARIABLES_UPDATE_INTERVAL = 5;
 
     final private static Preferences prefs = Preferences
-            .userNodeForPackage(SnapFind2.class);
+            .userNodeForPackage(StrangeFind.class);
 
     public class SessionVariablesWindow extends JFrame {
         public SessionVariablesWindow() {
@@ -353,7 +353,7 @@ public class SnapFind2 extends JFrame {
 
     private JFrame sessionVariablesWindow;
 
-    public SnapFind2() {
+    public StrangeFind() {
         super("Diamond Shell");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -424,7 +424,7 @@ public class SnapFind2 extends JFrame {
         resetStateButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int result = JOptionPane.showConfirmDialog(SnapFind2.this,
+                int result = JOptionPane.showConfirmDialog(StrangeFind.this,
                         "Really clear state?", "Confirm",
                         JOptionPane.OK_CANCEL_OPTION);
 
@@ -733,7 +733,7 @@ public class SnapFind2 extends JFrame {
         mi = new JMenuItem("XQuery Anomaly Detector");
         mi.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                searchList.addSearch(new XQueryAnomalyFilter(SnapFind2.this));
+                searchList.addSearch(new XQueryAnomalyFilter(StrangeFind.this));
             }
         });
         itemNew.add(mi);
@@ -761,7 +761,7 @@ public class SnapFind2 extends JFrame {
     }
 
     public static void main(String[] args) {
-        SnapFind2 sf = new SnapFind2();
+        StrangeFind sf = new StrangeFind();
         sf.setLocationByPlatform(true);
         sf.setVisible(true);
     }

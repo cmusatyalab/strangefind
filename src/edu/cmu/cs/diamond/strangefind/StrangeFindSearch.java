@@ -1,5 +1,5 @@
 /*
- *  StrangeFind, an anomaly detection system for the OpenDiamond Platform
+ *  StrangeFind, an anomaly detector for the OpenDiamond platform
  *
  *  Copyright (c) 2007-2008 Carnegie Mellon University
  *  All rights reserved.
@@ -38,12 +38,28 @@
  *  which carries forward this exception.
  */
 
-package edu.cmu.cs.diamond.snapfind2.search;
+package edu.cmu.cs.diamond.strangefind;
 
-final public class NeuriteMultiplaneAnomalyFilter extends AbstractNeuriteFilter {
+import java.util.Set;
 
-    public NeuriteMultiplaneAnomalyFilter() {
-        super("Neurite Multiplane Diamond Anomaly",
-                "Neurite Multiplane Anomaly Detector");
-    }
+import javax.swing.JPanel;
+
+import edu.cmu.cs.diamond.opendiamond.DoubleComposer;
+import edu.cmu.cs.diamond.opendiamond.Filter;
+
+public interface StrangeFindSearch {
+    // XXX rethink
+    JPanel getInterface();
+
+    Filter[] getFilters();
+
+    Annotator getAnnotator();
+
+    Decorator getDecorator();
+
+    DoubleComposer getDoubleComposer();
+
+    String[] getApplicationDependencies();
+
+    Set<String> getPushAttributes();
 }

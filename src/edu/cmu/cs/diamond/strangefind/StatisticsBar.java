@@ -1,5 +1,5 @@
 /*
- *  StrangeFind, an anomaly detection system for the OpenDiamond Platform
+ *  StrangeFind, an anomaly detector for the OpenDiamond platform
  *
  *  Copyright (c) 2007-2008 Carnegie Mellon University
  *  All rights reserved.
@@ -38,11 +38,45 @@
  *  which carries forward this exception.
  */
 
-package edu.cmu.cs.diamond.snapfind2.search;
+package edu.cmu.cs.diamond.strangefind;
 
-final public class NeuriteAnomalyFilter extends AbstractNeuriteFilter {
+import javax.swing.JProgressBar;
 
-    public NeuriteAnomalyFilter() {
-        super("Neurite Diamond Anomaly", "Neurite Anomaly Detector");
+import edu.cmu.cs.diamond.opendiamond.ServerStatistics;
+
+public class StatisticsBar extends JProgressBar {
+    public StatisticsBar() {
+        super();
+        setStringPainted(true);
+        clear();
+    }
+
+    public void clear() {
+        setNumbers(0, 0, 0);
+    }
+
+    private void setNumbers(int total, int searched, int dropped) {
+        setIndeterminate(false);
+        setString("Total: " + total + ", Searched: " + searched + ", Dropped: "
+                + dropped);
+        setMaximum(total);
+        setValue(searched);
+    }
+
+    public void update(ServerStatistics stats[]) {
+        int t = 0;
+        int s = 0;
+        int d = 0;
+        for (ServerStatistics ss : stats) {
+            t += ss.getTotalObjects();
+            s += ss.getProcessedObjects();
+            d += ss.getDroppedObjects();
+        }
+        setNumbers(t, s, d);
+    }
+    
+    public void setIndeterminateMessage(String message) {
+        setIndeterminate(true);
+        setString(message);
     }
 }

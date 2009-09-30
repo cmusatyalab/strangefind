@@ -1,4 +1,4 @@
-Anomaly Detection Filters for SnapFind2/StrangeFind
+Anomaly Detection Filters for StrangeFind
 
 Carnegie Mellon University
 http://diamond.cs.cmu.edu/
