@@ -43,16 +43,19 @@ package edu.cmu.cs.diamond.strangefind;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.TimerTask;
 
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.table.AbstractTableModel;
 
-import edu.cmu.cs.diamond.opendiamond.DoubleComposer;
-import edu.cmu.cs.diamond.opendiamond.Result;
-import edu.cmu.cs.diamond.opendiamond.Search;
-import edu.cmu.cs.diamond.opendiamond.ServerStatistics;
+import edu.cmu.cs.diamond.opendiamond.*;
 
 public class ThumbnailBox extends JPanel {
     volatile protected int nextEmpty = 0;
@@ -71,6 +74,8 @@ public class ThumbnailBox extends JPanel {
 
     protected Search search;
 
+    protected SearchFactory factory;
+
     final protected Object fullSynchronizer = new Object();
 
     private Annotator annotator;
@@ -87,9 +92,18 @@ public class ThumbnailBox extends JPanel {
         public void actionPerformed(ActionEvent e) {
             // because it is Swing Timer, this is called from the
             // AWT dispatch thread
-            ServerStatistics[] serverStats = search.getStatistics();
+            Map<String, ServerStatistics> serverStats = null;
+            try {
+                serverStats = search.getStatistics();
+            } catch (SearchClosedException e1) {
+                return;
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
             boolean hasStats = false;
-            for (ServerStatistics s : serverStats) {
+            for (ServerStatistics s : serverStats.values()) {
                 if (s.getTotalObjects() != 0) {
                     hasStats = true;
                     break;
@@ -113,7 +127,16 @@ public class ThumbnailBox extends JPanel {
             @Override
             public void run() {
                 // System.out.println("************timer task running");
-                search.mergeSessionVariables(globalSessionVariables, composer);
+                try {
+                    search.mergeSessionVariables(globalSessionVariables,
+                            composer);
+                } catch (SearchClosedException e) {
+                    // ignore
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 sessionVariablesTableModel.fireTableDataChanged();
             }
         };
@@ -129,13 +152,22 @@ public class ThumbnailBox extends JPanel {
 
     private TimerTask sessionVarsTimerTask;
 
+    private final JButton stopButton;
+
+    private final JButton startButton;
+
     public ThumbnailBox(Map<String, Double> globalSessionVariables,
-            AbstractTableModel sessionVariablesTableModel) {
+            AbstractTableModel sessionVariablesTableModel, JButton stopButton,
+            JButton startButton) {
         super();
 
         this.globalSessionVariables = globalSessionVariables;
 
         this.sessionVariablesTableModel = sessionVariablesTableModel;
+
+        this.stopButton = stopButton;
+
+        this.startButton = startButton;
 
         Box v = Box.createVerticalBox();
         add(v);
@@ -199,7 +231,7 @@ public class ThumbnailBox extends JPanel {
     protected void clearAll() {
         nextEmpty = 0;
         for (ResultViewer r : pics) {
-            r.setResult(null, null);
+            r.setResult(null, null, null);
             r.commitResult();
         }
     }
@@ -242,7 +274,7 @@ public class ThumbnailBox extends JPanel {
         // do slow activity of loading the item
         v.setResult(new AnnotatedResult(r, annotation, nonHTMLAnnotation,
                 oneLineAnnotation, tooltipAnnotation, verboseAnnotation,
-                decorator), search);
+                decorator), search, factory);
 
         // update GUI
         SwingUtilities.invokeLater(new Runnable() {
@@ -290,12 +322,10 @@ public class ThumbnailBox extends JPanel {
                 }
             } catch (InterruptedException e) {
                 System.out.println("INTERRUPTED !");
+            } catch (IOException e) {
+                e.printStackTrace();
             } finally {
                 running = false;
-
-                System.out.println("FINALLY stopping search");
-                search.stop();
-                System.out.println(" done");
 
                 // clear anything not shown
                 setNextEnabledOnAWT(false);
@@ -307,9 +337,40 @@ public class ThumbnailBox extends JPanel {
                 updateTimers();
 
                 // one more stats
+                try {
+                    SwingUtilities.invokeAndWait(new Runnable() {
+                        public void run() {
+                            try {
+                                System.out.println("last stats gathering");
+                                stats.update(search.getStatistics());
+                            } catch (SearchClosedException e) {
+                                // ignore
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (InterruptedException e1) {
+                    Thread.currentThread().interrupt();
+                } catch (InvocationTargetException e1) {
+                    e1.printStackTrace();
+                }
+
+                System.out.println("FINALLY stopping search");
+                try {
+                    search.close();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                System.out.println(" done");
+
                 SwingUtilities.invokeLater(new Runnable() {
+                    @Override
                     public void run() {
-                        stats.update(search.getStatistics());
+                        startButton.setEnabled(true);
+                        stopButton.setEnabled(false);
                     }
                 });
 
@@ -318,9 +379,9 @@ public class ThumbnailBox extends JPanel {
         }
     }
 
-    public void stop() {
+    public void stop() throws InterruptedException {
         running = false;
-        search.stop();
+        search.close();
 
         Thread rg = resultGatherer;
         if (rg != null) {
@@ -359,8 +420,9 @@ public class ThumbnailBox extends JPanel {
         }
     }
 
-    public void start(Search s) {
+    public void start(Search s, SearchFactory f) {
         search = s;
+        factory = f;
 
         running = true;
 
@@ -371,7 +433,6 @@ public class ThumbnailBox extends JPanel {
         new Thread(new Runnable() {
             public void run() {
                 System.out.println("start search");
-                search.start();
 
                 searchRunning = true;
                 updateTimers();

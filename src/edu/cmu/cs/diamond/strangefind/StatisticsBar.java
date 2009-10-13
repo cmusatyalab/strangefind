@@ -40,6 +40,8 @@
 
 package edu.cmu.cs.diamond.strangefind;
 
+import java.util.Map;
+
 import javax.swing.JProgressBar;
 
 import edu.cmu.cs.diamond.opendiamond.ServerStatistics;
@@ -63,18 +65,18 @@ public class StatisticsBar extends JProgressBar {
         setValue(searched);
     }
 
-    public void update(ServerStatistics stats[]) {
+    public void update(Map<String, ServerStatistics> serverStats) {
         int t = 0;
         int s = 0;
         int d = 0;
-        for (ServerStatistics ss : stats) {
+        for (ServerStatistics ss : serverStats.values()) {
             t += ss.getTotalObjects();
             s += ss.getProcessedObjects();
             d += ss.getDroppedObjects();
         }
         setNumbers(t, s, d);
     }
-    
+
     public void setIndeterminateMessage(String message) {
         setIndeterminate(true);
         setString(message);

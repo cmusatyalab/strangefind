@@ -52,7 +52,11 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import edu.cmu.cs.diamond.opendiamond.*;
+import edu.cmu.cs.diamond.opendiamond.DoubleComposer;
+import edu.cmu.cs.diamond.opendiamond.Filter;
+import edu.cmu.cs.diamond.opendiamond.FilterCode;
+import edu.cmu.cs.diamond.opendiamond.Result;
+import edu.cmu.cs.diamond.opendiamond.Util;
 import edu.cmu.cs.diamond.strangefind.Annotator;
 import edu.cmu.cs.diamond.strangefind.Decorator;
 import edu.cmu.cs.diamond.strangefind.LogicEngine;
@@ -464,16 +468,15 @@ public class XQueryAnomalyFilter implements StrangeFindSearch {
         try {
             FilterCode c;
 
-            c = new FilterCode(new FileInputStream(
-                    "/opt/snapfind/lib/fil_xquery.so"));
+            c = new FilterCode(new FileInputStream("/tmp/fil_xquery.so"));
 
             byte queryBlob[] = generateQueryBlob();
 
             System.out.println("queryBlob: " + new String(queryBlob));
 
             xquery = new Filter("xquery", c, "f_eval_xquery", "f_init_xquery",
-                    "f_fini_xquery", 0, new String[0], new String[] {}, 400,
-                    queryBlob);
+                    "f_fini_xquery", 0, Arrays.asList(new String[0]), Arrays
+                            .asList(new String[] {}), 400, queryBlob);
             System.out.println(xquery);
 
             List<String> paramsList = new ArrayList<String>();
@@ -490,11 +493,11 @@ public class XQueryAnomalyFilter implements StrangeFindSearch {
                             .getText()); // machine code
             System.arraycopy(paramsList.toArray(), 0, anomArgs, 3, paramsList
                     .size());
-            c = new FilterCode(new FileInputStream(
-                    "/opt/snapfind/lib/fil_anomaly.so"));
+            c = new FilterCode(new FileInputStream("/tmp/fil_anomaly.so"));
             anom = new Filter("anomaly", c, "f_eval_afilter", "f_init_afilter",
-                    "f_fini_afilter", 1, new String[] { "xquery" }, anomArgs,
-                    400);
+                    "f_fini_afilter", 1, Arrays
+                            .asList(new String[] { "xquery" }), Arrays
+                            .asList(anomArgs), 400);
             System.out.println(anom);
 
         } catch (FileNotFoundException e) {

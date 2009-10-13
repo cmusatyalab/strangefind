@@ -41,19 +41,7 @@
 package edu.cmu.cs.diamond.strangefind;
 
 import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
-import static java.awt.event.KeyEvent.VK_A;
-import static java.awt.event.KeyEvent.VK_C;
-import static java.awt.event.KeyEvent.VK_D;
-import static java.awt.event.KeyEvent.VK_E;
-import static java.awt.event.KeyEvent.VK_H;
-import static java.awt.event.KeyEvent.VK_I;
-import static java.awt.event.KeyEvent.VK_L;
-import static java.awt.event.KeyEvent.VK_N;
-import static java.awt.event.KeyEvent.VK_O;
-import static java.awt.event.KeyEvent.VK_P;
-import static java.awt.event.KeyEvent.VK_Q;
-import static java.awt.event.KeyEvent.VK_S;
-import static java.awt.event.KeyEvent.VK_V;
+import static java.awt.event.KeyEvent.*;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -107,7 +95,13 @@ public class StrangeFind extends JFrame {
 
             clear.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    clearSessionVariables();
+                    try {
+                        clearSessionVariables();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    } catch (InterruptedException e1) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
             });
 
@@ -227,7 +221,16 @@ public class StrangeFind extends JFrame {
                     return;
                 }
 
-                ServerStatistics stats[] = search.getStatistics();
+                Map<String, ServerStatistics> stats = null;
+                try {
+                    stats = search.getStatistics();
+                } catch (SearchClosedException e1) {
+                    return;
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
                 boolean revalidate = false;
 
                 // clear all
@@ -238,8 +241,10 @@ public class StrangeFind extends JFrame {
                 }
 
                 // update
-                for (ServerStatistics s : stats) {
-                    String name = s.getHostname();
+                for (Map.Entry<String, ServerStatistics> entry : stats
+                        .entrySet()) {
+                    String name = entry.getKey();
+                    ServerStatistics s = entry.getValue();
                     JProgressBar jp = servers.get(name);
                     if (jp == null) {
                         // create new
@@ -320,7 +325,9 @@ public class StrangeFind extends JFrame {
 
     final protected JButton resetStateButton = new JButton("Clear Session");
 
-    final protected Search search = Search.getSharedInstance();
+    protected Search search;
+
+    protected SearchFactory factory;
 
     final private Map<String, Double> globalSessionVariables = new TreeMap<String, Double>();
 
@@ -347,22 +354,35 @@ public class StrangeFind extends JFrame {
     };
 
     final protected ThumbnailBox results = new ThumbnailBox(
-            globalSessionVariables, sessionVariablesTableModel);
+            globalSessionVariables, sessionVariablesTableModel, stopButton,
+            startButton);
 
     private JFrame progressWindow;
 
     private JFrame sessionVariablesWindow;
 
+    protected Map<String, Cookie> cookieMap;
+
     public StrangeFind() {
         super("Diamond Shell");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+        try {
+            cookieMap = Cookie.createDefaultCookieMap();
+        } catch (IOException e2) {
+            e2.printStackTrace();
+        }
 
         setupMenu();
 
         // buttons
         defineScopeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                search.defineScope();
+                try {
+                    cookieMap = Cookie.createDefaultCookieMap();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
             }
         });
 
@@ -372,7 +392,15 @@ public class StrangeFind extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 // start
                 startButton.setEnabled(false);
-                prepareSearch();
+                stopButton.setEnabled(true);
+                factory = prepareSearchFactory();
+                try {
+                    search = prepareSearch();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                } catch (InterruptedException e1) {
+                    Thread.currentThread().interrupt();
+                }
 
                 // XXX
                 Annotator[] ans = searchList.getAnnotators();
@@ -389,7 +417,7 @@ public class StrangeFind extends JFrame {
                     results.setDoubleComposer(coms[0]);
                 }
 
-                results.start(search);
+                results.start(search, factory);
             }
         });
 
@@ -398,26 +426,11 @@ public class StrangeFind extends JFrame {
                 // stop
                 System.out.println(" *** stop search");
                 stopButton.setEnabled(false);
-                results.stop();
-            }
-        });
-
-        search.addSearchEventListener(new SearchEventListener() {
-            public void searchStopped(SearchEvent e) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        startButton.setEnabled(true);
-                        stopButton.setEnabled(false);
-                    }
-                });
-            }
-
-            public void searchStarted(SearchEvent e) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        stopButton.setEnabled(true);
-                    }
-                });
+                try {
+                    results.stop();
+                } catch (InterruptedException e1) {
+                    Thread.currentThread().interrupt();
+                }
             }
         });
 
@@ -429,7 +442,13 @@ public class StrangeFind extends JFrame {
                         JOptionPane.OK_CANCEL_OPTION);
 
                 if (result == JOptionPane.OK_OPTION) {
-                    clearSessionVariables();
+                    try {
+                        clearSessionVariables();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    } catch (InterruptedException e1) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
             }
         });
@@ -439,31 +458,18 @@ public class StrangeFind extends JFrame {
         pack();
     }
 
-    protected void prepareSearch() {
+    protected Search prepareSearch() throws IOException, InterruptedException {
+        Set<String> pushAttributes = searchList.getPushAttributes();
+        return factory.createSearch(pushAttributes);
+    }
+
+    protected SearchFactory prepareSearchFactory() {
         // read all enabled searches
-        Filter[] filters = searchList.getFilters();
+        List<Filter> filters = searchList.getFilters();
+        List<String> applicationDependencies = searchList
+                .getApplicationDependencies();
 
-        // set up search
-        if (filters.length == 0) {
-            search.setSearchlet(null);
-        } else {
-            Searchlet s = new Searchlet();
-
-            for (Filter ff : filters) {
-                s.addFilter(ff);
-            }
-
-            s.setApplicationDependencies(searchList
-                    .getApplicationDependencies());
-            search.setSearchlet(s);
-
-            Set<String> pushAttributes = searchList.getPushAttributes();
-            if (pushAttributes != null) {
-                System.out
-                        .println("setting push attributes: " + pushAttributes);
-                search.setPushAttributes(pushAttributes);
-            }
-        }
+        return new SearchFactory(filters, applicationDependencies, cookieMap);
     }
 
     private void setupWindow() {
@@ -739,19 +745,24 @@ public class StrangeFind extends JFrame {
         itemNew.add(mi);
     }
 
-    private void clearSessionVariables() {
+    private void clearSessionVariables() throws IOException,
+            InterruptedException {
         // clear locally
         for (Entry<String, Double> entry : globalSessionVariables.entrySet()) {
             globalSessionVariables.put(entry.getKey(), 0.0);
         }
 
         // clear on server
-        search.mergeSessionVariables(globalSessionVariables,
-                new DoubleComposer() {
-                    public double compose(String key, double a, double b) {
-                        return 0;
-                    }
-                });
+        try {
+            search.mergeSessionVariables(globalSessionVariables,
+                    new DoubleComposer() {
+                        public double compose(String key, double a, double b) {
+                            return 0;
+                        }
+                    });
+        } catch (SearchClosedException e) {
+            // ignore
+        }
         sessionVariablesTableModel.fireTableDataChanged();
     }
 

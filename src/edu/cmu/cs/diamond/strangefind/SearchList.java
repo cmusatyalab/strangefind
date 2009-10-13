@@ -42,7 +42,11 @@ package edu.cmu.cs.diamond.strangefind;
 
 import java.awt.Dimension;
 import java.awt.Insets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -78,12 +82,12 @@ public class SearchList extends JPanel {
         validate();
     }
 
-    public Filter[] getFilters() {
+    public List<Filter> getFilters() {
         List<Filter> f = new ArrayList<Filter>();
         for (StrangeFindSearch s : searches) {
             f.addAll(Arrays.asList(s.getFilters()));
         }
-        return f.toArray(new Filter[0]);
+        return f;
     }
 
     public Annotator[] getAnnotators() {
@@ -110,12 +114,12 @@ public class SearchList extends JPanel {
         return l.toArray(new DoubleComposer[0]);
     }
 
-    public String[] getApplicationDependencies() {
+    public List<String> getApplicationDependencies() {
         List<String> f = new ArrayList<String>();
         for (StrangeFindSearch s : searches) {
             f.addAll(Arrays.asList(s.getApplicationDependencies()));
         }
-        return f.toArray(new String[0]);
+        return f;
     }
 
     public Set<String> getPushAttributes() {

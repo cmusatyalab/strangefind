@@ -62,6 +62,7 @@ import org.jdesktop.swingx.graphics.GraphicsUtilities;
 
 import edu.cmu.cs.diamond.opendiamond.Result;
 import edu.cmu.cs.diamond.opendiamond.Search;
+import edu.cmu.cs.diamond.opendiamond.SearchFactory;
 import edu.cmu.cs.diamond.opendiamond.Util;
 
 public class ResultViewer extends JButton implements ActionListener {
@@ -78,6 +79,8 @@ public class ResultViewer extends JButton implements ActionListener {
     private volatile AnnotatedResult result;
 
     private volatile Search search;
+
+    private volatile SearchFactory factory;
 
     private volatile Icon thumbnail;
 
@@ -97,9 +100,10 @@ public class ResultViewer extends JButton implements ActionListener {
         addActionListener(this);
     }
 
-    public void setResult(AnnotatedResult r, Search s) {
+    public void setResult(AnnotatedResult r, Search s, SearchFactory f) {
         result = r;
         search = s;
+        factory = f;
 
         if (result == null) {
             thumbnail = null;
@@ -193,7 +197,7 @@ public class ResultViewer extends JButton implements ActionListener {
             byte data[] = diamondResult.getData();
             if (data.length == 0) {
                 // refetch
-                diamondResult = search
+                diamondResult = factory
                         .reevaluateResult(diamondResult, new HashSet<String>(
                                 Arrays.asList(new String[] { "" })));
             }
