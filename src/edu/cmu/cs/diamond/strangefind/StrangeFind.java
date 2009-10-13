@@ -41,7 +41,19 @@
 package edu.cmu.cs.diamond.strangefind;
 
 import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
-import static java.awt.event.KeyEvent.*;
+import static java.awt.event.KeyEvent.VK_A;
+import static java.awt.event.KeyEvent.VK_C;
+import static java.awt.event.KeyEvent.VK_D;
+import static java.awt.event.KeyEvent.VK_E;
+import static java.awt.event.KeyEvent.VK_H;
+import static java.awt.event.KeyEvent.VK_I;
+import static java.awt.event.KeyEvent.VK_L;
+import static java.awt.event.KeyEvent.VK_N;
+import static java.awt.event.KeyEvent.VK_O;
+import static java.awt.event.KeyEvent.VK_P;
+import static java.awt.event.KeyEvent.VK_Q;
+import static java.awt.event.KeyEvent.VK_S;
+import static java.awt.event.KeyEvent.VK_V;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -361,14 +373,14 @@ public class StrangeFind extends JFrame {
 
     private JFrame sessionVariablesWindow;
 
-    protected Map<String, Cookie> cookieMap;
+    protected CookieMap cookieMap;
 
     public StrangeFind() {
         super("Diamond Shell");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         try {
-            cookieMap = Cookie.createDefaultCookieMap();
+            cookieMap = CookieMap.createDefaultCookieMap();
         } catch (IOException e2) {
             e2.printStackTrace();
         }
@@ -379,7 +391,7 @@ public class StrangeFind extends JFrame {
         defineScopeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
-                    cookieMap = Cookie.createDefaultCookieMap();
+                    cookieMap = CookieMap.createDefaultCookieMap();
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
