@@ -15,11 +15,11 @@ tokens {
 }
 
 @header {
-package edu.cmu.cs.diamond.snapfind2;
+package edu.cmu.cs.diamond.strangefind;
 }
 
 @lexer::header {
-package edu.cmu.cs.diamond.snapfind2;
+package edu.cmu.cs.diamond.strangefind;
 }
 
 expr	:	term ;
