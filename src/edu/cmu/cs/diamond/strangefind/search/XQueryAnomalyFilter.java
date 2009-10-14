@@ -326,7 +326,7 @@ public class XQueryAnomalyFilter implements StrangeFindSearch {
             }
 
             private String getName(Result r) {
-                String name = r.getObjectName();
+                String name = r.getName();
                 name = name.substring(name.lastIndexOf('/') + 1);
                 return name;
             }
