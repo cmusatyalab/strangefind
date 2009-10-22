@@ -40,11 +40,7 @@
 
 package edu.cmu.cs.diamond.strangefind.search;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.io.FileInputStream;
@@ -54,14 +50,11 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.List;
 
 import javax.swing.*;
 
-import edu.cmu.cs.diamond.opendiamond.DoubleComposer;
-import edu.cmu.cs.diamond.opendiamond.Filter;
-import edu.cmu.cs.diamond.opendiamond.FilterCode;
-import edu.cmu.cs.diamond.opendiamond.Result;
-import edu.cmu.cs.diamond.opendiamond.Util;
+import edu.cmu.cs.diamond.opendiamond.*;
 import edu.cmu.cs.diamond.strangefind.*;
 
 public class CircleAnomalyFilter implements StrangeFindSearch {
@@ -129,7 +122,7 @@ public class CircleAnomalyFilter implements StrangeFindSearch {
             c = new FilterCode(new FileInputStream("/tmp/fil_rgb.so"));
             rgb = new Filter("rgb", c, "f_eval_img2rgb", "f_init_img2rgb",
                     "f_fini_img2rgb", 1, Arrays.asList(new String[0]), Arrays
-                            .asList(new String[0]), 400);
+                            .asList(new String[0]));
 
             c = new FilterCode(new FileInputStream("/tmp/fil_thumb.so"));
             thumb = new Filter("thumb", c, "f_eval_thumbnailer",
@@ -139,14 +132,13 @@ public class CircleAnomalyFilter implements StrangeFindSearch {
                                     Integer.toString(ResultViewer
                                             .getPreferredWidth()),
                                     Integer.toString(ResultViewer
-                                            .getPreferredHeight()) }), 0);
+                                            .getPreferredHeight()) }));
 
             c = new FilterCode(new FileInputStream("/tmp/fil_circle.so"));
             circles = new Filter("circles", c, "f_eval_circles",
                     "f_init_circles", "f_fini_circles", 0, Arrays
                             .asList(new String[] { "rgb" }), Arrays
-                            .asList(new String[] { "-1", "-1", "0.4", "1" }),
-                    400);
+                            .asList(new String[] { "-1", "-1", "0.4", "1" }));
             System.out.println(circles);
 
             List<String> paramsList = new ArrayList<String>();
@@ -192,7 +184,7 @@ public class CircleAnomalyFilter implements StrangeFindSearch {
             anom = new Filter("anomaly", c, "f_eval_afilter", "f_init_afilter",
                     "f_fini_afilter", 1, Arrays
                             .asList(new String[] { "circles" }), Arrays
-                            .asList(anomArgs), 400);
+                            .asList(anomArgs));
             System.out.println(anom);
 
         } catch (FileNotFoundException e) {

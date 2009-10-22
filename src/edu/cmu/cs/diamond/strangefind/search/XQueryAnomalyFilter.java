@@ -52,11 +52,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import edu.cmu.cs.diamond.opendiamond.DoubleComposer;
-import edu.cmu.cs.diamond.opendiamond.Filter;
-import edu.cmu.cs.diamond.opendiamond.FilterCode;
-import edu.cmu.cs.diamond.opendiamond.Result;
-import edu.cmu.cs.diamond.opendiamond.Util;
+import edu.cmu.cs.diamond.opendiamond.*;
 import edu.cmu.cs.diamond.strangefind.Annotator;
 import edu.cmu.cs.diamond.strangefind.Decorator;
 import edu.cmu.cs.diamond.strangefind.LogicEngine;
@@ -476,7 +472,7 @@ public class XQueryAnomalyFilter implements StrangeFindSearch {
 
             xquery = new Filter("xquery", c, "f_eval_xquery", "f_init_xquery",
                     "f_fini_xquery", 0, Arrays.asList(new String[0]), Arrays
-                            .asList(new String[] {}), 400, queryBlob);
+                            .asList(new String[] {}), queryBlob);
             System.out.println(xquery);
 
             List<String> paramsList = new ArrayList<String>();
@@ -497,7 +493,7 @@ public class XQueryAnomalyFilter implements StrangeFindSearch {
             anom = new Filter("anomaly", c, "f_eval_afilter", "f_init_afilter",
                     "f_fini_afilter", 1, Arrays
                             .asList(new String[] { "xquery" }), Arrays
-                            .asList(anomArgs), 400);
+                            .asList(anomArgs));
             System.out.println(anom);
 
         } catch (FileNotFoundException e) {

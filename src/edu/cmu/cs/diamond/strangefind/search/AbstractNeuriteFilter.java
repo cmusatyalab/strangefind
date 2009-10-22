@@ -42,19 +42,11 @@ package edu.cmu.cs.diamond.strangefind.search;
 
 import java.io.*;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import javax.swing.*;
 
-import edu.cmu.cs.diamond.opendiamond.DoubleComposer;
-import edu.cmu.cs.diamond.opendiamond.Filter;
-import edu.cmu.cs.diamond.opendiamond.FilterCode;
-import edu.cmu.cs.diamond.opendiamond.Result;
-import edu.cmu.cs.diamond.opendiamond.Util;
+import edu.cmu.cs.diamond.opendiamond.*;
 import edu.cmu.cs.diamond.strangefind.Annotator;
 import edu.cmu.cs.diamond.strangefind.Decorator;
 import edu.cmu.cs.diamond.strangefind.LogicEngine;
@@ -272,8 +264,7 @@ public abstract class AbstractNeuriteFilter implements StrangeFindSearch {
             neurites = new Filter("neurites", c, "f_eval_imagej_exec",
                     "f_init_imagej_exec", "f_fini_imagej_exec", 0, Arrays
                             .asList(new String[0]), Arrays
-                            .asList(new String[] { macroName2 }), 400,
-                    macroBytes);
+                            .asList(new String[] { macroName2 }), macroBytes);
             System.out.println(neurites);
 
             List<String> paramsList = new ArrayList<String>();
@@ -319,7 +310,7 @@ public abstract class AbstractNeuriteFilter implements StrangeFindSearch {
             anom = new Filter("anomaly", c, "f_eval_afilter", "f_init_afilter",
                     "f_fini_afilter", 1, Arrays
                             .asList(new String[] { "neurites" }), Arrays
-                            .asList(anomArgs), 400);
+                            .asList(anomArgs));
             System.out.println(anom);
 
         } catch (FileNotFoundException e) {
