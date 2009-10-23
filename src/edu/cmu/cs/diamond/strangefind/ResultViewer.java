@@ -197,9 +197,9 @@ public class ResultViewer extends JButton implements ActionListener {
             byte data[] = diamondResult.getData();
             if (data.length == 0) {
                 // refetch
-                diamondResult = factory
-                        .reevaluateResult(diamondResult, new HashSet<String>(
-                                Arrays.asList(new String[] { "" })));
+                diamondResult = factory.generateResult(diamondResult
+                        .getObjectIdentifier(), new HashSet<String>(Arrays
+                        .asList(new String[] { "" })));
             }
             img = ImageIO
                     .read(new ByteArrayInputStream(diamondResult.getData()));
