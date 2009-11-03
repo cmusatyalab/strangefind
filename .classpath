@@ -3,8 +3,8 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/jai_imageio.jar"/>
-	<classpathentry kind="lib" path="lib/swingx.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/OpenDiamond java"/>
-	<classpathentry kind="lib" path="lib/antlr3.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/swingx.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/antlr3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
