@@ -5,10 +5,9 @@
     <property name="target" value="1.6"/>
     <property name="source" value="1.6"/>
     <path id="StrangeFind.classpath">
-        <pathelement location="/usr/lib/opendiamond-java/opendiamondjava.jar"/>
-        <pathelement location="/usr/lib64/opendiamond-java/opendiamondjava.jar"/>
-        <pathelement location="lib/antlr-3.1.1.jar"/>
-        <pathelement location="lib/swingx.jar"/>
+        <pathelement location="/usr/share/java/opendiamond.jar"/>
+        <pathelement location="/usr/share/java/antlr3.jar"/>
+        <pathelement location="/usr/share/java/swingx.jar"/>
     </path>
     <target name="init">
         <mkdir dir="bin"/>
