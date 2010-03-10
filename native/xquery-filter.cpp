@@ -103,7 +103,7 @@ int f_eval_xquery (lf_obj_handle_t ohandle, void *filter_args) {
   // slurp in the entire object
   size_t len;
   unsigned char *data;
-  lf_next_block(ohandle, INT_MAX, &len, &data);
+  lf_ref_attr(ohandle, "", &len, &data);
 
   // parse the document, set it as context item
   xercesc::MemBufInputSource input_source(data, len, X("diamond"));
