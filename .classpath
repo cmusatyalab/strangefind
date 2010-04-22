@@ -4,7 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/OpenDiamond java"/>
 	<classpathentry kind="lib" path="/usr/share/java/swingx.jar"/>
-	<classpathentry kind="lib" path="/usr/share/java/antlr3.jar"/>
 	<classpathentry kind="lib" path="/usr/share/java/antlr3-runtime.jar"/>
 	<classpathentry kind="lib" path="/usr/share/java/jai_imageio.jar"/>
 	<classpathentry kind="output" path="bin"/>

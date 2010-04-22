@@ -6,7 +6,7 @@
     <property name="source" value="1.6"/>
     <path id="StrangeFind.classpath">
         <pathelement location="/usr/share/java/opendiamond.jar"/>
-        <pathelement location="/usr/share/java/antlr3.jar"/>
+        <pathelement location="/usr/share/java/antlr3-runtime.jar"/>
         <pathelement location="/usr/share/java/swingx.jar"/>
     </path>
     <target name="init">
