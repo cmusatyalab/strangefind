@@ -254,17 +254,16 @@ public abstract class AbstractNeuriteFilter implements StrangeFindSearch {
 
             c = new FilterCode(new FileInputStream("/tmp/fil_imagej_exec.so"));
 
-            String macroName2 = macroName.replace(' ', '_');
             ByteArrayOutputStream macroOut = new ByteArrayOutputStream();
 
             quickTarResources(new DataOutputStream(macroOut), new String[] {
-                    macroName2 + ".txt", "Fit_Polynomial.jar" });
+                    macroName, "Fit_Polynomial.jar" });
 
             byte macroBytes[] = macroOut.toByteArray();
             neurites = new Filter("neurites", c, "f_eval_imagej_exec",
                     "f_init_imagej_exec", "f_fini_imagej_exec", 0, Arrays
                             .asList(new String[0]), Arrays
-                            .asList(new String[] { macroName2 }), macroBytes);
+                            .asList(new String[] { macroName }), macroBytes);
             System.out.println(neurites);
 
             List<String> paramsList = new ArrayList<String>();

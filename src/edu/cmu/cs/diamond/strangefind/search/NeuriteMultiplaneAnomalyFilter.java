@@ -43,7 +43,7 @@ package edu.cmu.cs.diamond.strangefind.search;
 final public class NeuriteMultiplaneAnomalyFilter extends AbstractNeuriteFilter {
 
     public NeuriteMultiplaneAnomalyFilter() {
-        super("Neurite Multiplane Diamond Anomaly",
+        super("Neurite_Multiplane_Diamond_Anomaly.txt",
                 "Neurite Multiplane Anomaly Detector");
     }
 }
