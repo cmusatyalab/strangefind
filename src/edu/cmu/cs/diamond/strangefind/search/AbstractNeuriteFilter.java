@@ -257,7 +257,7 @@ public abstract class AbstractNeuriteFilter implements StrangeFindSearch {
             ByteArrayOutputStream macroOut = new ByteArrayOutputStream();
 
             quickTarResources(new DataOutputStream(macroOut), new String[] {
-                    macroName, "Fit_Polynomial.jar" });
+                    macroName, "Fit_Polynomial.jar", "Multi_Thresholder.jar" });
 
             byte macroBytes[] = macroOut.toByteArray();
             String b64MacroName = Util.base64EncodeWithNull(macroName
