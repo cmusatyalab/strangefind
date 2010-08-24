@@ -373,7 +373,7 @@ public class StrangeFind extends JFrame {
 
     private JFrame sessionVariablesWindow;
 
-    protected CookieMap cookieMap;
+    protected CookieMap cookieMap = CookieMap.emptyCookieMap();
 
     public StrangeFind() {
         super("Diamond Shell");
