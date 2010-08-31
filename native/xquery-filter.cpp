@@ -60,8 +60,8 @@ struct ctx {
   XQQuery *post_query;
 };
 
-int f_init_xquery (int num_arg, char **args,
-		   int bloblen, void *blob_data,
+int f_init_xquery (int num_arg, const char * const *args,
+		   int bloblen, const void *blob_data,
 		   const char *filter_name,
 		   void **filter_args) {
   // check args
@@ -102,11 +102,11 @@ int f_eval_xquery (lf_obj_handle_t ohandle, void *filter_args) {
 
   // slurp in the entire object
   size_t len;
-  unsigned char *data;
+  const void *data;
   lf_ref_attr(ohandle, "", &len, &data);
 
   // parse the document, set it as context item
-  xercesc::MemBufInputSource input_source(data, len, X("diamond"));
+  xercesc::MemBufInputSource input_source((const XMLByte *) data, len, X("diamond"));
   Node::Ptr doc = context->parseDocument(input_source);
   context->setContextItem(doc);
   context->setContextPosition(1);

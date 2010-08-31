@@ -111,8 +111,8 @@ static bool run_logic_engine(gchar **logic_code,
 
 
 // 3 functions for diamond filter interface
-int f_init_afilter (int num_arg, char **args,
-		    int bloblen, void *blob_data,
+int f_init_afilter (int num_arg, const char * const *args,
+		    int bloblen, const void *blob_data,
 		    const char *filter_name,
 		    void **filter_args) {
   int i;
@@ -195,10 +195,10 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
   // XXX stats done by non-statistician
   for (i = 0; i < ctx->size; i++) {
     // get each thing from string
-    unsigned char *str;
+    const void *str;
     err = lf_ref_attr(ohandle, ctx->name_array[i], &len, &str);
     char *tmp = g_malloc0(len + 1);
-    strncpy(tmp, (char *) str, len);
+    strncpy(tmp, (const char *) str, len);
     double d = strtod(tmp, NULL);
     printf(" %s = %g\n", ctx->name_array[i], d);
     g_free(tmp);
