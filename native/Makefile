@@ -1,11 +1,7 @@
-all: fil_circle.so fil_anomaly.so fil_xquery.so
+all: fil_anomaly.so fil_xquery.so
 
 clean:
-	$(RM) fil_circle.so fil_anomaly.so fil_xquery.so
-
-fil_circle.so: circles4.cpp circles4.h util.h util.c
-	g++ -fPIC ${LDFLAGS} ${CPPFLAGS} -I/opt/diamond-filter-kit/include -L/opt/diamond-filter-kit/lib `pkg-config opendiamond glib-2.0 --cflags` `lti-config nogtk --cxxflags` -O2 -g -m32 -Wall -shared  -o $@ circles4.cpp util.c `lti-config nogtk --libs` `pkg-config glib-2.0 --libs` -Wl,--version-script=filters.map
-	strip $@
+	$(RM) fil_anomaly.so fil_xquery.so
 
 fil_anomaly.so: anomaly-filter.c logic-stack-machine.h logic-stack-machine.c
 	gcc -std=gnu99 -fPIC ${LDFLAGS} ${CPPFLAGS} -I/opt/diamond-filter-kit/include -L/opt/diamond-filter-kit/lib `pkg-config opendiamond glib-2.0 --cflags` -O2 -g -m32 -Wall -shared  -o $@ anomaly-filter.c logic-stack-machine.c -Wl,--version-script=filters.map
