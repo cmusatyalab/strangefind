@@ -458,20 +458,19 @@ public class CircleAnomalyFilter implements StrangeFindSearch {
 
     static protected List<Circle> extractCircles(byte[] data) {
         List<Circle> circles = new ArrayList<Circle>();
-        final int sizeOfFloatPart = 4 * 5;
 
-        for (int i = 0; i < data.length; i += sizeOfFloatPart + 1) {
+        ByteBuffer b = ByteBuffer.wrap(data);
+        b.order(ByteOrder.LITTLE_ENDIAN);
+
+        while (b.hasRemaining()) {
             Circle c = new Circle();
-
-            ByteBuffer b = ByteBuffer.wrap(data, i, sizeOfFloatPart + 1);
-            b.order(ByteOrder.LITTLE_ENDIAN);
 
             c.x = b.getFloat();
             c.y = b.getFloat();
             c.a = b.getFloat();
             c.b = b.getFloat();
             c.t = b.getFloat();
-            c.inResult = b.get() != 0;
+            c.inResult = b.getInt() != 0;
 
             circles.add(c);
         }
