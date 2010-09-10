@@ -45,8 +45,8 @@
 #include "lib_filter.h"
 
 extern "C" {
-  int f_init_xquery (int num_arg, char **args,
-		     int bloblen, void *blob_data,
+  int f_init_xquery (int num_arg, const char * const *args,
+		     int bloblen, const void *blob_data,
 		     const char *filter_name,
 		     void **filter_args);
   int f_eval_xquery (lf_obj_handle_t ohandle, void *filter_args);
