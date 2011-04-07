@@ -252,7 +252,7 @@ public abstract class AbstractNeuriteFilter implements StrangeFindSearch {
         try {
             FilterCode c;
 
-            c = new FilterCode(new FileInputStream("/tmp/fil_imagej_exec.so"));
+            c = new FilterCode(new FileInputStream("/tmp/fil_imagej_exec"));
 
             ByteArrayOutputStream macroOut = new ByteArrayOutputStream();
 
@@ -263,8 +263,7 @@ public abstract class AbstractNeuriteFilter implements StrangeFindSearch {
             String b64MacroName = Util.base64EncodeWithNull(macroName
                     .getBytes("UTF-8"));
             System.out.println(b64MacroName);
-            neurites = new Filter("neurites", c, "f_eval_imagej_exec",
-                    "f_init_imagej_exec", "f_fini_imagej_exec", 0,
+            neurites = new Filter("neurites", c, 0,
                     Arrays.asList(new String[0]),
                     Arrays.asList(new String[] { b64MacroName }), macroBytes);
             System.out.println(neurites);
@@ -308,11 +307,10 @@ public abstract class AbstractNeuriteFilter implements StrangeFindSearch {
                     .getMachineCodeForExpression(logicalExpression.toString());
             System.arraycopy(paramsList.toArray(), 0, anomArgs, 3, paramsList
                     .size());
-            c = new FilterCode(new FileInputStream("/tmp/fil_anomaly.so"));
-            anom = new Filter("anomaly", c, "f_eval_afilter", "f_init_afilter",
-                    "f_fini_afilter", 1, Arrays
-                            .asList(new String[] { "neurites" }), Arrays
-                            .asList(anomArgs));
+            c = new FilterCode(new FileInputStream("/tmp/fil_anomaly"));
+            anom = new Filter("anomaly", c, 1,
+                    Arrays.asList(new String[] { "neurites" }),
+                    Arrays.asList(anomArgs));
             System.out.println(anom);
 
         } catch (FileNotFoundException e) {

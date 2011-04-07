@@ -464,15 +464,14 @@ public class XQueryAnomalyFilter implements StrangeFindSearch {
         try {
             FilterCode c;
 
-            c = new FilterCode(new FileInputStream("/tmp/fil_xquery.so"));
+            c = new FilterCode(new FileInputStream("/tmp/fil_xquery"));
 
             byte queryBlob[] = generateQueryBlob();
 
             System.out.println("queryBlob: " + new String(queryBlob));
 
-            xquery = new Filter("xquery", c, "f_eval_xquery", "f_init_xquery",
-                    "f_fini_xquery", 0, Arrays.asList(new String[0]), Arrays
-                            .asList(new String[] {}), queryBlob);
+            xquery = new Filter("xquery", c, 0, Arrays.asList(new String[0]),
+                    Arrays.asList(new String[] {}), queryBlob);
             System.out.println(xquery);
 
             List<String> paramsList = new ArrayList<String>();
@@ -489,11 +488,10 @@ public class XQueryAnomalyFilter implements StrangeFindSearch {
                             .getText()); // machine code
             System.arraycopy(paramsList.toArray(), 0, anomArgs, 3, paramsList
                     .size());
-            c = new FilterCode(new FileInputStream("/tmp/fil_anomaly.so"));
-            anom = new Filter("anomaly", c, "f_eval_afilter", "f_init_afilter",
-                    "f_fini_afilter", 1, Arrays
-                            .asList(new String[] { "xquery" }), Arrays
-                            .asList(anomArgs));
+            c = new FilterCode(new FileInputStream("/tmp/fil_anomaly"));
+            anom = new Filter("anomaly", c, 1,
+                    Arrays.asList(new String[] { "xquery" }),
+                    Arrays.asList(anomArgs));
             System.out.println(anom);
 
         } catch (FileNotFoundException e) {
