@@ -19,9 +19,13 @@
         <delete dir="bin"/>
         <delete file="src/edu/cmu/cs/diamond/strangefind/LogicExpressionLexer.java" />
         <delete file="src/edu/cmu/cs/diamond/strangefind/LogicExpressionParser.java" />
+        <delete file="LogicExpression.tokens" />
     </target>
-	<target name="build" depends="init">
+    <target name="build" depends="init">
         <echo message="${ant.project.name}: ${ant.file}"/>
+        <exec executable="antlr3">
+            <arg value="src/edu/cmu/cs/diamond/strangefind/LogicExpression.g"/>
+        </exec>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" encoding="UTF-8">
             <src path="src"/>
             <classpath refid="StrangeFind.classpath"/>

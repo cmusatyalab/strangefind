@@ -3,3 +3,7 @@
 
 *~
 /*.jar
+
+LogicExpressionLexer.java
+LogicExpressionParser.java
+LogicExpression.tokens
