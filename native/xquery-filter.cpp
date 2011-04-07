@@ -44,22 +44,13 @@
 
 #include "lib_filter.h"
 
-extern "C" {
-  int f_init_xquery (int num_arg, const char * const *args,
-		     int bloblen, const void *blob_data,
-		     const char *filter_name,
-		     void **filter_args);
-  int f_eval_xquery (lf_obj_handle_t ohandle, void *filter_args);
-  int f_fini_xquery (void *filter_args);
-}
-
-
 struct ctx {
   XQilla xqilla;
   XQQuery *query;
   XQQuery *post_query;
 };
 
+static
 int f_init_xquery (int num_arg, const char * const *args,
 		   int bloblen, const void *blob_data,
 		   const char *filter_name,
@@ -89,8 +80,7 @@ int f_init_xquery (int num_arg, const char * const *args,
   return 0;
 }
 
-
-
+static
 int f_eval_xquery (lf_obj_handle_t ohandle, void *filter_args) {
   XQQuery *query = ((struct ctx *) filter_args)->query;
   XQQuery *post_query = ((struct ctx *) filter_args)->post_query;
@@ -146,13 +136,4 @@ int f_eval_xquery (lf_obj_handle_t ohandle, void *filter_args) {
   return 1;
 }
 
-
-
-int f_fini_xquery (void *filter_args) {
-  struct ctx *ctx = (struct ctx *) filter_args;
-
-  delete ctx->query;
-  delete ctx->post_query;
-  delete ctx;
-  return 0;
-}
+LF_MAIN(f_init_xquery, f_eval_xquery)

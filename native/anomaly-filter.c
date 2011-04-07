@@ -110,7 +110,8 @@ static bool run_logic_engine(gchar **logic_code,
 }
 
 
-// 3 functions for diamond filter interface
+// 2 functions for diamond filter interface
+static
 int f_init_afilter (int num_arg, const char * const *args,
 		    int bloblen, const void *blob_data,
 		    const char *filter_name,
@@ -173,8 +174,7 @@ int f_init_afilter (int num_arg, const char * const *args,
   return 0;
 }
 
-
-
+static
 int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
   // afilter
   context_t *ctx = (context_t *) filter_args;
@@ -269,26 +269,4 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
   return result;
 }
 
-
-
-int f_fini_afilter (void *filter_args) {
-  context_t *ctx = (context_t *) filter_args;
-
-  int i;
-  for (i = 0; i < ctx->size; i++) {
-    g_free(ctx->name_array[i]);
-  }
-
-  for (i = 0; i < ctx->size * 3; i++) {
-    g_slice_free(lf_session_variable_t, ctx->stats[i]);
-  }
-
-  lsm_destroy(ctx->lsmr);
-  g_strfreev(ctx->logic_code);
-  g_slice_free1(ctx->size * sizeof(char *), ctx->name_array);
-  g_slice_free1(ctx->size * sizeof(double), ctx->stddev_array);
-  g_free(ctx->stats);
-
-  g_slice_free(context_t, ctx);
-  return 0;
-}
+LF_MAIN(f_init_afilter, f_eval_afilter)
