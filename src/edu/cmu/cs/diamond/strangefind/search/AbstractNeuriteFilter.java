@@ -252,7 +252,7 @@ public abstract class AbstractNeuriteFilter implements StrangeFindSearch {
         try {
             FilterCode c;
 
-            c = new FilterCode(new FileInputStream("/tmp/fil_imagej_exec"));
+            c = new FilterCode(new FileInputStream("/opt/snapfind/lib/fil_imagej_exec"));
 
             ByteArrayOutputStream macroOut = new ByteArrayOutputStream();
 
@@ -307,7 +307,7 @@ public abstract class AbstractNeuriteFilter implements StrangeFindSearch {
                     .getMachineCodeForExpression(logicalExpression.toString());
             System.arraycopy(paramsList.toArray(), 0, anomArgs, 3, paramsList
                     .size());
-            c = new FilterCode(new FileInputStream("/tmp/fil_anomaly"));
+            c = new FilterCode(new FileInputStream("/opt/snapfind/lib/fil_anomaly"));
             anom = new Filter("anomaly", c, 1,
                     Arrays.asList(new String[] { "neurites" }),
                     Arrays.asList(anomArgs));

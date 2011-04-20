@@ -464,7 +464,7 @@ public class XQueryAnomalyFilter implements StrangeFindSearch {
         try {
             FilterCode c;
 
-            c = new FilterCode(new FileInputStream("/tmp/fil_xquery"));
+            c = new FilterCode(new FileInputStream("/opt/snapfind/lib/fil_xquery"));
 
             byte queryBlob[] = generateQueryBlob();
 
@@ -488,7 +488,7 @@ public class XQueryAnomalyFilter implements StrangeFindSearch {
                             .getText()); // machine code
             System.arraycopy(paramsList.toArray(), 0, anomArgs, 3, paramsList
                     .size());
-            c = new FilterCode(new FileInputStream("/tmp/fil_anomaly"));
+            c = new FilterCode(new FileInputStream("/opt/snapfind/lib/fil_anomaly"));
             anom = new Filter("anomaly", c, 1,
                     Arrays.asList(new String[] { "xquery" }),
                     Arrays.asList(anomArgs));
