@@ -43,6 +43,8 @@ package edu.cmu.cs.diamond.strangefind.search;
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.swing.*;
 
@@ -256,7 +258,7 @@ public abstract class AbstractNeuriteFilter implements StrangeFindSearch {
 
             ByteArrayOutputStream macroOut = new ByteArrayOutputStream();
 
-            quickTarResources(new DataOutputStream(macroOut), new String[] {
+            encodeResources(macroOut, new String[] {
                     macroName, "Multi_Thresholder.jar" });
 
             byte macroBytes[] = macroOut.toByteArray();
@@ -322,14 +324,17 @@ public abstract class AbstractNeuriteFilter implements StrangeFindSearch {
         return new Filter[] { neurites, anom };
     }
 
-    private void quickTarResources(DataOutputStream macroOut, String[] resources)
+    private void encodeResources(OutputStream macroOut, String[] resources)
             throws IOException {
+        ZipOutputStream zos = new ZipOutputStream(macroOut);
         for (String r : resources) {
             InputStream in = this.getClass().getResourceAsStream(
                     "resources/" + r);
             byte bb[] = Util.readFully(in);
-            Util.quickTar1(macroOut, bb, r);
+            zos.putNextEntry(new ZipEntry(r));
+            zos.write(bb, 0, bb.length);
         }
+        zos.close();
     }
 
     final private JCheckBox[] checkboxes = new JCheckBox[LABELS.length];
