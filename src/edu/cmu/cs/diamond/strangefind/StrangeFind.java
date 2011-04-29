@@ -78,6 +78,7 @@ import edu.cmu.cs.diamond.opendiamond.*;
 import edu.cmu.cs.diamond.strangefind.search.CircleAnomalyFilter;
 import edu.cmu.cs.diamond.strangefind.search.NeuriteAnomalyFilter;
 import edu.cmu.cs.diamond.strangefind.search.NeuriteMultiplaneAnomalyFilter;
+import edu.cmu.cs.diamond.strangefind.search.OOMuscleAnomalyFilter;
 import edu.cmu.cs.diamond.strangefind.search.XQueryAnomalyFilter;
 
 public class StrangeFind extends JFrame {
@@ -744,6 +745,14 @@ public class StrangeFind extends JFrame {
         mi.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 searchList.addSearch(new NeuriteMultiplaneAnomalyFilter());
+            }
+        });
+        itemNew.add(mi);
+
+        mi = new JMenuItem("OO Muscle Anomaly Detector");
+        mi.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                searchList.addSearch(new OOMuscleAnomalyFilter());
             }
         });
         itemNew.add(mi);
