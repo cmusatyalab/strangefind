@@ -148,7 +148,7 @@ public class OOMuscleAnomalyFilter implements StrangeFindSearch {
                 throw new IOException("Missing filter code");
             }
             oomuscle = new Filter("oomuscle", c, 1,
-                    Arrays.asList(new String[0]),
+                    Arrays.asList(new String[] { "rgb" }),
                     Arrays.asList(new String[] { "0", "0", "0" }), blob);
 
             List<String> paramsList = new ArrayList<String>();
