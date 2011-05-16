@@ -548,29 +548,6 @@ public class StrangeFind extends JFrame {
         menu.add(itemNew);
         populateFiltersMenu(itemNew);
 
-        menu.add(createMenuItem("New From Example...", VK_E,
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        newSearchFromExample();
-                    }
-                }));
-        menu.addSeparator();
-
-        menu.add(createMenuItem("Open...", VK_O, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                openSearch();
-            }
-        }));
-        menu.add(createMenuItem("Import...", VK_I, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                importSearch();
-            }
-        }));
-        menu.add(createMenuItem("Save As...", VK_A, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                saveAsSearch();
-            }
-        }));
         menu.add(createMenuItem("Configure Image Server...", VK_C,
                 new ActionListener() {
                     @Override
@@ -592,14 +569,6 @@ public class StrangeFind extends JFrame {
         // 
         menu = new JMenu("Debug");
         menu.setMnemonic(VK_D);
-        mi = createMenuItem("Stats Window", VK_S, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                showStatsWindow();
-            }
-        });
-        mi.setAccelerator(KeyStroke.getKeyStroke(VK_I, CTRL_DOWN_MASK));
-        menu.add(mi);
-
         mi = createMenuItem("Progress Window", VK_P, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 showProgressWindow();
@@ -615,22 +584,6 @@ public class StrangeFind extends JFrame {
                     }
                 });
         mi.setAccelerator(KeyStroke.getKeyStroke(VK_V, CTRL_DOWN_MASK));
-        menu.add(mi);
-
-        mi = createMenuItem("Log Window", VK_L, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                showLogWindow();
-            }
-        });
-        mi.setAccelerator(KeyStroke.getKeyStroke(VK_L, CTRL_DOWN_MASK));
-        menu.add(mi);
-
-        mi = createMenuItem("Cache Window", VK_C, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                showCacheWindow();
-            }
-        });
-        mi.setAccelerator(KeyStroke.getKeyStroke(VK_H, CTRL_DOWN_MASK));
         menu.add(mi);
 
         jmb.add(menu);
@@ -674,40 +627,11 @@ public class StrangeFind extends JFrame {
         sessionVariablesWindow.setVisible(true);
     }
 
-    protected void showCacheWindow() {
-        // TODO Auto-generated method stub
-
-    }
-
     protected void showProgressWindow() {
         if (progressWindow == null) {
             progressWindow = new ProgressWindow();
         }
         progressWindow.setVisible(true);
-    }
-
-    protected void showLogWindow() {
-        // TODO Auto-generated method stub
-
-    }
-
-    protected void showStatsWindow() {
-        // TODO Auto-generated method stub
-
-    }
-
-    protected void newSearchFromExample() {
-        // TODO
-    }
-
-    protected void saveAsSearch() {
-        // TODO Auto-generated method stub
-
-    }
-
-    protected void importSearch() {
-        // TODO Auto-generated method stub
-
     }
 
     private JMenuItem createMenuItem(String title, int mnemonic,
@@ -716,11 +640,6 @@ public class StrangeFind extends JFrame {
         mi = new JMenuItem(title, mnemonic);
         mi.addActionListener(a);
         return mi;
-    }
-
-    protected void openSearch() {
-        // TODO Auto-generated method stub
-
     }
 
     private void populateFiltersMenu(JMenu itemNew) {
