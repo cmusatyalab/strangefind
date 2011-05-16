@@ -377,7 +377,7 @@ public class StrangeFind extends JFrame {
     protected CookieMap cookieMap = CookieMap.emptyCookieMap();
 
     public StrangeFind() {
-        super("Diamond Shell");
+        super("StrangeFind");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         try {
@@ -615,8 +615,8 @@ public class StrangeFind extends JFrame {
     }
 
     protected void showAboutBox() {
-        JOptionPane.showMessageDialog(this, "The Diamond Shell\n"
-                + "Copyright 2007-2008 Carnegie Mellon University\n"
+        JOptionPane.showMessageDialog(this, "StrangeFind\n"
+                + "Copyright 2007-2011 Carnegie Mellon University\n"
                 + "Licensed under the GNU GPL v2");
     }
 
