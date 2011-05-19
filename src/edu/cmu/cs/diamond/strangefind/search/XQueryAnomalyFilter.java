@@ -454,10 +454,6 @@ public class XQueryAnomalyFilter implements StrangeFindSearch {
         return composer;
     }
 
-    public String[] getApplicationDependencies() {
-        return new String[] { "xquery" };
-    }
-
     public Filter[] getFilters() {
         Filter xquery = null;
         Filter anom = null;

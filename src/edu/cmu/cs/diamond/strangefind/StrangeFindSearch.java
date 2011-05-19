@@ -59,7 +59,5 @@ public interface StrangeFindSearch {
 
     DoubleComposer getDoubleComposer();
 
-    String[] getApplicationDependencies();
-
     Set<String> getPushAttributes();
 }

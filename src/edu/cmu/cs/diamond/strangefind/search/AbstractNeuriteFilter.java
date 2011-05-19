@@ -244,10 +244,6 @@ public abstract class AbstractNeuriteFilter implements StrangeFindSearch {
         return composer;
     }
 
-    public String[] getApplicationDependencies() {
-        return new String[] { "neurites" };
-    }
-
     public Filter[] getFilters() {
         Filter neurites = null;
         Filter anom = null;

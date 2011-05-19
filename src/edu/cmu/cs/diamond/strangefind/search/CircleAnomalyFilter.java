@@ -108,10 +108,6 @@ public class CircleAnomalyFilter implements StrangeFindSearch {
         checkboxes[6].setSelected(true);
     }
 
-    public String[] getApplicationDependencies() {
-        return new String[] { "rgb" };
-    }
-
     public Filter[] getFilters() {
         Filter rgb = null;
         Filter thumb = null;

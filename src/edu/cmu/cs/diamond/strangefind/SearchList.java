@@ -114,14 +114,6 @@ public class SearchList extends JPanel {
         return l.toArray(new DoubleComposer[0]);
     }
 
-    public List<String> getApplicationDependencies() {
-        List<String> f = new ArrayList<String>();
-        for (StrangeFindSearch s : searches) {
-            f.addAll(Arrays.asList(s.getApplicationDependencies()));
-        }
-        return f;
-    }
-
     public Set<String> getPushAttributes() {
         boolean anyPushAttributes = false;
 

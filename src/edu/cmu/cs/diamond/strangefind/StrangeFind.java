@@ -479,10 +479,8 @@ public class StrangeFind extends JFrame {
     protected SearchFactory prepareSearchFactory() {
         // read all enabled searches
         List<Filter> filters = searchList.getFilters();
-        List<String> applicationDependencies = searchList
-                .getApplicationDependencies();
 
-        return new SearchFactory(filters, applicationDependencies, cookieMap);
+        return new SearchFactory(filters, cookieMap);
     }
 
     private void setupWindow() {

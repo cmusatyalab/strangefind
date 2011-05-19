@@ -366,11 +366,6 @@ public class OOMuscleAnomalyFilter implements StrangeFindSearch {
     }
 
     @Override
-    public String[] getApplicationDependencies() {
-        return new String[] { "thumb" };
-    }
-
-    @Override
     public Set<String> getPushAttributes() {
         Set<String> set = new HashSet<String>();
         String a = "anomaly-descriptor-";
