@@ -357,15 +357,6 @@ public class OOMuscleAnomalyFilter implements StrangeFindSearch {
     }
 
     @Override
-    public DoubleComposer getDoubleComposer() {
-        return new DoubleComposer() {
-            public double compose(String key, double a, double b) {
-                return a + b;
-            }
-        };
-    }
-
-    @Override
     public Set<String> getPushAttributes() {
         Set<String> set = new HashSet<String>();
         String a = "anomaly-descriptor-";

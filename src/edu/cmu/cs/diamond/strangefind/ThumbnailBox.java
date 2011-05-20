@@ -128,8 +128,7 @@ public class ThumbnailBox extends JPanel {
             public void run() {
                 // System.out.println("************timer task running");
                 try {
-                    search.mergeSessionVariables(globalSessionVariables,
-                            composer);
+                    search.mergeSessionVariables(globalSessionVariables);
                 } catch (SearchClosedException e) {
                     // ignore
                 } catch (IOException e) {
@@ -143,8 +142,6 @@ public class ThumbnailBox extends JPanel {
 
         return sessionVarsTimerTask;
     }
-
-    private DoubleComposer composer;
 
     private volatile boolean searchRunning;
 
@@ -218,10 +215,6 @@ public class ThumbnailBox extends JPanel {
 
     public void setDecorator(Decorator d) {
         decorator = d;
-    }
-
-    public void setDoubleComposer(DoubleComposer c) {
-        composer = c;
     }
 
     protected boolean isFull() {

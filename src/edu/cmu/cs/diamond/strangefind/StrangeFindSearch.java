@@ -44,7 +44,6 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
-import edu.cmu.cs.diamond.opendiamond.DoubleComposer;
 import edu.cmu.cs.diamond.opendiamond.Filter;
 
 public interface StrangeFindSearch {
@@ -56,8 +55,6 @@ public interface StrangeFindSearch {
     Annotator getAnnotator();
 
     Decorator getDecorator();
-
-    DoubleComposer getDoubleComposer();
 
     Set<String> getPushAttributes();
 }

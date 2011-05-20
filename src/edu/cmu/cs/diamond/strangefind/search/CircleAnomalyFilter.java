@@ -238,16 +238,6 @@ public class CircleAnomalyFilter implements StrangeFindSearch {
         };
     }
 
-    private static final DoubleComposer composer = new DoubleComposer() {
-        public double compose(String key, double a, double b) {
-            return a + b;
-        }
-    };
-
-    public DoubleComposer getDoubleComposer() {
-        return composer;
-    }
-
     protected void drawCircle(Graphics2D g, Circle circle, double scale,
             CircleFill fill) {
         float x = circle.x;

@@ -418,16 +418,12 @@ public class StrangeFind extends JFrame {
                 // XXX
                 Annotator[] ans = searchList.getAnnotators();
                 Decorator[] des = searchList.getDecorators();
-                DoubleComposer[] coms = searchList.getDoubleComposers();
 
                 if (ans.length > 0) {
                     results.setAnnotator(ans[0]);
                 }
                 if (des.length > 0) {
                     results.setDecorator(des[0]);
-                }
-                if (coms.length > 0) {
-                    results.setDoubleComposer(coms[0]);
                 }
 
                 results.start(search, factory);
@@ -686,18 +682,11 @@ public class StrangeFind extends JFrame {
     private void clearSessionVariables() throws IOException,
             InterruptedException {
         // clear locally
-        for (Entry<String, Double> entry : globalSessionVariables.entrySet()) {
-            globalSessionVariables.put(entry.getKey(), 0.0);
-        }
+        globalSessionVariables.clear();
 
         // clear on server
         try {
-            search.mergeSessionVariables(globalSessionVariables,
-                    new DoubleComposer() {
-                        public double compose(String key, double a, double b) {
-                            return 0;
-                        }
-                    });
+            search.clearSessionVariables();
         } catch (SearchClosedException e) {
             // ignore
         }

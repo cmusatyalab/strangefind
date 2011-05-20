@@ -234,16 +234,6 @@ public abstract class AbstractNeuriteFilter implements StrangeFindSearch {
         return null;
     }
 
-    private static final DoubleComposer composer = new DoubleComposer() {
-        public double compose(String key, double a, double b) {
-            return a + b;
-        }
-    };
-
-    public DoubleComposer getDoubleComposer() {
-        return composer;
-    }
-
     public Filter[] getFilters() {
         Filter neurites = null;
         Filter anom = null;
