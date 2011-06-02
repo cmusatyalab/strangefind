@@ -331,7 +331,11 @@ public abstract class AbstractNeuriteFilter implements StrangeFindSearch {
             InputStream in = this.getClass().getResourceAsStream(
                     "resources/" + r);
             byte bb[] = Util.readFully(in);
-            zos.putNextEntry(new ZipEntry(r));
+            ZipEntry ze = new ZipEntry(r);
+            // storing different timestamps on every run would defeat
+            // server-side result caching
+            ze.setTime(0);
+            zos.putNextEntry(ze);
             zos.write(bb, 0, bb.length);
         }
         zos.close();
