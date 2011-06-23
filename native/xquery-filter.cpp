@@ -136,4 +136,8 @@ int f_eval_xquery (lf_obj_handle_t ohandle, void *filter_args) {
   return 1;
 }
 
-LF_MAIN(f_init_xquery, f_eval_xquery)
+int main(void)
+{
+  lf_main(f_init_xquery, f_eval_xquery);
+  return 0;
+}
