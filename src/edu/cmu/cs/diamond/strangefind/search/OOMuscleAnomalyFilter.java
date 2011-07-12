@@ -147,9 +147,10 @@ public class OOMuscleAnomalyFilter implements StrangeFindSearch {
             if (c == null) {
                 throw new IOException("Missing filter code");
             }
-            oomuscle = new Filter("oomuscle", c, 1,
+            oomuscle = new Filter("oomuscle", c, Double.NEGATIVE_INFINITY,
+                    Double.POSITIVE_INFINITY,
                     Arrays.asList(new String[] { "rgb" }),
-                    Arrays.asList(new String[] { "0", "0", "0" }), blob);
+                    Arrays.asList(new String[] { "0" }), blob);
 
             List<String> paramsList = new ArrayList<String>();
             for (int i = 0; i < checkboxes.length; i++) {
