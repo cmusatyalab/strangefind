@@ -248,12 +248,9 @@ public abstract class AbstractNeuriteFilter implements StrangeFindSearch {
                     macroName, "Multi_Thresholder.jar" });
 
             byte macroBytes[] = macroOut.toByteArray();
-            String b64MacroName = Util.base64EncodeWithNull(macroName
-                    .getBytes("UTF-8"));
-            System.out.println(b64MacroName);
             neurites = new Filter("neurites", c, 0,
                     Arrays.asList(new String[0]),
-                    Arrays.asList(new String[] { b64MacroName }), macroBytes);
+                    Arrays.asList(new String[] { macroName }), macroBytes);
             System.out.println(neurites);
 
             List<String> paramsList = new ArrayList<String>();
