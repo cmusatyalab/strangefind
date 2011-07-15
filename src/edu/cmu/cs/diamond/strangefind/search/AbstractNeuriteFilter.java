@@ -43,8 +43,6 @@ package edu.cmu.cs.diamond.strangefind.search;
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import javax.swing.*;
 
@@ -242,12 +240,8 @@ public abstract class AbstractNeuriteFilter implements StrangeFindSearch {
 
             c = new FilterCode(new FileInputStream("/opt/snapfind/lib/fil_imagej_exec"));
 
-            ByteArrayOutputStream macroOut = new ByteArrayOutputStream();
-
-            encodeResources(macroOut, new String[] {
+            byte macroBytes[] = encodeResources(new String[] {
                     macroName, "Multi_Thresholder.jar" });
-
-            byte macroBytes[] = macroOut.toByteArray();
             neurites = new Filter("neurites", c, 0,
                     Arrays.asList(new String[0]),
                     Arrays.asList(new String[] { macroName }), macroBytes);
@@ -307,21 +301,15 @@ public abstract class AbstractNeuriteFilter implements StrangeFindSearch {
         return new Filter[] { neurites, anom };
     }
 
-    private void encodeResources(OutputStream macroOut, String[] resources)
-            throws IOException {
-        ZipOutputStream zos = new ZipOutputStream(macroOut);
+    private byte[] encodeResources(String[] resources) throws IOException {
+        Map<String, byte[]> zipMap = new HashMap<String, byte[]>();
         for (String r : resources) {
             InputStream in = this.getClass().getResourceAsStream(
                     "resources/" + r);
             byte bb[] = Util.readFully(in);
-            ZipEntry ze = new ZipEntry(r);
-            // storing different timestamps on every run would defeat
-            // server-side result caching
-            ze.setTime(0);
-            zos.putNextEntry(ze);
-            zos.write(bb, 0, bb.length);
+            zipMap.put(r, bb);
         }
-        zos.close();
+        return Util.encodeZipFile(zipMap);
     }
 
     final private JCheckBox[] checkboxes = new JCheckBox[LABELS.length];

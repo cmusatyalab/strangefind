@@ -43,8 +43,6 @@ package edu.cmu.cs.diamond.strangefind.search;
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import javax.swing.*;
 
@@ -130,22 +128,14 @@ public class OOMuscleAnomalyFilter implements StrangeFindSearch {
                                             .getPreferredHeight()) }));
 
             FileInputStream fis = new FileInputStream("/opt/snapfind/lib/fil_oomuscle.zip");
-            ZipInputStream zip = new ZipInputStream(fis);
-            ZipEntry entry;
-            c = null;
-            byte blob[] = new byte[0];
-            while ((entry = zip.getNextEntry()) != null) {
-                String name = entry.getName();
-                if (name.equals("filter")) {
-                    c = new FilterCode(zip);
-                } else if (name.equals("blob")) {
-                    blob = Util.readFully(zip);
-                }
-            }
-            zip.close();
-            fis.close();
-            if (c == null) {
+            Map<String, byte[]> zipMap = Util.readZipFile(fis);
+            if (!zipMap.containsKey("filter")) {
                 throw new IOException("Missing filter code");
+            }
+            c = new FilterCode(zipMap.get("filter"));
+            byte blob[] = new byte[0];
+            if (zipMap.containsKey("blob")) {
+                blob = zipMap.get("blob");
             }
             oomuscle = new Filter("oomuscle", c, Double.NEGATIVE_INFINITY,
                     Double.POSITIVE_INFINITY,
