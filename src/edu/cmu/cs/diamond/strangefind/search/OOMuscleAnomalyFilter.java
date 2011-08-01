@@ -127,20 +127,11 @@ public class OOMuscleAnomalyFilter implements StrangeFindSearch {
                                     Integer.toString(ResultViewer
                                             .getPreferredHeight()) }));
 
-            FileInputStream fis = new FileInputStream("/opt/snapfind/lib/fil_oomuscle.zip");
-            Map<String, byte[]> zipMap = Util.readZipFile(fis);
-            if (!zipMap.containsKey("filter")) {
-                throw new IOException("Missing filter code");
-            }
-            c = new FilterCode(zipMap.get("filter"));
-            byte blob[] = new byte[0];
-            if (zipMap.containsKey("blob")) {
-                blob = zipMap.get("blob");
-            }
-            oomuscle = new Filter("oomuscle", c, Double.NEGATIVE_INFINITY,
-                    Double.POSITIVE_INFINITY,
+            c = new FilterCode(new FileInputStream("/usr/share/diamond/filters/fil_oomuscle"));
+            byte blob[] = Util.readFully(new FileInputStream("/usr/share/diamond/filters/blob_oomuscle"));
+            oomuscle = new Filter("oomuscle", c, 1,
                     Arrays.asList(new String[] { "rgb" }),
-                    Arrays.asList(new String[] { "0" }), blob);
+                    Arrays.asList(new String[] { "OOMuscleAnalytics" }), blob);
 
             List<String> paramsList = new ArrayList<String>();
             for (int i = 0; i < checkboxes.length; i++) {
