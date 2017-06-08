@@ -180,7 +180,6 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
   context_t *ctx = (context_t *) filter_args;
 
   int i;
-  int err;
 
   // for attributes from diamond
   size_t len;
@@ -196,7 +195,7 @@ int f_eval_afilter (lf_obj_handle_t ohandle, void *filter_args) {
   for (i = 0; i < ctx->size; i++) {
     // get each thing from string
     const void *str;
-    err = lf_ref_attr(ohandle, ctx->name_array[i], &len, &str);
+    (void)lf_ref_attr(ohandle, ctx->name_array[i], &len, &str);
     char *tmp = g_malloc0(len + 1);
     strncpy(tmp, (const char *) str, len);
     double d = strtod(tmp, NULL);
