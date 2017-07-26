@@ -114,11 +114,11 @@ public class OOMuscleAnomalyFilter implements StrangeFindSearch {
         try {
             FilterCode c;
 
-            c = new FilterCode(new FileInputStream("/usr/share/diamond/filters/fil_rgb"));
+            c = new FilterCode(new FileInputStream("/usr/local/share/diamond/filters/fil_rgb"));
             rgb = new Filter("rgb", c, 1, Arrays.asList(new String[0]),
                     Arrays.asList(new String[0]));
 
-            c = new FilterCode(new FileInputStream("/usr/share/diamond/filters/fil_thumb"));
+            c = new FilterCode(new FileInputStream("/usr/local/share/diamond/filters/fil_thumb"));
             thumb = new Filter("thumb", c, 1,
                     Arrays.asList(new String[] { "rgb" }),
                     Arrays.asList(new String[] {
@@ -127,8 +127,8 @@ public class OOMuscleAnomalyFilter implements StrangeFindSearch {
                                     Integer.toString(ResultViewer
                                             .getPreferredHeight()) }));
 
-            c = new FilterCode(new FileInputStream("/usr/share/diamond/filters/fil_oomuscle"));
-            byte blob[] = Util.readFully(new FileInputStream("/usr/share/diamond/filters/blob_oomuscle"));
+            c = new FilterCode(new FileInputStream("/usr/local/share/diamond/filters/fil_oomuscle"));
+            byte blob[] = Util.readFully(new FileInputStream("/usr/local/share/diamond/filters/blob_oomuscle"));
             oomuscle = new Filter("oomuscle", c, 1,
                     Arrays.asList(new String[] { "rgb" }),
                     Arrays.asList(new String[] { "OOMuscleAnalytics" }), blob);
@@ -172,7 +172,7 @@ public class OOMuscleAnomalyFilter implements StrangeFindSearch {
                     .getMachineCodeForExpression(logicalExpression.toString());
             System.arraycopy(paramsList.toArray(), 0, anomArgs, 3, paramsList
                     .size());
-            c = new FilterCode(new FileInputStream("/usr/share/diamond/filters/fil_anomaly"));
+            c = new FilterCode(new FileInputStream("/usr/local/share/diamond/filters/fil_anomaly"));
             anom = new Filter("anomaly", c, 1,
                     Arrays.asList(new String[] { "oomuscle" }),
                     Arrays.asList(anomArgs));

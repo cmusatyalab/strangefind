@@ -238,7 +238,7 @@ public abstract class AbstractNeuriteFilter implements StrangeFindSearch {
         try {
             FilterCode c;
 
-            c = new FilterCode(new FileInputStream("/usr/share/diamond/filters/fil_imagej_exec"));
+            c = new FilterCode(new FileInputStream("/usr/local/share/diamond/filters/fil_imagej_exec"));
 
             byte macroBytes[] = encodeResources(new String[] {
                     macroName, "Multi_Thresholder.jar" });
@@ -286,7 +286,7 @@ public abstract class AbstractNeuriteFilter implements StrangeFindSearch {
                     .getMachineCodeForExpression(logicalExpression.toString());
             System.arraycopy(paramsList.toArray(), 0, anomArgs, 3, paramsList
                     .size());
-            c = new FilterCode(new FileInputStream("/usr/share/diamond/filters/fil_anomaly"));
+            c = new FilterCode(new FileInputStream("/usr/local/share/diamond/filters/fil_anomaly"));
             anom = new Filter("anomaly", c, 1,
                     Arrays.asList(new String[] { "neurites" }),
                     Arrays.asList(anomArgs));

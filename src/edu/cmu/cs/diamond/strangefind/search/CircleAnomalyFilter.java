@@ -115,11 +115,11 @@ public class CircleAnomalyFilter implements StrangeFindSearch {
         Filter anom = null;
         try {
             FilterCode c;
-            c = new FilterCode(new FileInputStream("/usr/share/diamond/filters/fil_rgb"));
+            c = new FilterCode(new FileInputStream("/usr/local/share/diamond/filters/fil_rgb"));
             rgb = new Filter("rgb", c, 1, Arrays.asList(new String[0]),
                     Arrays.asList(new String[0]));
 
-            c = new FilterCode(new FileInputStream("/usr/share/diamond/filters/fil_thumb"));
+            c = new FilterCode(new FileInputStream("/usr/local/share/diamond/filters/fil_thumb"));
             thumb = new Filter("thumb", c, 1,
                     Arrays.asList(new String[] { "rgb" }),
                     Arrays.asList(new String[] {
@@ -128,7 +128,7 @@ public class CircleAnomalyFilter implements StrangeFindSearch {
                                     Integer.toString(ResultViewer
                                             .getPreferredHeight()) }));
 
-            c = new FilterCode(new FileInputStream("/usr/share/diamond/filters/fil_circle"));
+            c = new FilterCode(new FileInputStream("/usr/local/share/diamond/filters/fil_circle"));
             circles = new Filter("circles", c, 0,
                     Arrays.asList(new String[] { "rgb" }),
                     Arrays.asList(new String[] { "-1", "-1", "0.4", "1" }));
@@ -173,7 +173,7 @@ public class CircleAnomalyFilter implements StrangeFindSearch {
                     .getMachineCodeForExpression(logicalExpression.toString());
             System.arraycopy(paramsList.toArray(), 0, anomArgs, 3, paramsList
                     .size());
-            c = new FilterCode(new FileInputStream("/usr/share/diamond/filters/fil_anomaly"));
+            c = new FilterCode(new FileInputStream("/usr/local/share/diamond/filters/fil_anomaly"));
             anom = new Filter("anomaly", c, 1,
                     Arrays.asList(new String[] { "circles" }),
                     Arrays.asList(anomArgs));
